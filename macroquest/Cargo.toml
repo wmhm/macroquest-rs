@@ -1,0 +1,11 @@
+[package]
+name = "macroquest"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+macroquest-macros = { path = "../macroquest-macros" }
+parking_lot = "0.12.1"
+
+[build-dependencies]
+macroquest-build-config = { path = "../macroquest-build-config" }
