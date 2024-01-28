@@ -13,6 +13,12 @@ struct BuildConfig {
 }
 
 fn main() {
+    // We need to rerun if a number of things change, so mark them all.
+    println!("cargo:rerun-if-env-changed=MACROQUEST_BUILD_PROFILE");
+    println!("cargo:rerun-if-env-changed=MACROQUEST_DIR");
+    println!("cargo:rerun-if-env-changed=MACROQUEST_BUILD_BIN_DIR");
+    println!("cargo:rerun-if-changed=build.rs");
+
     // Compute our Build Configuration
     let mq_profile = env::var("MACROQUEST_BUILD_PROFILE").unwrap_or_else(|_| "release".into());
     let mq_root_dir = PathBuf::from(
@@ -32,10 +38,4 @@ fn main() {
     let out_dir = env::var_os("OUT_DIR").unwrap();
     let dest_path = Path::new(&out_dir).join("config.toml");
     fs::write(dest_path, toml::to_string(&config).unwrap()).unwrap();
-
-    // We need to rerun if a number of things change, so mark them all.
-    println!("cargo:rerun-if-env-changed=MACROQUEST_BUILD_PROFILE");
-    println!("cargo:rerun-if-env-changed=MACROQUEST_DIR");
-    println!("cargo:rerun-if-env-changed=MACROQUEST_BUILD_BIN_DIR");
-    println!("cargo:rerun-if-changed=build.rs");
 }
