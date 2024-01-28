@@ -26,11 +26,11 @@ pub fn plugin(_args: TokenStream, stream: TokenStream) -> TokenStream {
 
         #[no_mangle]
         extern "system" fn DllMain(
-            _: windows::Win32::Foundation::HINSTANCE,
+            _: ::macroquest::windows::HINSTANCE,
             call_reason: u32,
             _: *mut (),
         ) -> bool {
-            use windows::Win32::System::SystemServices::{DLL_PROCESS_ATTACH, DLL_PROCESS_DETACH};
+            use ::macroquest::windows::{DLL_PROCESS_ATTACH, DLL_PROCESS_DETACH};
 
             match call_reason {
                 DLL_PROCESS_ATTACH => #plugin.replace(Some(#plugin_t::new())),
