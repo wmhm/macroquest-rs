@@ -2,7 +2,7 @@
 #include "rust/cxx.h"
 #pragma warning(push)
 #pragma warning(disable : 4100 4189 4201 4245 4458)
-#include "eqlib/EQClasses.h"
+#include "eqlib/EQLib.h"
 #pragma warning(pop)
 
 namespace mqrust
