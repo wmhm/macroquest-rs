@@ -5,10 +5,9 @@ namespace mqrust
 {
     namespace eqlib
     {
-        rust::Str EQGroundItem::name() const
-        {
-            return this->Name;
-        }
+        rust::Str PlayerClient::name() const { return this->Name; }
+
+        rust::Str EQGroundItem::name() const { return this->Name; }
     }
 
 }

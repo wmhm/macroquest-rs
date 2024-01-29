@@ -93,9 +93,15 @@ pub fn plugin(_args: TokenStream, stream: TokenStream) -> TokenStream {
             #plugin.on_incoming_chat(line_ptr, color as i32)
         }
 
-        // OnAddSpawn
+        #[no_mangle]
+        pub unsafe fn OnAddSpawn(spawn: *const ::macroquest::ffi::eqlib::PlayerClient) {
+            #plugin.on_add_spawn(spawn)
+        }
 
-        // OnRemoveSpawn
+        #[no_mangle]
+        pub unsafe fn OnRemoveSpawn(spawn: *const ::macroquest::ffi::eqlib::PlayerClient) {
+            #plugin.on_remove_spawn(spawn)
+        }
 
         #[no_mangle]
         pub unsafe fn OnAddGroundItem(item: *const ::macroquest::ffi::eqlib::EQGroundItem) {

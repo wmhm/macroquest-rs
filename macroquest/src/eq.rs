@@ -170,24 +170,22 @@ pub enum ChatColor {
     Unknown(i32),
 }
 
-mod macros {
-    macro_rules! chat_color {
-        ($num:literal) => {
-            $num + 255
-        };
-    }
+pub struct Spawn<'a>(pub(crate) &'a eqlib::PlayerClient);
 
-    pub(super) use chat_color;
+impl<'a> Spawn<'a> {
+    getter!(name -> &str);
 }
 
-use macros::chat_color;
+impl<'a> fmt::Debug for Spawn<'a> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Spawn").field("name", &self.name()).finish()
+    }
+}
 
 pub struct GroundItem<'a>(pub(crate) &'a eqlib::EQGroundItem);
 
 impl<'a> GroundItem<'a> {
-    pub fn name(&self) -> &str {
-        self.0.name()
-    }
+    getter!(name -> &str);
 }
 
 impl<'a> fmt::Debug for GroundItem<'a> {
@@ -197,3 +195,23 @@ impl<'a> fmt::Debug for GroundItem<'a> {
             .finish()
     }
 }
+
+mod macros {
+    macro_rules! chat_color {
+        ($num:literal) => {
+            $num + 255
+        };
+    }
+
+    macro_rules! getter {
+        ($name:ident -> $rtype:ty) => {
+            pub fn $name(&self) -> $rtype {
+                self.0.$name()
+            }
+        };
+    }
+
+    pub(super) use {chat_color, getter};
+}
+
+use macros::{chat_color, getter};

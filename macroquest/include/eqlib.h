@@ -9,6 +9,12 @@ namespace mqrust
 {
     namespace eqlib
     {
+        class PlayerClient : ::eqlib::PlayerClient
+        {
+        public:
+            rust::Str name() const;
+        };
+
         class EQGroundItem : ::eqlib::EQGroundItem
         {
         public:

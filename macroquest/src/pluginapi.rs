@@ -1,7 +1,7 @@
 use std::ffi::CStr;
 use std::os::raw::c_char;
 
-use crate::eq::{ChatColor, GameState, GroundItem};
+use crate::eq::{ChatColor, GameState, GroundItem, Spawn};
 use crate::ffi;
 
 /// The Plugin trait implements the protocol that a MacroQuest plugin must
@@ -101,9 +101,20 @@ pub trait Plugin {
         false
     }
 
-    // TODO: Figure out how to expose PSPAWNINFO
-    // fn on_add_spawn(&mut self, spawn: PSPAWNINFO?) {}
-    // fn on_remove_spawn(&mut self, spawn: PSPAWNINFO? {}
+    /// This is called each time a spawn is added to a zone (ie, something
+    /// spawns). It is also called for each existing spawn when a plugin first
+    /// initializes.
+    ///
+    /// When zoning, this is called for all spawns in the zone after on_end_zone
+    /// is called and before on_zoned is called.
+    fn on_add_spawn(&mut self, spawn: &Spawn) {}
+
+    /// This is called each time a spawn is removed from a zone (ie, something
+    /// despawns or is killed). It is NOT called when a plugin shuts down.
+    ///
+    /// When zoning, this is called for all spawns in the zone after
+    /// on_begin_zone is called.
+    fn on_remove_spawn(&mut self, spawn: &Spawn) {}
 
     /// This is called each time a ground item is added to a zone (ie, something
     /// spawns). It is also called for each existing ground item when a plugin
@@ -231,6 +242,26 @@ impl<T: Plugin> PluginHandler<T> {
         match value.to_str() {
             Ok(s) => hook!(self, on_incoming_chat, s, color.into()),
             Err(_) => todo!("figure out error handling"),
+        }
+    }
+
+    pub unsafe fn on_add_spawn(&self, ptr: *const ffi::eqlib::PlayerClient) {
+        match ptr.as_ref() {
+            Some(ffi_item) => {
+                let item = Spawn(ffi_item);
+                hook!(self, on_add_spawn, &item)
+            }
+            None => todo!("figure out error handling"),
+        }
+    }
+
+    pub unsafe fn on_remove_spawn(&self, ptr: *const ffi::eqlib::PlayerClient) {
+        match ptr.as_ref() {
+            Some(ffi_item) => {
+                let item = Spawn(ffi_item);
+                hook!(self, on_remove_spawn, &item)
+            }
+            None => todo!("figure out error handling"),
         }
     }
 
