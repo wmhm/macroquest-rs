@@ -2,7 +2,28 @@ use proc_macro::TokenStream;
 use quote::{format_ident, quote, ToTokens};
 use syn::{parse_macro_input, ItemStruct};
 
-mod ffi;
+mod ffi {
+    use std::ffi::CStr;
+    use std::os::raw::c_char;
+
+    #[link(name = "MQ2Main")]
+    extern "C" {
+        static gszVersion: [c_char; 32];
+        static gszTime: [c_char; 32];
+    }
+
+    pub(super) fn eq_version() -> &'static str {
+        let v = unsafe { CStr::from_ptr(gszVersion.as_ptr()) };
+
+        v.to_str().unwrap()
+    }
+
+    pub(super) fn eq_time() -> &'static str {
+        let v = unsafe { CStr::from_ptr(gszTime.as_ptr()) };
+
+        v.to_str().unwrap()
+    }
+}
 
 #[proc_macro_attribute]
 pub fn plugin(_args: TokenStream, stream: TokenStream) -> TokenStream {
