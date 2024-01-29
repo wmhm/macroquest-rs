@@ -97,9 +97,15 @@ pub fn plugin(_args: TokenStream, stream: TokenStream) -> TokenStream {
 
         // OnRemoveSpawn
 
-        // OnAddGroundItem
+        #[no_mangle]
+        pub unsafe fn OnAddGroundItem(item: *const ::macroquest::ffi::eqlib::EQGroundItem) {
+            #plugin.on_add_ground_item(item)
+        }
 
-        // OnRemoveGroundItem
+        #[no_mangle]
+        pub unsafe fn OnRemoveGroundItem(item: *const ::macroquest::ffi::eqlib::EQGroundItem) {
+            #plugin.on_remove_ground_item(item)
+        }
 
         #[no_mangle]
         pub fn OnBeginZone() {

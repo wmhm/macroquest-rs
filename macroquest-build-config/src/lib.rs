@@ -32,4 +32,21 @@ impl BuildConfig {
             None => self.root_dir.join("build/bin/"),
         }
     }
+
+    pub fn include_dirs(&self) -> Vec<PathBuf> {
+        [
+            "include",
+            "src",
+            "contrib",
+            r"contrib\vcpkg\installed\x64-windows-static\include",
+            r"contrib\vcpkg\installed\x64-windows\include",
+        ]
+        .iter()
+        .map(|s| self.root_dir.join(s))
+        .collect()
+    }
+
+    pub fn eqlib_dir(&self) -> PathBuf {
+        self.root_dir.join(r"src\eqlib")
+    }
 }

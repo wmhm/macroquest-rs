@@ -1,9 +1,10 @@
 pub use macroquest_macros::plugin;
 
 pub use crate::pluginapi::{Plugin, PluginHandler};
-pub use crate::types::{ChatColor, GameState};
 
+pub mod eq;
+#[doc(hidden)]
+pub mod ffi;
 mod pluginapi;
-pub mod types;
 #[doc(hidden)]
 pub mod windows;

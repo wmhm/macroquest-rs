@@ -5,6 +5,7 @@ edition = "2021"
 
 [dependencies]
 macroquest-macros = { path = "../macroquest-macros" }
+cxx = "1"
 num_enum = "0.7.2"
 parking_lot = "0.12.1"
 windows = { version = "0.*", features = [
@@ -15,3 +16,5 @@ windows = { version = "0.*", features = [
 
 [build-dependencies]
 macroquest-build-config = { path = "../macroquest-build-config" }
+cxx-build = "1"
+walkdir = "2"

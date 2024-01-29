@@ -1,7 +1,8 @@
 use std::ffi::CStr;
 use std::os::raw::c_char;
 
-use crate::types::{ChatColor, GameState};
+use crate::eq::{ChatColor, GameState, GroundItem};
+use crate::ffi;
 
 /// The Plugin trait implements the protocol that a MacroQuest plugin must
 /// implement.
@@ -104,9 +105,21 @@ pub trait Plugin {
     // fn on_add_spawn(&mut self, spawn: PSPAWNINFO?) {}
     // fn on_remove_spawn(&mut self, spawn: PSPAWNINFO? {}
 
-    // TODO: Figure out how to expose PGROUNDITEM
-    // fn on_add_ground_item(&mut self, item: PGROUNDITEM?) {}
-    // fn on_remove_ground_item(&mut self, item: PGROUNDITEM?) {}
+    /// This is called each time a ground item is added to a zone (ie, something
+    /// spawns). It is also called for each existing ground item when a plugin
+    /// first initializes.
+    ///
+    /// When zoning, this is called for all ground items in the zone after
+    /// on_end_zone is called and before on_zoned is called.
+    fn on_add_ground_item(&mut self, item: &GroundItem) {}
+
+    /// This is called each time a ground item is removed from a zone (ie,
+    /// something despawns or is picked up). It is NOT called when a plugin
+    /// shuts down.
+    ///
+    /// When zoning, this is called for all ground items in the zone after
+    /// on_begin_zone is called.
+    fn on_remove_ground_item(&mut self, item: &GroundItem) {}
 
     /// This is called just after entering a zone line and as the loading screen
     /// appears.
@@ -166,6 +179,7 @@ pub struct PluginHandler<T: Plugin> {
     data: parking_lot::Mutex<Option<T>>,
 }
 
+#[allow(clippy::missing_safety_doc)]
 impl<T: Plugin> PluginHandler<T> {
     pub const fn new() -> PluginHandler<T> {
         PluginHandler {
@@ -198,7 +212,6 @@ impl<T: Plugin> PluginHandler<T> {
         hook!(self, on_set_game_state, state.into())
     }
 
-    #[allow(clippy::missing_safety_doc)]
     pub unsafe fn on_write_chat_color<C: Into<ChatColor>>(&self, ptr: *const c_char, color: C) {
         let value = CStr::from_ptr(ptr);
 
@@ -208,7 +221,6 @@ impl<T: Plugin> PluginHandler<T> {
         }
     }
 
-    #[allow(clippy::missing_safety_doc)]
     pub unsafe fn on_incoming_chat<C: Into<ChatColor>>(
         &self,
         ptr: *const c_char,
@@ -219,6 +231,26 @@ impl<T: Plugin> PluginHandler<T> {
         match value.to_str() {
             Ok(s) => hook!(self, on_incoming_chat, s, color.into()),
             Err(_) => todo!("figure out error handling"),
+        }
+    }
+
+    pub unsafe fn on_add_ground_item(&self, ptr: *const ffi::eqlib::EQGroundItem) {
+        match ptr.as_ref() {
+            Some(ffi_item) => {
+                let item = GroundItem(ffi_item);
+                hook!(self, on_add_ground_item, &item)
+            }
+            None => todo!("figure out error handling"),
+        }
+    }
+
+    pub unsafe fn on_remove_ground_item(&self, ptr: *const ffi::eqlib::EQGroundItem) {
+        match ptr.as_ref() {
+            Some(ffi_item) => {
+                let item = GroundItem(ffi_item);
+                hook!(self, on_remove_ground_item, &item)
+            }
+            None => todo!("figure out error handling"),
         }
     }
 }

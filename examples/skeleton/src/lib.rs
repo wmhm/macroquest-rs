@@ -1,5 +1,5 @@
 use log::{debug, trace};
-use macroquest::{ChatColor, GameState, Plugin};
+use macroquest::{eq, Plugin};
 
 const LOG_TARGET: &str = "MQRustSkeleton";
 const VERSION: &str = "1.0";
@@ -32,7 +32,7 @@ impl macroquest::Plugin for MQRustSkeleton {
         trace!(target: LOG_TARGET, "HUD drawn");
     }
 
-    fn on_set_game_state(&mut self, state: GameState) {
+    fn on_set_game_state(&mut self, state: eq::GameState) {
         trace!(target: LOG_TARGET, "Game state updated: {:?}", state);
     }
 
@@ -40,14 +40,22 @@ impl macroquest::Plugin for MQRustSkeleton {
         trace!(target: LOG_TARGET, "Pulsed");
     }
 
-    fn on_write_chat_color(&mut self, line: &str, color: ChatColor) {
+    fn on_write_chat_color(&mut self, line: &str, color: eq::ChatColor) {
         trace!(target: LOG_TARGET, "WriteChatColor ({:?}): {}", color, line);
     }
 
-    fn on_incoming_chat(&mut self, line: &str, color: ChatColor) -> bool {
+    fn on_incoming_chat(&mut self, line: &str, color: eq::ChatColor) -> bool {
         trace!(target: LOG_TARGET, "Chat ({:?}): {}", color, line);
 
         false
+    }
+
+    fn on_add_ground_item(&mut self, item: &eq::GroundItem) {
+        trace!(target: LOG_TARGET, "GroundItem spawned: {:?}", item);
+    }
+
+    fn on_remove_ground_item(&mut self, item: &eq::GroundItem) {
+        trace!(target: LOG_TARGET, "GroundItem despawned: {:?}", item);
     }
 
     fn on_begin_zone(&mut self) {

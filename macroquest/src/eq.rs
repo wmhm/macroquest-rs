@@ -1,4 +1,8 @@
+use std::fmt;
+
 use num_enum::FromPrimitive;
+
+use crate::ffi::eqlib;
 
 #[derive(Debug, Eq, PartialEq, FromPrimitive)]
 #[repr(i32)]
@@ -177,3 +181,19 @@ mod macros {
 }
 
 use macros::chat_color;
+
+pub struct GroundItem<'a>(pub(crate) &'a eqlib::EQGroundItem);
+
+impl<'a> GroundItem<'a> {
+    pub fn name(&self) -> &str {
+        self.0.name()
+    }
+}
+
+impl<'a> fmt::Debug for GroundItem<'a> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("GroundItem")
+            .field("name", &self.name())
+            .finish()
+    }
+}
