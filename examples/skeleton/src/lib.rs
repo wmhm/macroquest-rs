@@ -50,6 +50,14 @@ impl macroquest::Plugin for MQRustSkeleton {
         false
     }
 
+    fn on_add_spawn(&mut self, spawn: &eq::Spawn) {
+        trace!(target: LOG_TARGET, "Spawn: {:?}", spawn);
+    }
+
+    fn on_remove_spawn(&mut self, spawn: &eq::Spawn) {
+        trace!(target: LOG_TARGET, "Despawn: {:?}", spawn);
+    }
+
     fn on_add_ground_item(&mut self, item: &eq::GroundItem) {
         trace!(target: LOG_TARGET, "GroundItem spawned: {:?}", item);
     }
