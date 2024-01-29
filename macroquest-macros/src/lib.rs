@@ -80,6 +80,7 @@ pub fn plugin(_args: TokenStream, stream: TokenStream) -> TokenStream {
         pub unsafe fn OnWriteChatColor(
             line_ptr: *const ::std::os::raw::c_char,
             color: i32,
+            _filter: i32,  // Per brainiac, filter appears to be unused
         ) {
             #plugin.on_write_chat_color(line_ptr, color)
         }
