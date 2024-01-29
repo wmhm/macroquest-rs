@@ -43,7 +43,101 @@ pub fn plugin(_args: TokenStream, stream: TokenStream) -> TokenStream {
 
         #[no_mangle]
         pub fn InitializePlugin() {
-            #plugin.hook_initialize()
+            #plugin.initialize()
+        }
+
+        #[no_mangle]
+        pub fn ShutdownPlugin() {
+            #plugin.shutdown()
+        }
+
+        #[no_mangle]
+        pub fn OnCleanUI() {
+            #plugin.on_clean_ui()
+        }
+
+        #[no_mangle]
+        pub fn OnReloadUI() {
+            #plugin.on_reload_ui()
+        }
+
+        #[no_mangle]
+        pub fn OnDrawHUD() {
+            #plugin.on_draw_hud()
+        }
+
+        #[no_mangle]
+        pub fn SetGameState(state: i32) {
+            #plugin.on_set_game_state(state)
+        }
+
+        #[no_mangle]
+        pub fn OnPulse() {
+            #plugin.on_pulse()
+        }
+
+        #[no_mangle]
+        pub unsafe fn OnWriteChatColor(
+            line_ptr: *const ::std::os::raw::c_char,
+            color: i32,
+        ) {
+            #plugin.on_write_chat_color(line_ptr, color)
+        }
+
+        #[no_mangle]
+        pub unsafe fn OnIncomingChat(
+            line_ptr: *const ::std::os::raw::c_char,
+            color: u32,
+        ) -> bool {
+            #plugin.on_incoming_chat(line_ptr, color as i32)
+        }
+
+        // OnAddSpawn
+
+        // OnRemoveSpawn
+
+        // OnAddGroundItem
+
+        // OnRemoveGroundItem
+
+        #[no_mangle]
+        pub fn OnBeginZone() {
+            #plugin.on_begin_zone()
+        }
+
+        #[no_mangle]
+        pub fn OnEndZone() {
+            #plugin.on_end_zone()
+        }
+
+        #[no_mangle]
+        pub fn OnZoned() {
+            #plugin.on_zoned()
+        }
+
+        #[no_mangle]
+        pub fn OnUpdateImGui() {
+            #plugin.on_update_imgui()
+        }
+
+        #[no_mangle]
+        pub unsafe fn OnMacroStart(name_ptr: *const ::std::os::raw::c_char) {
+            #plugin.on_macro_start(name_ptr)
+        }
+
+        #[no_mangle]
+        pub unsafe fn OnMacroStop(name_ptr: *const ::std::os::raw::c_char) {
+            #plugin.on_macro_stop(name_ptr)
+        }
+
+        #[no_mangle]
+        pub unsafe fn OnLoadPlugin(name_ptr: *const ::std::os::raw::c_char) {
+            #plugin.on_plugin_load(name_ptr)
+        }
+
+        #[no_mangle]
+        pub unsafe fn OnUnloadPlugin(name_ptr: *const ::std::os::raw::c_char) {
+            #plugin.on_plugin_unload(name_ptr)
         }
     };
 
