@@ -18,8 +18,6 @@ windows = { version = "0.*", features = [
 
 [build-dependencies]
 macroquest-build-config = { workspace = true }
-cxx-build = "1"
-walkdir = "2"
 
 
 [package.metadata.docs.rs]
