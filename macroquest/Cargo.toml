@@ -31,7 +31,7 @@ logger = ["dep:tracing-subscriber"]
 
 
 [package.metadata.docs.rs]
-features = []
+features = ["colors", "logger"]
 no-default-features = true
 targets = ["x86_64-pc-windows-msvc"]
 rustdoc-args = ["--cfg", "docsrs"]
