@@ -6,6 +6,7 @@ fn main() {
         .includes(mq_config.include_dirs())
         .define("NOMINMAX", None)
         .file("src/ffi/eqlib.cc")
+        .file("src/ffi/mq.cc")
         .compile("mqrust");
 
     mq_config.emit();
@@ -25,6 +26,8 @@ fn main() {
 
     println!("cargo:rerun-if-changed=build.rs");
     println!("cargo:rerun-if-changed=include/eqlib.h");
+    println!("cargo:rerun-if-changed=include/mq.h");
     println!("cargo:rerun-if-changed=src/ffi/mod.rs");
     println!("cargo:rerun-if-changed=src/ffi/eqlib.cc");
+    println!("cargo:rerun-if-changed=src/ffi/mq.cc");
 }

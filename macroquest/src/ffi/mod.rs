@@ -17,3 +17,12 @@ pub mod eqlib {
         fn name(&self) -> &str;
     }
 }
+
+#[cxx::bridge(namespace = "mqrust::mq")]
+pub(crate) mod mq {
+    unsafe extern "C++" {
+        include!("macroquest/include/mq.h");
+
+        fn write_chat_color(line: &str, color: i32);
+    }
+}

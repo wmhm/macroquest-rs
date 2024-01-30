@@ -1,10 +1,10 @@
 use std::fmt;
 
-use num_enum::FromPrimitive;
+use num_enum::{FromPrimitive, IntoPrimitive};
 
 use crate::ffi::eqlib;
 
-#[derive(Debug, Eq, PartialEq, FromPrimitive)]
+#[derive(Debug, Eq, PartialEq, FromPrimitive, IntoPrimitive)]
 #[repr(i32)]
 pub enum GameState {
     PreCharacterSelect = -1,
@@ -19,7 +19,7 @@ pub enum GameState {
     Unknown(i32),
 }
 
-#[derive(Debug, Eq, PartialEq, FromPrimitive)]
+#[derive(Debug, Eq, PartialEq, FromPrimitive, IntoPrimitive)]
 #[repr(i32)]
 pub enum ChatColor {
     Say = chat_color!(1),

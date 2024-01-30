@@ -1,37 +1,98 @@
+use darling::ast::NestedMeta;
+use darling::util::Override;
+use darling::{Error, FromMeta};
 use proc_macro::TokenStream;
 use quote::{format_ident, quote, ToTokens};
 use syn::{parse_macro_input, ItemStruct};
 
-mod ffi {
-    use std::ffi::CStr;
-    use std::os::raw::c_char;
+#[derive(Debug, Clone, FromMeta)]
+enum LevelFilter {
+    #[darling(rename = "off")]
+    Off,
+    #[darling(rename = "error")]
+    Error,
+    #[darling(rename = "warn")]
+    Warn,
+    #[darling(rename = "info")]
+    Info,
+    #[darling(rename = "debug")]
+    Debug,
+    #[darling(rename = "trace")]
+    Trace,
+}
 
-    #[link(name = "MQ2Main")]
-    extern "C" {
-        static gszVersion: [c_char; 32];
-        static gszTime: [c_char; 32];
-    }
+#[derive(Debug, Clone, FromMeta)]
+struct ConsoleLogging {
+    level: LevelFilter,
+}
 
-    pub(super) fn eq_version() -> &'static str {
-        let v = unsafe { CStr::from_ptr(gszVersion.as_ptr()) };
-
-        v.to_str().unwrap()
-    }
-
-    pub(super) fn eq_time() -> &'static str {
-        let v = unsafe { CStr::from_ptr(gszTime.as_ptr()) };
-
-        v.to_str().unwrap()
+impl Default for ConsoleLogging {
+    fn default() -> Self {
+        ConsoleLogging {
+            level: LevelFilter::Debug,
+        }
     }
 }
 
+impl ToTokens for ConsoleLogging {
+    fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
+        let level = match self.level {
+            LevelFilter::Off => quote! { ::macroquest::log::logger::LevelFilter::OFF },
+            LevelFilter::Error => quote! { ::macroquest::log::logger::LevelFilter::ERROR },
+            LevelFilter::Warn => quote! { ::macroquest::log::logger::LevelFilter::WARN },
+            LevelFilter::Info => quote! { ::macroquest::log::logger::LevelFilter::INFO },
+            LevelFilter::Debug => quote! { ::macroquest::log::logger::LevelFilter::DEBUG },
+            LevelFilter::Trace => quote! { ::macroquest::log::logger::LevelFilter::TRACE },
+        };
+
+        (quote! { Some(#level) }).to_tokens(tokens)
+    }
+}
+
+#[derive(Debug, Default, FromMeta)]
+struct Logging {
+    console: Option<Override<ConsoleLogging>>,
+}
+
+impl ToTokens for Logging {
+    fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
+        let console = self
+            .console
+            .as_ref()
+            .map(|c| c.clone().unwrap_or_default())
+            .unwrap_or_default();
+
+        (quote! {
+            ::macroquest::log::logger::init(#console);
+        })
+        .to_tokens(tokens)
+    }
+}
+
+#[derive(Debug, FromMeta)]
+struct PluginArgs {
+    logging: Option<Override<Logging>>,
+}
+
 #[proc_macro_attribute]
-pub fn plugin(_args: TokenStream, stream: TokenStream) -> TokenStream {
+pub fn plugin(args: TokenStream, stream: TokenStream) -> TokenStream {
+    let args = match NestedMeta::parse_meta_list(args.into()) {
+        Ok(v) => v,
+        Err(e) => return TokenStream::from(Error::from(e).write_errors()),
+    };
+
+    let args = match PluginArgs::from_list(&args) {
+        Ok(v) => v,
+        Err(e) => return TokenStream::from(e.write_errors()),
+    };
+
     let input = parse_macro_input!(stream as ItemStruct);
+
     let mut output = proc_macro2::TokenStream::new();
 
     let plugin_t = format_ident!("{}", input.ident);
     let plugin = format_ident!("__{}", input.ident.to_string().to_uppercase());
+    let logging = args.logging.map(|l| l.unwrap_or_default());
 
     let eq_version_str = format!("{} {}", ffi::eq_version(), ffi::eq_time()).into_bytes();
 
@@ -54,7 +115,10 @@ pub fn plugin(_args: TokenStream, stream: TokenStream) -> TokenStream {
             use ::macroquest::windows::{DLL_PROCESS_ATTACH, DLL_PROCESS_DETACH};
 
             match call_reason {
-                DLL_PROCESS_ATTACH => #plugin.replace(Some(#plugin_t::new())),
+                DLL_PROCESS_ATTACH => {
+                    #logging
+                    #plugin.replace(Some(#plugin_t::new()))
+                }
                 DLL_PROCESS_DETACH => #plugin.replace(None),
                 _ => {}
             }
@@ -179,4 +243,27 @@ pub fn plugin(_args: TokenStream, stream: TokenStream) -> TokenStream {
     implementation.to_tokens(&mut output);
 
     TokenStream::from(output)
+}
+
+mod ffi {
+    use std::ffi::CStr;
+    use std::os::raw::c_char;
+
+    #[link(name = "MQ2Main")]
+    extern "C" {
+        static gszVersion: [c_char; 32];
+        static gszTime: [c_char; 32];
+    }
+
+    pub(super) fn eq_version() -> &'static str {
+        let v = unsafe { CStr::from_ptr(gszVersion.as_ptr()) };
+
+        v.to_str().unwrap()
+    }
+
+    pub(super) fn eq_time() -> &'static str {
+        let v = unsafe { CStr::from_ptr(gszTime.as_ptr()) };
+
+        v.to_str().unwrap()
+    }
 }

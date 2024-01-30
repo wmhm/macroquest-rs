@@ -8,8 +8,7 @@ edition = "2021"
 crate-type = ["cdylib"]
 
 [dependencies]
-macroquest = { path = "../../macroquest" }
-log = "0.4"
+macroquest = { path = "../../macroquest", features = ["logger", "colors"] }
 
 [build-dependencies]
 macroquest-build-config = { path = "../../macroquest-build-config" }

@@ -10,6 +10,7 @@ struct BuildConfig {
     profile: String,
     root_dir: PathBuf,
     bin_dir: Option<PathBuf>,
+    lib_dir: Option<PathBuf>,
 }
 
 fn main() {
@@ -17,6 +18,7 @@ fn main() {
     println!("cargo:rerun-if-env-changed=MACROQUEST_BUILD_PROFILE");
     println!("cargo:rerun-if-env-changed=MACROQUEST_DIR");
     println!("cargo:rerun-if-env-changed=MACROQUEST_BUILD_BIN_DIR");
+    println!("cargo:rerun-if-env-changed=MACROQUEST_BUILD_LIB_DIR");
     println!("cargo:rerun-if-changed=build.rs");
 
     // Compute our Build Configuration
@@ -26,11 +28,13 @@ fn main() {
             .expect("Must set MACROQUEST_DIR to the root of a MacroQuest checkout"),
     );
     let mq_bin_dir = env::var_os("MACROQUEST_BUILD_BIN_DIR").map(PathBuf::from);
+    let mq_lib_dir = env::var_os("MACROQUEST_BUILD_LIB_DIR").map(PathBuf::from);
 
     let config = BuildConfig {
         root_dir: mq_root_dir,
         profile: mq_profile,
         bin_dir: mq_bin_dir,
+        lib_dir: mq_lib_dir,
     };
 
     // Actually write out our configuration file so that our crate can read it
