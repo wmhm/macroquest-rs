@@ -29,4 +29,4 @@ bindings = ["dep:macroquest-sys"]
 features = []
 no-default-features = true
 targets = ["x86_64-pc-windows-msvc"]
-rustc-args = ["--cfg", "docsrs"]
+rustdoc-args = ["--cfg", "docsrs"]
