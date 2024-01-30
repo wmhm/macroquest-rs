@@ -2,29 +2,6 @@ use proc_macro::TokenStream;
 use quote::{format_ident, quote, ToTokens};
 use syn::{parse_macro_input, ItemStruct};
 
-mod ffi {
-    use std::ffi::CStr;
-    use std::os::raw::c_char;
-
-    #[link(name = "MQ2Main")]
-    extern "C" {
-        static gszVersion: [c_char; 32];
-        static gszTime: [c_char; 32];
-    }
-
-    pub(super) fn eq_version() -> &'static str {
-        let v = unsafe { CStr::from_ptr(gszVersion.as_ptr()) };
-
-        v.to_str().unwrap()
-    }
-
-    pub(super) fn eq_time() -> &'static str {
-        let v = unsafe { CStr::from_ptr(gszTime.as_ptr()) };
-
-        v.to_str().unwrap()
-    }
-}
-
 #[proc_macro_attribute]
 pub fn plugin(_args: TokenStream, stream: TokenStream) -> TokenStream {
     let input = parse_macro_input!(stream as ItemStruct);
@@ -33,7 +10,7 @@ pub fn plugin(_args: TokenStream, stream: TokenStream) -> TokenStream {
     let plugin_t = format_ident!("{}", input.ident);
     let plugin = format_ident!("__{}", input.ident.to_string().to_uppercase());
 
-    let eq_version_str = format!("{} {}", ffi::eq_version(), ffi::eq_time()).into_bytes();
+    let eq_version_str = include_str!(concat!(env!("OUT_DIR"), "/eq_version.txt")).as_bytes();
 
     let implementation = quote! {
         #[no_mangle]
@@ -180,3 +157,19 @@ pub fn plugin(_args: TokenStream, stream: TokenStream) -> TokenStream {
 
     TokenStream::from(output)
 }
+
+// fn eq_version() -> String {
+//     use std::ffi::CStr;
+//     use std::os::raw::c_char;
+
+//     #[link(name = "MQ2Main")]
+//     extern "C" {
+//         static gszVersion: [c_char; 32];
+//         static gszTime: [c_char; 32];
+//     }
+
+//     let date = unsafe { CStr::from_ptr(gszVersion.as_ptr()) };
+//     let time = unsafe { CStr::from_ptr(gszTime.as_ptr()) };
+
+//     format!("{} {}", date.to_str().unwrap(), time.to_str().unwrap())
+// }

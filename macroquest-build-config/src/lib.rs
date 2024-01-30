@@ -5,9 +5,10 @@ use serde::Deserialize;
 // NOTE: this has to be kept in sync with the BuildConfig located in build.rs
 #[derive(Deserialize, Debug)]
 pub struct BuildConfig {
+    eq_version: String,
     profile: String,
     root_dir: PathBuf,
-    bin_dir: Option<PathBuf>,
+    bin_dir: PathBuf,
 }
 
 impl BuildConfig {
@@ -20,19 +21,12 @@ impl BuildConfig {
     pub fn emit(&self) {
         println!(
             "cargo:rustc-link-search={}",
-            self.bin_dir().join(self.profile.as_str()).display()
+            self.bin_dir.join(self.profile.as_str()).display()
         );
     }
 }
 
 impl BuildConfig {
-    fn bin_dir(&self) -> PathBuf {
-        match &self.bin_dir {
-            Some(d) => d.clone(),
-            None => self.root_dir.join("build/bin/"),
-        }
-    }
-
     pub fn include_dirs(&self) -> Vec<PathBuf> {
         [
             "include",
@@ -48,5 +42,9 @@ impl BuildConfig {
 
     pub fn eqlib_dir(&self) -> PathBuf {
         self.root_dir.join(r"src\eqlib")
+    }
+
+    pub fn eq_version(&self) -> &str {
+        self.eq_version.as_str()
     }
 }
