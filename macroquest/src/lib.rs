@@ -23,3 +23,17 @@ pub mod mq;
 mod pluginapi;
 #[doc(hidden)]
 pub mod windows;
+
+mod macros {
+    #[macro_export]
+    macro_rules! println {
+        () => {};
+
+        ($($arg:tt)*) => {
+            ::macroquest::mq::write_chat_color(
+                format!($($arg)*),
+                ::macroquest::eq::ChatColor::ChatChannel,
+            );
+        };
+    }
+}
