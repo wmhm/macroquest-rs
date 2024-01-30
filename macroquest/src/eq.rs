@@ -1,8 +1,7 @@
 use std::fmt;
 
+use macroquest_sys as ffi;
 use num_enum::FromPrimitive;
-
-use crate::ffi::eqlib;
 
 #[derive(Debug, Eq, PartialEq, FromPrimitive)]
 #[repr(i32)]
@@ -170,7 +169,7 @@ pub enum ChatColor {
     Unknown(i32),
 }
 
-pub struct Spawn<'a>(pub(crate) &'a eqlib::PlayerClient);
+pub struct Spawn<'a>(pub(crate) &'a ffi::eqlib::PlayerClient);
 
 impl<'a> Spawn<'a> {
     getter!(name -> &str);
@@ -182,7 +181,7 @@ impl<'a> fmt::Debug for Spawn<'a> {
     }
 }
 
-pub struct GroundItem<'a>(pub(crate) &'a eqlib::EQGroundItem);
+pub struct GroundItem<'a>(pub(crate) &'a ffi::eqlib::EQGroundItem);
 
 impl<'a> GroundItem<'a> {
     getter!(name -> &str);

@@ -1,13 +1,12 @@
 [package]
-name = "macroquest"
-description = "Write MacroQuest plugins in Rust"
+name = "macroquest-sys"
+description = "Raw bindings to the MacroQuest API"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
 
 [dependencies]
-macroquest-macros = { workspace = true }
-macroquest-sys = { workspace = true }
+cxx = "1"
 num_enum = "0.7.2"
 parking_lot = "0.12.1"
 windows = { version = "0.*", features = [

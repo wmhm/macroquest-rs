@@ -1,8 +1,9 @@
 use std::ffi::CStr;
 use std::os::raw::c_char;
 
+use macroquest_sys::eqlib;
+
 use crate::eq::{ChatColor, GameState, GroundItem, Spawn};
-use crate::ffi;
 
 /// The Plugin trait implements the protocol that a MacroQuest plugin must
 /// implement.
@@ -245,7 +246,7 @@ impl<T: Plugin> PluginHandler<T> {
         }
     }
 
-    pub unsafe fn on_add_spawn(&self, ptr: *const ffi::eqlib::PlayerClient) {
+    pub unsafe fn on_add_spawn(&self, ptr: *const eqlib::PlayerClient) {
         match ptr.as_ref() {
             Some(ffi_item) => {
                 let item = Spawn(ffi_item);
@@ -255,7 +256,7 @@ impl<T: Plugin> PluginHandler<T> {
         }
     }
 
-    pub unsafe fn on_remove_spawn(&self, ptr: *const ffi::eqlib::PlayerClient) {
+    pub unsafe fn on_remove_spawn(&self, ptr: *const eqlib::PlayerClient) {
         match ptr.as_ref() {
             Some(ffi_item) => {
                 let item = Spawn(ffi_item);
@@ -265,7 +266,7 @@ impl<T: Plugin> PluginHandler<T> {
         }
     }
 
-    pub unsafe fn on_add_ground_item(&self, ptr: *const ffi::eqlib::EQGroundItem) {
+    pub unsafe fn on_add_ground_item(&self, ptr: *const eqlib::EQGroundItem) {
         match ptr.as_ref() {
             Some(ffi_item) => {
                 let item = GroundItem(ffi_item);
@@ -275,7 +276,7 @@ impl<T: Plugin> PluginHandler<T> {
         }
     }
 
-    pub unsafe fn on_remove_ground_item(&self, ptr: *const ffi::eqlib::EQGroundItem) {
+    pub unsafe fn on_remove_ground_item(&self, ptr: *const eqlib::EQGroundItem) {
         match ptr.as_ref() {
             Some(ffi_item) => {
                 let item = GroundItem(ffi_item);
