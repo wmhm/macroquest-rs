@@ -1,3 +1,5 @@
+#![cfg(target_os = "windows")]
+
 pub use macroquest_macros::plugin;
 
 pub use crate::pluginapi::{Plugin, PluginHandler};

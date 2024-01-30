@@ -13,7 +13,7 @@ pub struct BuildConfig {
 
 impl BuildConfig {
     pub fn load() -> BuildConfig {
-        let config_str = include_str!(concat!(env!("OUT_DIR"), r"\config.toml"));
+        let config_str = include_str!(concat!(env!("OUT_DIR"), "/config.toml"));
         let config: BuildConfig = toml::from_str(config_str).unwrap();
         config
     }

@@ -1,10 +1,12 @@
 [package]
 name = "macroquest"
-version = "0.1.0"
-edition = "2021"
+description = "Write MacroQuest plugins in Rust"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
 
 [dependencies]
-macroquest-macros = { path = "../macroquest-macros" }
+macroquest-macros = { workspace = true }
 cxx = "1"
 num_enum = "0.7.2"
 parking_lot = "0.12.1"
@@ -15,6 +17,11 @@ windows = { version = "0.*", features = [
 
 
 [build-dependencies]
-macroquest-build-config = { path = "../macroquest-build-config" }
+macroquest-build-config = { workspace = true }
 cxx-build = "1"
 walkdir = "2"
+
+
+[package.metadata.docs.rs]
+all-features = true
+targets = ["x86_64-pc-windows-msvc"]
