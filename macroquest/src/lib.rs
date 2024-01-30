@@ -8,10 +8,25 @@ pub use macroquest_sys as ffi;
 
 #[cfg(docsrs)]
 #[doc(hidden)]
+// I hate that we have to maintain this in order to get doc building to work
+// correctly on docs.rs, but such is life.
 pub mod ffi {
     pub mod eqlib {
         pub struct PlayerClient;
         pub struct EQGroundItem;
+    }
+
+    pub mod mq {
+        fn get_path_MQRoot() -> &'static str;
+        fn get_path_Config() -> &'static str;
+        fn get_path_MQini() -> &'static str;
+        fn get_path_Macros() -> &'static str;
+        fn get_path_Logs() -> &'static str;
+        fn get_path_CrashDumps() -> &'static str;
+        fn get_path_Plugins() -> &'static str;
+        fn get_path_Resources() -> &'static str;
+        fn get_path_EverQuest() -> &'static str;
+        fn write_chat_color(line: &str, color: i32);
     }
 }
 
