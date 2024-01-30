@@ -5,14 +5,13 @@ use std::marker::PhantomData;
 use crate::eq::ChatColor;
 use crate::ffi::mq as mqlib;
 
-pub fn write_chat_color<'a, S>(line: S, color: Option<ChatColor>)
+pub fn write_chat_color<'a, S>(line: S, color: ChatColor)
 where
     S: Into<Cow<'a, str>>,
 {
-    let color = color.unwrap_or(ChatColor::Default).into();
     match line.into() {
-        Cow::Borrowed(s) => mqlib::write_chat_color(s, color),
-        Cow::Owned(s) => mqlib::write_chat_color(s.as_str(), color),
+        Cow::Borrowed(s) => mqlib::write_chat_color(s, color.into()),
+        Cow::Owned(s) => mqlib::write_chat_color(s.as_str(), color.into()),
     }
 }
 
@@ -20,7 +19,7 @@ pub fn write_chat<'a, S>(line: S)
 where
     S: Into<Cow<'a, str>>,
 {
-    write_chat_color(line, None)
+    write_chat_color(line, ChatColor::Default)
 }
 
 pub struct ConsoleWriter(PhantomData<()>);
