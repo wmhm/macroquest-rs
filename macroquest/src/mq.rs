@@ -1,9 +1,77 @@
 use std::borrow::Cow;
 use std::io;
 use std::marker::PhantomData;
+use std::path::Path;
+use std::sync::OnceLock;
 
 use crate::eq::ChatColor;
 use crate::ffi::mq as mqlib;
+
+static PATHS: OnceLock<Paths> = OnceLock::new();
+
+pub struct Paths<'a> {
+    root: &'a Path,
+    config: &'a Path,
+    ini: &'a Path,
+    macros: &'a Path,
+    logs: &'a Path,
+    crash_dumps: &'a Path,
+    plugins: &'a Path,
+    resources: &'a Path,
+    everquest: &'a Path,
+}
+
+impl<'a> Paths<'a> {
+    pub fn root(&self) -> &Path {
+        self.root
+    }
+
+    pub fn config(&self) -> &Path {
+        self.config
+    }
+
+    pub fn ini(&self) -> &Path {
+        self.ini
+    }
+
+    pub fn macros(&self) -> &Path {
+        self.macros
+    }
+
+    pub fn logs(&self) -> &Path {
+        self.logs
+    }
+
+    pub fn crash_dumps(&self) -> &Path {
+        self.crash_dumps
+    }
+
+    pub fn plugins(&self) -> &Path {
+        self.plugins
+    }
+
+    pub fn resources(&self) -> &Path {
+        self.resources
+    }
+
+    pub fn everquest(&self) -> &Path {
+        self.everquest
+    }
+}
+
+pub fn paths() -> &'static Paths<'static> {
+    PATHS.get_or_init(|| Paths {
+        root: Path::new(mqlib::get_path_MQRoot()),
+        config: Path::new(mqlib::get_path_Config()),
+        ini: Path::new(mqlib::get_path_MQini()),
+        macros: Path::new(mqlib::get_path_Macros()),
+        logs: Path::new(mqlib::get_path_Logs()),
+        crash_dumps: Path::new(mqlib::get_path_CrashDumps()),
+        plugins: Path::new(mqlib::get_path_Plugins()),
+        resources: Path::new(mqlib::get_path_Resources()),
+        everquest: Path::new(mqlib::get_path_EverQuest()),
+    })
+}
 
 pub fn write_chat_color<'a, S>(line: S, color: ChatColor)
 where

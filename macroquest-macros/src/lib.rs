@@ -59,9 +59,7 @@ struct FileLogging {
 
 impl FileLogging {
     fn with_plugin_name(mut self, name: Option<String>) -> Self {
-        self.filename = self
-            .filename
-            .or_else(|| name.map(|n| PathBuf::from(n + ".log")));
+        self.filename = self.filename.or_else(|| name.map(PathBuf::from));
         self
     }
 }
@@ -90,7 +88,7 @@ impl ToTokens for FileLogging {
         let filename = self
             .filename
             .as_ref()
-            .expect("do not have a filename")
+            .expect("does not have a filename")
             .to_string_lossy();
 
         (quote! { Some((#level, #filename)) }).to_tokens(tokens)
@@ -120,8 +118,14 @@ impl ToTokens for Logging {
             .map(|c| c.clone().unwrap_or_default())
             .unwrap_or_default();
 
+        let file = self
+            .file
+            .as_ref()
+            .map(|f| f.clone().unwrap_or_default())
+            .unwrap_or_default();
+
         (quote! {
-            ::macroquest::log::logger::init(#console);
+            ::macroquest::log::logger::init(#console, #file);
         })
         .to_tokens(tokens)
     }
@@ -140,14 +144,16 @@ pub fn plugin(args: TokenStream, stream: TokenStream) -> TokenStream {
         Err(e) => return TokenStream::from(Error::from(e).write_errors()),
     };
 
-    let args = match PluginArgs::from_list(&args) {
+    let mut args = match PluginArgs::from_list(&args) {
         Ok(v) => v,
         Err(e) => return TokenStream::from(e.write_errors()),
     };
 
     let input = parse_macro_input!(stream as ItemStruct);
 
-    let mut output = proc_macro2::TokenStream::new();
+    if args.name.is_none() {
+        args.name = Some(input.ident.to_string())
+    }
 
     let plugin_t = format_ident!("{}", input.ident);
     let plugin = format_ident!("__{}", input.ident.to_string().to_uppercase());
@@ -299,6 +305,8 @@ pub fn plugin(args: TokenStream, stream: TokenStream) -> TokenStream {
             #plugin.on_plugin_unload(name_ptr)
         }
     };
+
+    let mut output = proc_macro2::TokenStream::new();
 
     input.to_tokens(&mut output);
     implementation.to_tokens(&mut output);
