@@ -33,8 +33,6 @@ fn eq_version(dir: &Path) -> Result<String, Box<dyn std::error::Error>> {
 
         format!("{} {}", version, time)
     })
-
-    // Ok(format!("{} {}", version, time))
 }
 
 fn main() {
@@ -44,24 +42,45 @@ fn main() {
     println!("cargo:rerun-if-env-changed=MACROQUEST_BUILD_BIN_DIR");
     println!("cargo:rerun-if-changed=build.rs");
 
-    // Compute our Build Configuration
-    let mq_profile = env::var("MACROQUEST_BUILD_PROFILE").unwrap_or_else(|_| "release".into());
-    let mq_root_dir = PathBuf::from(
-        env::var_os("MACROQUEST_DIR")
-            .expect("Must set MACROQUEST_DIR to the root of a MacroQuest checkout"),
-    );
-    let mq_bin_dir = env::var_os("MACROQUEST_BUILD_BIN_DIR")
-        .map(PathBuf::from)
-        .unwrap_or_else(|| mq_root_dir.join("build/bin/"));
+    let target_os = std::env::var("CARGO_CFG_TARGET_OS").unwrap();
 
-    // Determine what version of EverQuest we're building against
-    let eq_version = eq_version(mq_bin_dir.as_path()).unwrap();
+    let config = if std::env::var("DOCS_RS").is_ok() {
+        // If we're building on docs.rs then we synthesize a build configuration
+        BuildConfig {
+            eq_version: String::from("docs build"),
+            root_dir: PathBuf::from("docs build"),
+            profile: String::from("docs build"),
+            bin_dir: PathBuf::from("docs build"),
+        }
+    } else if target_os != "windows" {
+        // If we're building for a non windows platform, then we synthesize a
+        // build configuration
+        BuildConfig {
+            eq_version: String::from("non windows build"),
+            root_dir: PathBuf::from("non windows build"),
+            profile: String::from("non windows build"),
+            bin_dir: PathBuf::from("non windows build"),
+        }
+    } else {
+        // Compute our Build Configuration
+        let mq_profile = env::var("MACROQUEST_BUILD_PROFILE").unwrap_or_else(|_| "release".into());
+        let mq_root_dir = PathBuf::from(
+            env::var_os("MACROQUEST_DIR")
+                .expect("Must set MACROQUEST_DIR to the root of a MacroQuest checkout"),
+        );
+        let mq_bin_dir = env::var_os("MACROQUEST_BUILD_BIN_DIR")
+            .map(PathBuf::from)
+            .unwrap_or_else(|| mq_root_dir.join("build/bin/"));
 
-    let config = BuildConfig {
-        eq_version,
-        root_dir: mq_root_dir,
-        profile: mq_profile,
-        bin_dir: mq_bin_dir,
+        // Determine what version of EverQuest we're building against
+        let eq_version = eq_version(mq_bin_dir.as_path()).unwrap();
+
+        BuildConfig {
+            eq_version,
+            root_dir: mq_root_dir,
+            profile: mq_profile,
+            bin_dir: mq_bin_dir,
+        }
     };
 
     // Actually write out our configuration file so that our crate can read it

@@ -1,13 +1,22 @@
 [package]
 name = "macroquest-build-config"
-version = "0.1.0"
-edition = "2021"
+description = "Build configuration for the MacroQuest ecosystem"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
 
 [dependencies]
 serde = { version = "1.0", features = ["derive"] }
 toml = "0.8"
 
+
 [build-dependencies]
 libloading = "0.8"
 serde = { version = "1.0", features = ["derive"] }
 toml = "0.8"
+
+
+[package.metadata.docs.rs]
+all-features = true
+targets = ["x86_64-pc-windows-msvc"]

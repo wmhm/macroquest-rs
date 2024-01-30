@@ -1,5 +1,5 @@
-#include "macroquest/include/eqlib.h"
-#include "macroquest/src/ffi/mod.rs.h"
+#include "macroquest-sys/include/eqlib.h"
+#include "macroquest-sys/src/lib.rs.h"
 
 namespace mqrust
 {

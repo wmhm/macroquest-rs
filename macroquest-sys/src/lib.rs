@@ -1,7 +1,9 @@
+#![cfg(target_os = "windows")]
+
 #[cxx::bridge(namespace = "mqrust::eqlib")]
 pub mod eqlib {
     unsafe extern "C++" {
-        include!("macroquest/include/eqlib.h");
+        include!("macroquest-sys/include/eqlib.h");
 
         pub type PlayerClient;
 
@@ -10,7 +12,7 @@ pub mod eqlib {
     }
 
     unsafe extern "C++" {
-        include!("macroquest/include/eqlib.h");
+        include!("macroquest-sys/include/eqlib.h");
 
         pub type EQGroundItem;
 

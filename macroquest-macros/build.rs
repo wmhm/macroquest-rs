@@ -4,7 +4,6 @@ use std::path::Path;
 
 fn main() {
     println!("cargo:rerun-if-changed=build.rs");
-    println!("cargo:rerun-if-env-changed=DOCS_RS");
 
     let config = macroquest_build_config::BuildConfig::load();
 
