@@ -80,7 +80,6 @@ fn colorize(line: &str) -> String {
                     // standard 8, adding Purple and Orange. To support
                     // these two colors we'll use a similiar color with the
                     // blink ANSI code set.
-                    // TODO: Purple and Orange
                     match fg {
                         Color::Black | Color::BrightBlack => "b",
                         Color::Green | Color::BrightGreen => "g",
