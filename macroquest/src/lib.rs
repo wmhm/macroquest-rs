@@ -2,12 +2,12 @@
 
 pub use macroquest_macros::plugin;
 
-#[doc(hidden)]
 #[cfg(not(docsrs))]
+#[doc(hidden)]
 pub use macroquest_sys as ffi;
 
-#[doc(hidden)]
 #[cfg(docsrs)]
+#[doc(hidden)]
 pub mod ffi {
     pub mod eqlib {
         pub struct PlayerClient;
