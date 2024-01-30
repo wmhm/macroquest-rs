@@ -3,14 +3,16 @@
 pub use macroquest_macros::plugin;
 
 #[doc(hidden)]
-#[cfg(not(bindings))]
+#[cfg(not(docrs))]
 pub use macroquest_sys as ffi;
 
 #[doc(hidden)]
 #[cfg(docrs)]
-mod ffi {
-    pub struct PlayerClient;
-    pub struct EQGroundItem;
+pub mod ffi {
+    pub mod eqlib {
+        pub struct PlayerClient;
+        pub struct EQGroundItem;
+    }
 }
 
 pub use crate::pluginapi::{Plugin, PluginHandler};
