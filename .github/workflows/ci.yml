@@ -13,7 +13,6 @@ jobs:
       RUSTDOCFLAGS: -Dwarnings
     steps:
       - uses: actions/checkout@v4
-      - uses: egor-tensin/setup-mingw@v2
       - uses: dtolnay/rust-toolchain@nightly
         with:
           targets: x86_64-pc-windows-gnu
