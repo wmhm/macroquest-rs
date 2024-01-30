@@ -17,16 +17,45 @@ pub mod ffi {
     }
 
     pub mod mq {
-        pub fn get_path_MQRoot() -> &'static str;
-        pub fn get_path_Config() -> &'static str;
-        pub fn get_path_MQini() -> &'static str;
-        pub fn get_path_Macros() -> &'static str;
-        pub fn get_path_Logs() -> &'static str;
-        pub fn get_path_CrashDumps() -> &'static str;
-        pub fn get_path_Plugins() -> &'static str;
-        pub fn get_path_Resources() -> &'static str;
-        pub fn get_path_EverQuest() -> &'static str;
-        pub fn write_chat_color(line: &str, color: i32);
+        pub fn get_path_MQRoot() -> &'static str {
+            unimplemented!()
+        }
+
+        pub fn get_path_Config() -> &'static str {
+            unimplemented!()
+        }
+
+        pub fn get_path_MQini() -> &'static str {
+            unimplemented!()
+        }
+
+        pub fn get_path_Macros() -> &'static str {
+            unimplemented!()
+        }
+
+        pub fn get_path_Logs() -> &'static str {
+            unimplemented!()
+        }
+
+        pub fn get_path_CrashDumps() -> &'static str {
+            unimplemented!()
+        }
+
+        pub fn get_path_Plugins() -> &'static str {
+            unimplemented!()
+        }
+
+        pub fn get_path_Resources() -> &'static str {
+            unimplemented!()
+        }
+
+        pub fn get_path_EverQuest() -> &'static str {
+            unimplemented!()
+        }
+
+        pub fn write_chat_color(line: &str, color: i32) {
+            unimplemented!()
+        }
     }
 }
 
