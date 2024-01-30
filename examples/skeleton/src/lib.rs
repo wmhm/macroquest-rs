@@ -3,7 +3,7 @@ use macroquest::{eq, Plugin};
 
 const VERSION: &str = "1.0";
 
-#[macroquest::plugin(logging)]
+#[macroquest::plugin(logging(file))]
 struct MQRustSkeleton {}
 
 impl macroquest::Plugin for MQRustSkeleton {

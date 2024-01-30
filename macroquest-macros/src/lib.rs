@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use darling::ast::NestedMeta;
 use darling::util::Override;
 use darling::{Error, FromMeta};
@@ -49,9 +51,65 @@ impl ToTokens for ConsoleLogging {
     }
 }
 
+#[derive(Debug, Clone, FromMeta)]
+struct FileLogging {
+    level: Option<LevelFilter>,
+    filename: Option<PathBuf>,
+}
+
+impl FileLogging {
+    fn with_plugin_name(mut self, name: Option<String>) -> Self {
+        self.filename = self
+            .filename
+            .or_else(|| name.map(|n| PathBuf::from(n + ".log")));
+        self
+    }
+}
+
+impl Default for FileLogging {
+    fn default() -> Self {
+        FileLogging {
+            level: Some(LevelFilter::Debug),
+            filename: None,
+        }
+    }
+}
+
+impl ToTokens for FileLogging {
+    fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
+        let level = match self.level {
+            Some(LevelFilter::Off) => quote! { ::macroquest::log::logger::LevelFilter::OFF },
+            Some(LevelFilter::Error) => quote! { ::macroquest::log::logger::LevelFilter::ERROR },
+            Some(LevelFilter::Warn) => quote! { ::macroquest::log::logger::LevelFilter::WARN },
+            Some(LevelFilter::Info) => quote! { ::macroquest::log::logger::LevelFilter::INFO },
+            Some(LevelFilter::Debug) => quote! { ::macroquest::log::logger::LevelFilter::DEBUG },
+            Some(LevelFilter::Trace) => quote! { ::macroquest::log::logger::LevelFilter::TRACE },
+            None => quote! { ::macroquest::log::logger::LevelFilter::DEBUG },
+        };
+
+        let filename = self
+            .filename
+            .as_ref()
+            .expect("do not have a filename")
+            .to_string_lossy();
+
+        (quote! { Some((#level, #filename)) }).to_tokens(tokens)
+    }
+}
+
 #[derive(Debug, Default, FromMeta)]
 struct Logging {
     console: Option<Override<ConsoleLogging>>,
+    file: Option<Override<FileLogging>>,
+}
+
+impl Logging {
+    fn with_plugin_name(mut self, name: Option<String>) -> Self {
+        self.file = self
+            .file
+            .map(|f| Override::Explicit(f.unwrap_or_default().with_plugin_name(name)));
+        self
+    }
 }
 
 impl ToTokens for Logging {
@@ -71,6 +129,7 @@ impl ToTokens for Logging {
 
 #[derive(Debug, FromMeta)]
 struct PluginArgs {
+    name: Option<String>,
     logging: Option<Override<Logging>>,
 }
 
@@ -92,7 +151,9 @@ pub fn plugin(args: TokenStream, stream: TokenStream) -> TokenStream {
 
     let plugin_t = format_ident!("{}", input.ident);
     let plugin = format_ident!("__{}", input.ident.to_string().to_uppercase());
-    let logging = args.logging.map(|l| l.unwrap_or_default());
+    let logging = args
+        .logging
+        .map(|l| l.unwrap_or_default().with_plugin_name(args.name.clone()));
 
     let eq_version_str = format!("{} {}", ffi::eq_version(), ffi::eq_time()).into_bytes();
 
