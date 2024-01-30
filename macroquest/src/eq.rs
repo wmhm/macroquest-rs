@@ -1,7 +1,8 @@
 use std::fmt;
 
-use macroquest_sys as ffi;
 use num_enum::FromPrimitive;
+
+use crate::ffi;
 
 #[derive(Debug, Eq, PartialEq, FromPrimitive)]
 #[repr(i32)]
