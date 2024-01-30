@@ -4,5 +4,17 @@ members = [
     "macroquest",
     "macroquest-build-config",
     "macroquest-macros",
+    "macroquest-sys",
     "examples/skeleton",
 ]
+
+[workspace.package]
+version = "0.1.7"
+edition = "2021"
+license = "MIT"
+
+[workspace.dependencies]
+macroquest = { version = "0.1", path = "./macroquest" }
+macroquest-build-config = { version = "0.1", path = "./macroquest-build-config" }
+macroquest-macros = { version = "0.1", path = "./macroquest-macros" }
+macroquest-sys = { version = "0.1", path = "./macroquest-sys" }

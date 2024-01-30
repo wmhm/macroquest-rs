@@ -1,0 +1,26 @@
+[package]
+name = "macroquest-sys"
+description = "Raw bindings to the MacroQuest API"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+cxx = "1"
+num_enum = "0.7.2"
+parking_lot = "0.12.1"
+windows = { version = "0.*", features = [
+    "Win32_Foundation",
+    "Win32_System_SystemServices",
+] }
+
+
+[build-dependencies]
+macroquest-build-config = { workspace = true }
+cxx-build = "1"
+walkdir = "2"
+
+
+[package.metadata.docs.rs]
+all-features = true
+targets = ["x86_64-pc-windows-msvc"]

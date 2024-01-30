@@ -1,7 +1,9 @@
+#![cfg(target_os = "windows")]
+
 #[cxx::bridge(namespace = "mqrust::eqlib")]
 pub mod eqlib {
     unsafe extern "C++" {
-        include!("macroquest/include/eqlib.h");
+        include!("macroquest-sys/include/eqlib.h");
 
         pub type PlayerClient;
 
@@ -10,7 +12,7 @@ pub mod eqlib {
     }
 
     unsafe extern "C++" {
-        include!("macroquest/include/eqlib.h");
+        include!("macroquest-sys/include/eqlib.h");
 
         pub type EQGroundItem;
 
@@ -19,9 +21,9 @@ pub mod eqlib {
 }
 
 #[cxx::bridge(namespace = "mqrust::mq")]
-pub(crate) mod mq {
+pub mod mq {
     unsafe extern "C++" {
-        include!("macroquest/include/mq.h");
+        include!("macroquest-sys/include/mq.h");
 
         fn write_chat_color(line: &str, color: i32);
     }

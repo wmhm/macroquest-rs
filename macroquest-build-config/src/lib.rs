@@ -5,15 +5,15 @@ use serde::Deserialize;
 // NOTE: this has to be kept in sync with the BuildConfig located in build.rs
 #[derive(Deserialize, Debug)]
 pub struct BuildConfig {
+    eq_version: String,
     profile: String,
     root_dir: PathBuf,
-    bin_dir: Option<PathBuf>,
-    lib_dir: Option<PathBuf>,
+    bin_dir: PathBuf,
 }
 
 impl BuildConfig {
     pub fn load() -> BuildConfig {
-        let config_str = include_str!(concat!(env!("OUT_DIR"), r"\config.toml"));
+        let config_str = include_str!(concat!(env!("OUT_DIR"), "/config.toml"));
         let config: BuildConfig = toml::from_str(config_str).unwrap();
         config
     }
@@ -21,12 +21,12 @@ impl BuildConfig {
     pub fn emit(&self) {
         println!(
             "cargo:rustc-link-search={}",
-            self.bin_dir().join(self.profile.as_str()).display()
+            self.bin_dir.join(self.profile.as_str()).display()
         );
         println!(
             "cargo:rustc-link-search={}",
-            self.lib_dir()
-                .join("x64")
+            self.root_dir
+                .join("build/lib/x64")
                 .join(self.profile.as_str())
                 .display()
         );
@@ -50,20 +50,6 @@ impl BuildConfig {
 }
 
 impl BuildConfig {
-    fn bin_dir(&self) -> PathBuf {
-        match &self.bin_dir {
-            Some(d) => d.clone(),
-            None => self.root_dir.join("build/bin/"),
-        }
-    }
-
-    fn lib_dir(&self) -> PathBuf {
-        match &self.lib_dir {
-            Some(d) => d.clone(),
-            None => self.root_dir.join("build/lib/"),
-        }
-    }
-
     pub fn include_dirs(&self) -> Vec<PathBuf> {
         [
             "include",
@@ -80,5 +66,9 @@ impl BuildConfig {
 
     pub fn eqlib_dir(&self) -> PathBuf {
         self.root_dir.join(r"src\eqlib")
+    }
+
+    pub fn eq_version(&self) -> &str {
+        self.eq_version.as_str()
     }
 }
