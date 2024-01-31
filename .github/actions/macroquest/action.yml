@@ -1,0 +1,16 @@
+# Adapted from the official macroquest/macroquest GitHub Action
+name: "MacroQuest"
+description: "Setup a MacroQuest Build"
+runs:
+  using: composite
+  steps:
+    - uses: actions/checkout@v4
+      with:
+        repository: macroquest/macroquest
+        path: ./MacroQuest
+        submodules: recursive
+    - uses: microsoft/setup-msbuild@v1.1
+      with:
+        msbuild-architecture: x64
+    - run: msbuild src/MacroQuest.sln /NoLogo /Verbosity:minimal /p:Configuration=Release /p:Platform=${{ env.platform }}
+      working-directory: ./MacroQuest

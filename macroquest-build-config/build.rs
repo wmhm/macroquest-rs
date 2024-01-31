@@ -53,15 +53,6 @@ fn main() {
             profile: String::from("docs build"),
             bin_dir: PathBuf::from("docs build"),
         }
-    } else if std::env::var("WITHOUT_MACROQUEST_HACK").is_ok() {
-        // If we've marked that we're not building for some reason then we
-        // synthesize a fake build configuration.
-        BuildConfig {
-            eq_version: String::from("non working build"),
-            root_dir: PathBuf::from("non working build"),
-            profile: String::from("non working build"),
-            bin_dir: PathBuf::from("non working build"),
-        }
     } else if target_os != "windows" {
         // If we're building for a non windows platform, then we synthesize a
         // build configuration

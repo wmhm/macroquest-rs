@@ -12,14 +12,18 @@ jobs:
   test:
     name: Clippy
     runs-on: windows-latest
-    env:
-      WITHOUT_MACROQUEST_HACK: 1
     steps:
       - uses: actions/checkout@v4
+        with:
+          path: ./crates
+      - uses: ./.github/actions/macroquest
       - uses: dtolnay/rust-toolchain@clippy
         with:
           toolchain: nightly
       - run: cargo clippy --workspace --all-targets --all-features
+        working-directory: ./crates
+        env:
+          MACROQUEST_DIR: ../MacroQuest/
 
 
   doc:
