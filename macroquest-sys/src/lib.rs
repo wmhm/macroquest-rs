@@ -1,3 +1,8 @@
+#![warn(clippy::correctness)]
+#![warn(clippy::suspicious)]
+#![warn(clippy::complexity)]
+#![warn(clippy::perf)]
+#![warn(clippy::style)]
 #![warn(clippy::pedantic)]
 #![cfg(target_os = "windows")]
 
