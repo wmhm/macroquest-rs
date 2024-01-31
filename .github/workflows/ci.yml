@@ -13,12 +13,14 @@ jobs:
     name: Clippy
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout macroquest-rs
+        uses: actions/checkout@v4
         with:
           path: ./crates
       - name: Build MacroQuest
         uses: ./crates/.github/actions/macroquest
-      - uses: dtolnay/rust-toolchain@clippy
+      - name: Install Clippy
+        uses: dtolnay/rust-toolchain@clippy
         with:
           toolchain: nightly
       - run: cargo clippy --workspace --all-targets --all-features
