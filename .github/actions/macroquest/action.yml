@@ -19,11 +19,23 @@ runs:
         ref: ${{ inputs.branch }}
         path: ./MacroQuest
         submodules: recursive
+    - name: Get MacroQuest Commit
+      id: macroquest-commit
+      run: echo "macroquest-commit=$(git rev-parse HEAD)" >> $GITHUB_OUPUT
+      shell: bash
+    - name: Restore MacroQuest Cache
+      id: cache-macroquest-restore
+      uses: actions/cache/restore@v4
+      with:
+        path: ${{ github.workspace }}/MacroQuest/build
+        key: ${{ runner.os }}-macroquest-x64-${{ steps.macroquest-commit.outputs.macroquest-commit }}
     - name: Install MSBuild
+      if: steps.cache-macroquest-restore.outputs.cache-hit != 'true'
       uses: microsoft/setup-msbuild@v1.1
       with:
         msbuild-architecture: x64
     - name: Cache vcpkg
+      if: steps.cache-macroquest-restore.outputs.cache-hit != 'true'
       id: cache-vcpkg
       uses: actions/cache@v3
       with:
@@ -38,21 +50,14 @@ runs:
         restore-keys: |
           ${{ runner.os }}-vcpkg-x64-
           ${{ runner.os }}-vcpkg-
-    - name: Cache MacroQuest
-      id: cache-macroquest
-      uses: actions/cache@v3
-      with:
-        path: |
-          MacroQuest/build
-        key: ${{ runner.os }}-macroquest-x64-${{ github.run_id }}
-        restore-keys: |
-          ${{ runner.os }}-macroquest-x64-
-          ${{ runner.os }}-macroquest-vcpkg-
     - name: Build MacroQuest
+      if: steps.cache-macroquest-restore.outputs.cache-hit != 'true'
       run: msbuild src/MacroQuest.sln /NoLogo /Verbosity:minimal /p:Configuration=Release /p:Platform=x64
       shell: pwsh
       working-directory: ./MacroQuest
-    - name: Get MacroQuest Commit
-      id: macroquest-commit
-      run: echo "macroquest-commit=$(git rev-parse HEAD)" >> $GITHUB_OUPUT
-      shell: bash
+    - name: Save MacroQuest Cache
+      id: cache-macroquest-save
+      uses: actions/cache/save@v4
+      with:
+        path: ${{ github.workspace }}/MacroQuest/build
+        key: ${{ runner.os }}-macroquest-x64-${{ steps.macroquest-commit.outputs.macroquest-commit }}
