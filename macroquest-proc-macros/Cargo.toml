@@ -1,0 +1,22 @@
+[package]
+name = "macroquest-proc-macros"
+description = "Internal implementation of the macroquest proc macros"
+readme = "README.md"
+categories = ["games"]
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+keywords.workspace = true
+
+
+[lib]
+proc-macro = true
+
+
+[dependencies]
+
+
+[package.metadata.docs.rs]
+all-features = true
+targets = ["x86_64-pc-windows-msvc"]
