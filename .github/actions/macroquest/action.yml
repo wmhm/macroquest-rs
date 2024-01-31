@@ -57,6 +57,7 @@ runs:
       shell: pwsh
       working-directory: ./MacroQuest
     - name: Save MacroQuest Cache
+      if: steps.cache-macroquest-restore.outputs.cache-hit != 'true'
       id: cache-macroquest-save
       uses: actions/cache/save@v4
       with:
