@@ -1,3 +1,10 @@
+#![warn(clippy::cargo)]
+#![warn(clippy::correctness)]
+#![warn(clippy::suspicious)]
+#![warn(clippy::complexity)]
+#![warn(clippy::perf)]
+#![warn(clippy::style)]
+#![warn(clippy::pedantic)]
 #![cfg(target_os = "windows")]
 
 #[cxx::bridge(namespace = "mqrust::eqlib")]
@@ -7,6 +14,7 @@ pub mod eqlib {
 
         pub type PlayerClient;
 
+        #[must_use]
         fn name(&self) -> &str;
 
     }
@@ -16,6 +24,7 @@ pub mod eqlib {
 
         pub type EQGroundItem;
 
+        #[must_use]
         fn name(&self) -> &str;
     }
 }
@@ -26,14 +35,31 @@ pub mod mq {
         include!("macroquest-sys/include/mq.h");
 
         // Path Functions
+        #[must_use]
         fn get_path_MQRoot() -> &'static str;
+
+        #[must_use]
         fn get_path_Config() -> &'static str;
+
+        #[must_use]
         fn get_path_MQini() -> &'static str;
+
+        #[must_use]
         fn get_path_Macros() -> &'static str;
+
+        #[must_use]
         fn get_path_Logs() -> &'static str;
+
+        #[must_use]
         fn get_path_CrashDumps() -> &'static str;
+
+        #[must_use]
         fn get_path_Plugins() -> &'static str;
+
+        #[must_use]
         fn get_path_Resources() -> &'static str;
+
+        #[must_use]
         fn get_path_EverQuest() -> &'static str;
 
         // General Functions

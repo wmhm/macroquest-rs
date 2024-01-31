@@ -1,3 +1,11 @@
+#![warn(clippy::cargo)]
+#![warn(clippy::correctness)]
+#![warn(clippy::suspicious)]
+#![warn(clippy::complexity)]
+#![warn(clippy::perf)]
+#![warn(clippy::style)]
+#![warn(clippy::pedantic)]
+
 use std::path::PathBuf;
 
 use darling::ast::NestedMeta;
@@ -47,7 +55,7 @@ impl ToTokens for ConsoleLogging {
             LevelFilter::Trace => quote! { ::macroquest::log::logger::LevelFilter::TRACE },
         };
 
-        (quote! { Some(#level) }).to_tokens(tokens)
+        (quote! { Some(#level) }).to_tokens(tokens);
     }
 }
 
@@ -80,9 +88,10 @@ impl ToTokens for FileLogging {
             Some(LevelFilter::Error) => quote! { ::macroquest::log::logger::LevelFilter::ERROR },
             Some(LevelFilter::Warn) => quote! { ::macroquest::log::logger::LevelFilter::WARN },
             Some(LevelFilter::Info) => quote! { ::macroquest::log::logger::LevelFilter::INFO },
-            Some(LevelFilter::Debug) => quote! { ::macroquest::log::logger::LevelFilter::DEBUG },
             Some(LevelFilter::Trace) => quote! { ::macroquest::log::logger::LevelFilter::TRACE },
-            None => quote! { ::macroquest::log::logger::LevelFilter::DEBUG },
+            Some(LevelFilter::Debug) | None => {
+                quote! { ::macroquest::log::logger::LevelFilter::DEBUG }
+            }
         };
 
         let filename = self
@@ -91,7 +100,7 @@ impl ToTokens for FileLogging {
             .expect("does not have a filename")
             .to_string_lossy();
 
-        (quote! { Some((#level, #filename)) }).to_tokens(tokens)
+        (quote! { Some((#level, #filename)) }).to_tokens(tokens);
     }
 }
 
@@ -127,7 +136,7 @@ impl ToTokens for Logging {
         (quote! {
             ::macroquest::log::logger::init(#console, #file);
         })
-        .to_tokens(tokens)
+        .to_tokens(tokens);
     }
 }
 
@@ -138,6 +147,7 @@ struct PluginArgs {
 }
 
 #[proc_macro_attribute]
+#[allow(clippy::too_many_lines)]
 pub fn plugin(args: TokenStream, stream: TokenStream) -> TokenStream {
     let args = match NestedMeta::parse_meta_list(args.into()) {
         Ok(v) => v,
@@ -152,7 +162,7 @@ pub fn plugin(args: TokenStream, stream: TokenStream) -> TokenStream {
     let input = parse_macro_input!(stream as ItemStruct);
 
     if args.name.is_none() {
-        args.name = Some(input.ident.to_string())
+        args.name = Some(input.ident.to_string());
     }
 
     let plugin_t = format_ident!("{}", input.ident);

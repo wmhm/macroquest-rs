@@ -1,3 +1,11 @@
+#![warn(clippy::cargo)]
+#![warn(clippy::correctness)]
+#![warn(clippy::suspicious)]
+#![warn(clippy::complexity)]
+#![warn(clippy::perf)]
+#![warn(clippy::style)]
+#![warn(clippy::pedantic)]
+
 use std::path::PathBuf;
 
 use serde::Deserialize;
@@ -12,6 +20,8 @@ pub struct BuildConfig {
 }
 
 impl BuildConfig {
+    #[must_use]
+    #[allow(clippy::missing_panics_doc)]
     pub fn load() -> BuildConfig {
         let config_str = include_str!(concat!(env!("OUT_DIR"), "/config.toml"));
         let config: BuildConfig = toml::from_str(config_str).unwrap();
@@ -50,6 +60,7 @@ impl BuildConfig {
 }
 
 impl BuildConfig {
+    #[must_use]
     pub fn include_dirs(&self) -> Vec<PathBuf> {
         [
             "include",
@@ -64,10 +75,12 @@ impl BuildConfig {
         .collect()
     }
 
+    #[must_use]
     pub fn eqlib_dir(&self) -> PathBuf {
         self.root_dir.join(r"src\eqlib")
     }
 
+    #[must_use]
     pub fn eq_version(&self) -> &str {
         self.eq_version.as_str()
     }

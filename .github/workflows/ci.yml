@@ -4,19 +4,159 @@ on:
     branches:
       - main
   pull_request:
+  schedule:
+    - cron: "30 1 * * *"
+
+env:
+  RUSTFLAGS: -Dwarnings
 
 jobs:
-  doc:
-    name: Documentation
+  macroquest:
+    name: Build MacroQuest
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+    outputs:
+      commit: ${{ steps.build-macroquest.outputs.commit }}
+    steps:
+      - name: Checkout macroquest-rs
+        uses: actions/checkout@v4
+        with:
+          path: ./crates
+      - name: Build MacroQuest
+        id: build-macroquest
+        uses: ./crates/.github/actions/macroquest
+        with:
+          ref: rel-live
+
+  build:
+    name: Build - ${{matrix.rust}}
+    runs-on: windows-latest
+    needs: [macroquest]
+    strategy:
+      matrix:
+        rust: [stable, beta, nightly]
+    steps:
+      - name: Checkout macroquest-rs
+        uses: actions/checkout@v4
+        with:
+          path: ./crates
+      - name: Build MacroQuest
+        uses: ./crates/.github/actions/macroquest
+        with:
+          ref: ${{ needs.macroquest.outputs.commit }}
+      - name: Fetch Rust Toolchain
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{matrix.rust}}
+      - name: Cache Rust Dependencies
+        if: ${{ matrix.rust != 'nightly' }}
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: crates
+      - run: cargo build --workspace --all-targets
+        working-directory:  ${{ github.workspace }}/crates
+        env:
+          MACROQUEST_DIR: ${{ github.workspace }}//MacroQuest/
+      - run: cargo build --workspace --all-targets --all-features
+        working-directory: ${{ github.workspace }}/crates
+        env:
+          MACROQUEST_DIR: ${{ github.workspace }}/MacroQuest/
+
+  test:
+    name: Tests
+    runs-on: windows-latest
+    needs: [macroquest]
+    steps:
+      - name: Checkout macroquest-rs
+        uses: actions/checkout@v4
+        with:
+          path: ./crates
+      - name: Build MacroQuest
+        uses: ./crates/.github/actions/macroquest
+        with:
+          ref: ${{ needs.macroquest.outputs.commit }}
+      - name: Fetch Rust Toolchain
+        uses: dtolnay/rust-toolchain@stable
+      - name: Cache Rust Dependencies
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: crates
+      - name: Update Path
+        run: echo "${{ github.workspace }}/MacroQuest/build/bin/release" >> $GITHUB_PATH
+        shell: bash
+      - run: cargo test --workspace --all-targets --all-features
+        working-directory:  ${{ github.workspace }}/crates
+        env:
+          MACROQUEST_DIR: ${{ github.workspace }}//MacroQuest/
+      - run: cargo test --workspace --exclude 'mqrust*' --all-features --doc
+        working-directory:  ${{ github.workspace }}/crates
+        env:
+          MACROQUEST_DIR: ${{ github.workspace }}//MacroQuest/
+
+
+  clippy:
+    name: Clippy
+    runs-on: windows-latest
+    needs: [macroquest]
+    strategy:
+      fail-fast: false
+    steps:
+      - name: Checkout macroquest-rs
+        uses: actions/checkout@v4
+        with:
+          path: ./crates
+      - name: Build MacroQuest
+        uses: ./crates/.github/actions/macroquest
+        with:
+          ref: ${{ needs.macroquest.outputs.commit }}
+      - name: Install Clippy
+        uses: dtolnay/rust-toolchain@clippy
+        with:
+          toolchain: nightly
+      - name: Cache Rust Dependencies
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: crates
+      - run: cargo clippy --workspace --all-targets --all-features
+        working-directory: ${{ github.workspace }}/crates
+        env:
+          MACROQUEST_DIR: ${{ github.workspace }}/MacroQuest/
+
+
+  fmt:
+    name: Code Formatting
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
     env:
       RUSTDOCFLAGS: -Dwarnings
     steps:
-      - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@nightly
+      - name: Checkout macroquest-rs
+        uses: actions/checkout@v4
+      - name: Fetch Rust Toolchain
+        uses: dtolnay/rust-toolchain@nightly
+        with:
+          components: rustfmt
+      - run: cargo fmt --check --all
+
+
+  doc:
+    name: Documentation
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+    env:
+      RUSTDOCFLAGS: -Dwarnings
+    steps:
+      - name: Checkout macroquest-rs
+        uses: actions/checkout@v4
+      - name: Fetch Rust Toolchain
+        uses: dtolnay/rust-toolchain@nightly
         with:
           targets: x86_64-pc-windows-msvc
-      - uses: dtolnay/install@cargo-docs-rs
+      - name: Fetch cargo docs-rs
+        uses: dtolnay/install@cargo-docs-rs
       - run: cargo docs-rs -p macroquest-build-config
       - run: cargo docs-rs -p macroquest-macros
       - run: cargo docs-rs -p macroquest

@@ -1,0 +1,87 @@
+# Adapted from the official macroquest/macroquest GitHub Action
+name: "MacroQuest"
+description: "Setup a MacroQuest Build"
+
+inputs:
+  ref:
+    description: What ref of MacroQuest to build against
+    default: master
+
+outputs:
+  commit:
+    description: What commit of MacroQuest we built against
+    value: ${{ steps.macroquest-commit.outputs.macroquest-commit }}
+
+runs:
+  using: composite
+  steps:
+    - name: Checkout MacroQuest
+      uses: actions/checkout@v4
+      with:
+        repository: macroquest/macroquest
+        ref: ${{ inputs.ref }}
+        path: ./MacroQuest
+        submodules: recursive
+
+    - name: Get MacroQuest Commit
+      id: macroquest-commit
+      run: echo "macroquest-commit=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
+      working-directory: ./MacroQuest
+      shell: bash
+
+    - name: Restore MacroQuest Cache
+      id: cache-macroquest-restore
+      uses: actions/cache/restore@v4
+      with:
+        path: ${{ github.workspace }}/MacroQuest/build
+        key: ${{ runner.os }}-macroquest-x64-${{ steps.macroquest-commit.outputs.macroquest-commit }}
+
+    - name: Restore vcpkg Cache
+      id: cache-vcpkg-restore
+      uses: actions/cache/restore@v4
+      with:
+        path: |
+          MacroQuest/contrib/vcpkg/buildtrees
+          MacroQuest/contrib/vcpkg/downloads
+          MacroQuest/contrib/vcpkg/installed
+          MacroQuest/contrib/vcpkg/packages
+          MacroQuest/contrib/vcpkg/vcpkg.exe
+          MacroQuest/contrib/vcpkg/vcpkg_mq_last_bootstrap*.txt
+        key: ${{ runner.os }}-vcpkg-x64-${{ steps.macroquest-commit.outputs.macroquest-commit }}
+        restore-keys: |
+          ${{ runner.os }}-vcpkg-x64-
+          ${{ runner.os }}-vcpkg-
+
+    - name: Install MSBuild
+      if: steps.cache-macroquest-restore.outputs.cache-hit != 'true'
+      uses: microsoft/setup-msbuild@v1.1
+      with:
+        msbuild-architecture: x64
+
+    - name: Build MacroQuest
+      if: steps.cache-macroquest-restore.outputs.cache-hit != 'true'
+      run: msbuild src/MacroQuest.sln /NoLogo /Verbosity:minimal /p:Configuration=Release /p:Platform=x64
+      shell: pwsh
+      working-directory: ./MacroQuest
+
+    - name: Save MacroQuest Cache
+      if: steps.cache-macroquest-restore.outputs.cache-hit != 'true'
+      id: cache-macroquest-save
+      uses: actions/cache/save@v4
+      with:
+        path: ${{ github.workspace }}/MacroQuest/build
+        key: ${{ runner.os }}-macroquest-x64-${{ steps.macroquest-commit.outputs.macroquest-commit }}
+
+    - name: Save vcpkg Cache
+      if: steps.cache-vcpkg-restore.outputs.cache-hit != 'true'
+      id: cache-vcpkg-save
+      uses: actions/cache/save@v4
+      with:
+        path: |
+          MacroQuest/contrib/vcpkg/buildtrees
+          MacroQuest/contrib/vcpkg/downloads
+          MacroQuest/contrib/vcpkg/installed
+          MacroQuest/contrib/vcpkg/packages
+          MacroQuest/contrib/vcpkg/vcpkg.exe
+          MacroQuest/contrib/vcpkg/vcpkg_mq_last_bootstrap*.txt
+        key: ${{ runner.os }}-macroquest-x64-${{ steps.macroquest-commit.outputs.macroquest-commit }}

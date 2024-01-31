@@ -12,6 +12,9 @@ members = [
 version = "0.1.7"
 edition = "2021"
 license = "MIT"
+repository = "https://github.com/wmhm/macroquest-rs"
+keywords = ["gamedev", "bindings", "codegen", "macroquest"]
+
 
 [workspace.dependencies]
 macroquest = { version = "0.1", path = "./macroquest" }

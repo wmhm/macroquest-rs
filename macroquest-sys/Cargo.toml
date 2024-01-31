@@ -1,9 +1,13 @@
 [package]
 name = "macroquest-sys"
 description = "Raw bindings to the MacroQuest API"
+readme = "README.md"
+categories = ["external-ffi-bindings", "games"]
 version.workspace = true
 edition.workspace = true
 license.workspace = true
+repository.workspace = true
+keywords.workspace = true
 
 [dependencies]
 cxx = "1"

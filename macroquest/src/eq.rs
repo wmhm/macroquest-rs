@@ -205,6 +205,7 @@ mod macros {
 
     macro_rules! getter {
         ($name:ident -> $rtype:ty) => {
+            #[must_use]
             pub fn $name(&self) -> $rtype {
                 self.0.$name()
             }

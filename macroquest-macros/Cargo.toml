@@ -1,9 +1,13 @@
 [package]
 name = "macroquest-macros"
 description = "Internal macros for the MacroQuest ecosystem"
+readme = "README.md"
+categories = ["gaming"]
 version.workspace = true
 edition.workspace = true
 license.workspace = true
+repository.workspace = true
+keywords.workspace = true
 
 
 [lib]

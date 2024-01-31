@@ -22,38 +22,47 @@ pub struct Paths<'a> {
 }
 
 impl<'a> Paths<'a> {
+    #[must_use]
     pub fn root(&self) -> &Path {
         self.root
     }
 
+    #[must_use]
     pub fn config(&self) -> &Path {
         self.config
     }
 
+    #[must_use]
     pub fn ini(&self) -> &Path {
         self.ini
     }
 
+    #[must_use]
     pub fn macros(&self) -> &Path {
         self.macros
     }
 
+    #[must_use]
     pub fn logs(&self) -> &Path {
         self.logs
     }
 
+    #[must_use]
     pub fn crash_dumps(&self) -> &Path {
         self.crash_dumps
     }
 
+    #[must_use]
     pub fn plugins(&self) -> &Path {
         self.plugins
     }
 
+    #[must_use]
     pub fn resources(&self) -> &Path {
         self.resources
     }
 
+    #[must_use]
     pub fn everquest(&self) -> &Path {
         self.everquest
     }
@@ -87,13 +96,14 @@ pub fn write_chat<'a, S>(line: S)
 where
     S: Into<Cow<'a, str>>,
 {
-    write_chat_color(line, ChatColor::Default)
+    write_chat_color(line, ChatColor::Default);
 }
 
 pub struct ConsoleWriter(PhantomData<()>);
 
 impl ConsoleWriter {
     #[allow(clippy::new_without_default)]
+    #[must_use]
     pub fn new() -> Self {
         ConsoleWriter(PhantomData)
     }
