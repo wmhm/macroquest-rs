@@ -184,7 +184,7 @@ pub fn plugin(args: TokenStream, stream: TokenStream) -> TokenStream {
             match call_reason {
                 DLL_PROCESS_ATTACH => {
                     #logging
-                    #plugin.replace(Some(#plugin_t::new()))
+                    #plugin.replace(Some(#plugin_t::default()))
                 }
                 DLL_PROCESS_DETACH => #plugin.replace(None),
                 _ => {}
