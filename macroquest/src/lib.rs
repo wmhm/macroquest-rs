@@ -1,3 +1,4 @@
+#![warn(clippy::pedantic)]
 #![cfg(target_os = "windows")]
 
 pub use macroquest_macros::plugin;

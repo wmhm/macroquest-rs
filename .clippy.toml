@@ -1,0 +1,2 @@
+msrv = "1.75.0"
+doc-valid-idents = ["MacroQuest", "MQ2Main", "ImGui"]

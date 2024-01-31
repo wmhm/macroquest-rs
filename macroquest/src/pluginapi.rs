@@ -8,8 +8,8 @@ use crate::ffi;
 /// implement.
 ///
 /// For each process, there is one global plugin instance, created using the
-/// Plugin::new() function, and the MacroQuest plugin hooks will get dispatched
-/// to the instance methods of that plugin instance.
+/// ``Plugin::new()`` function, and the MacroQuest plugin hooks will get
+/// dispatched to the instance methods of that plugin instance.
 ///
 /// All MacroQuest plugin hooks have a default, no-op implementation, allowing
 /// a Plugin implementation to implement only the ones that they actually care
@@ -53,16 +53,16 @@ pub trait Plugin: Default {
     /// times the code in this section is executed.
     fn on_draw_hud(&mut self) {}
 
-    /// This is called when the GameState changes. It is also called once after
-    /// the plugin is initialized.
+    /// This is called when the ``GameState`` changes. It is also called once
+    /// after the plugin is initialized.
     ///
-    /// For a list of known GameState values, see the GameState enum. The most
-    /// commonly used of these is GameState::InGame.
+    /// For a list of known ``GameState`` values, see the ``GameState`` enum.
+    /// The most commonly used of these is ``GameState::InGame``.
     ///
-    /// When zoning, this is called once after on_begin_zone, on_remove_spawn,
-    /// and on_remove_ground_item are all done, and then called once again after
-    /// on_end_zone and on_add_spawn are done but prior to on_add_ground_item
-    /// and on_zoned.
+    /// When zoning, this is called once after ``on_begin_zone``,
+    /// ``on_remove_spawn``, and ``on_remove_ground_item`` are all done, and
+    /// then called once again after ``on_end_zone`` and ``on_add_spawn`` are
+    /// done but prior to ``on_add_ground_item`` and ``on_zoned``.
     fn on_set_game_state(&mut self, state: GameState) {}
 
     /// This is called each time MQ2 goes through its heartbeat (pulse) function.
@@ -72,26 +72,26 @@ pub trait Plugin: Default {
     /// code in this section is executed.
     fn on_pulse(&mut self) {}
 
-    /// This is called each time WriteChatColor is called (whether by MQ2Main or
-    /// by any plugin).  This can be considered the "when outputting text from
-    /// MQ" callback.
+    /// This is called each time ``WriteChatColor`` is called (whether by
+    /// MQ2Main or by any plugin).  This can be considered the "when outputting
+    /// text from MQ" callback.
     ///
     /// This ignores filters on display, so if they are needed either implement
-    /// them in this section or see on_incoming_chat where filters are already
-    /// handled.
+    /// them in this section or see ``on_incoming_chat`` where filters are
+    /// already handled.
     ///
-    /// If CEverQuest::dsp_chat is not called, and events are required, they'll
-    /// need to be implemented here as well. Otherwise, see on_incoming_chat
-    /// where that is already handled.
+    /// If ``CEverQuest::dsp_chat`` is not called, and events are required,
+    /// they'll need to be implemented here as well. Otherwise, see
+    /// ``on_incoming_chat`` where that is already handled.
     ///
-    /// For a list of Color values, see the UserColor enum.
+    /// For a list of color values, see the ``UserColor`` enum.
     fn on_write_chat_color(&mut self, line: &str, color: ChatColor) {}
 
     /// This is called each time a line of chat is shown. It occurs after MQ
     /// filters and chat events have been handled.  If you need to know when
-    /// MQ2 has sent chat, consider using o_write_chat_color instead.
+    /// MQ2 has sent chat, consider using ``on_write_chat_color`` instead.
     ///
-    /// For a list of Color values, see the UserColor enum.
+    /// For a list of color values, see the ``UserColor`` enum.
     fn on_incoming_chat(&mut self, line: &str, color: ChatColor) -> bool {
         false
     }
@@ -100,15 +100,15 @@ pub trait Plugin: Default {
     /// spawns). It is also called for each existing spawn when a plugin first
     /// initializes.
     ///
-    /// When zoning, this is called for all spawns in the zone after on_end_zone
-    /// is called and before on_zoned is called.
+    /// When zoning, this is called for all spawns in the zone after
+    /// ``on_end_zone`` is called and before ``on_zoned`` is called.
     fn on_add_spawn(&mut self, spawn: &Spawn) {}
 
     /// This is called each time a spawn is removed from a zone (ie, something
     /// despawns or is killed). It is NOT called when a plugin shuts down.
     ///
     /// When zoning, this is called for all spawns in the zone after
-    /// on_begin_zone is called.
+    /// ``on_begin_zone`` is called.
     fn on_remove_spawn(&mut self, spawn: &Spawn) {}
 
     /// This is called each time a ground item is added to a zone (ie, something
@@ -116,7 +116,7 @@ pub trait Plugin: Default {
     /// first initializes.
     ///
     /// When zoning, this is called for all ground items in the zone after
-    /// on_end_zone is called and before on_zoned is called.
+    /// ``on_end_zone`` is called and before ``on_zoned`` is called.
     fn on_add_ground_item(&mut self, item: &GroundItem) {}
 
     /// This is called each time a ground item is removed from a zone (ie,
@@ -124,7 +124,7 @@ pub trait Plugin: Default {
     /// shuts down.
     ///
     /// When zoning, this is called for all ground items in the zone after
-    /// on_begin_zone is called.
+    /// ``on_begin_zone`` is called.
     fn on_remove_ground_item(&mut self, item: &GroundItem) {}
 
     /// This is called just after entering a zone line and as the loading screen
@@ -134,18 +134,18 @@ pub trait Plugin: Default {
     /// This is called just after the loading screen, but prior to the zone
     /// being fully loaded.
     ///
-    /// This should occur before on_add_spawn and on_add_ground_item are called.
-    /// It always occurs before on_zoned is called.
+    /// This should occur before ``on_add_spawn`` and ``on_add_ground_item`` are
+    /// called. It always occurs before ``on_zoned`` is called.
     fn on_end_zone(&mut self) {}
 
     /// This is called after entering a new zone and the zone is considered
     /// "loaded."
     ///
-    /// It occurs after on_end_zone, on_add_spawn, and on_add_ground_item have
-    /// been called.
+    /// It occurs after ``on_end_zone``, ``on_add_spawn``, and
+    /// ``on_add_ground_item`` have been called.
     fn on_zoned(&mut self) {}
 
-    /// This is called each time that the ImGui Overlay is rendered. Use this to
+    /// This is called each time that the ImGui overlay is rendered. Use this to
     /// render and update plugin specific widgets.
     ///
     /// Because this happens extremely frequently, it is recommended to move any
@@ -153,30 +153,32 @@ pub trait Plugin: Default {
     /// display.
     fn on_update_imgui(&mut self) {}
 
-    /// This is called each time a macro starts (ex: /mac somemacro.mac), prior
-    /// to launching the macro.
+    /// This is called each time a macro starts (ex: ``/mac somemacro.mac``),
+    /// prior to launching the macro.
     fn on_macro_start(&mut self, name: &str) {}
 
-    /// This is called each time a macro stops (ex: /endmac), after the macro
-    /// has ended.
+    /// This is called each time a macro stops (ex: ``/endmac``), after the
+    /// macro has ended.
     fn on_macro_stop(&mut self, name: &str) {}
 
-    /// This is called each time a plugin is loaded (ex: /plugin someplugin),
-    /// after the plugin has been loaded and any associated -AutoExec.cfg file
-    /// have been launched.
+    /// This is called each time a plugin is loaded
+    /// (ex: ``/plugin someplugin``), after the plugin has been loaded and any
+    /// associated ``-AutoExec.cfg`` file have been launched.
     ///
-    /// This means it will be executed after the plugin's initialize callback.
+    /// This means it will be executed after the plugin's ``initialize``
+    /// callback.
     ///
     /// This is also called when THIS plugin is loaded, but initialization tasks
-    /// should still be done in initialize.
+    /// should still be done in ``initialize``.
     fn on_plugin_load(&mut self, name: &str) {}
 
-    /// This is called each time a plugin is unloaded (ex: /plugin someplugin unload),
-    /// just prior to the plugin unloading. This means it will be executed prior
-    /// to that plugin's shutdown callback.
+    /// This is called each time a plugin is unloaded
+    /// (ex: ``/plugin someplugin unload``), just prior to the plugin unloading.
+    /// This means it will be executed prior to that plugin's ``shutdown``
+    /// callback.
     ///
     /// This is also called when THIS plugin is unloaded, but shutdown tasks
-    /// should still be done in shutdown.
+    /// should still be done in ``shutdown``.
     fn on_plugin_unload(&mut self, name: &str) {}
 }
 
@@ -215,7 +217,7 @@ impl<T: Plugin> PluginHandler<T> {
     str_hook!(on_plugin_unload);
 
     pub fn on_set_game_state<S: Into<GameState>>(&self, state: S) {
-        hook!(self, on_set_game_state, state.into())
+        hook!(self, on_set_game_state, state.into());
     }
 
     pub unsafe fn on_write_chat_color<C: Into<ChatColor>>(&self, ptr: *const c_char, color: C) {
@@ -244,7 +246,7 @@ impl<T: Plugin> PluginHandler<T> {
         match ptr.as_ref() {
             Some(ffi_item) => {
                 let item = Spawn(ffi_item);
-                hook!(self, on_add_spawn, &item)
+                hook!(self, on_add_spawn, &item);
             }
             None => todo!("figure out error handling"),
         }
@@ -254,7 +256,7 @@ impl<T: Plugin> PluginHandler<T> {
         match ptr.as_ref() {
             Some(ffi_item) => {
                 let item = Spawn(ffi_item);
-                hook!(self, on_remove_spawn, &item)
+                hook!(self, on_remove_spawn, &item);
             }
             None => todo!("figure out error handling"),
         }
@@ -264,7 +266,7 @@ impl<T: Plugin> PluginHandler<T> {
         match ptr.as_ref() {
             Some(ffi_item) => {
                 let item = GroundItem(ffi_item);
-                hook!(self, on_add_ground_item, &item)
+                hook!(self, on_add_ground_item, &item);
             }
             None => todo!("figure out error handling"),
         }
@@ -274,7 +276,7 @@ impl<T: Plugin> PluginHandler<T> {
         match ptr.as_ref() {
             Some(ffi_item) => {
                 let item = GroundItem(ffi_item);
-                hook!(self, on_remove_ground_item, &item)
+                hook!(self, on_remove_ground_item, &item);
             }
             None => todo!("figure out error handling"),
         }
