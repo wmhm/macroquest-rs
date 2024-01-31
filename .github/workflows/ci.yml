@@ -26,13 +26,13 @@ jobs:
         with:
           toolchain: ${{matrix.rust}}
       - run: cargo build --workspace --all-targets
-        working-directory: ./crates
+        working-directory:  ${{ github.workspace }}/crates
         env:
-          MACROQUEST_DIR: ../MacroQuest/
+          MACROQUEST_DIR: ${{ github.workspace }}//MacroQuest/
       - run: cargo build --workspace --all-targets --all-features
-        working-directory: ./crates
+        working-directory: ${{ github.workspace }}/crates
         env:
-          MACROQUEST_DIR: ../MacroQuest/
+          MACROQUEST_DIR: ${{ github.workspace }}/MacroQuest/
 
   clippy:
     name: Clippy
