@@ -115,7 +115,6 @@ jobs:
         with:
           toolchain: nightly
       - name: Cache Rust Dependencies
-        if: ${{ matrix.rust != 'nightly' }}
         uses: Swatinem/rust-cache@v2
         with:
           workspaces: crates
