@@ -12,6 +12,6 @@ runs:
     - uses: microsoft/setup-msbuild@v1.1
       with:
         msbuild-architecture: x64
-    - run: msbuild src/MacroQuest.sln /NoLogo /Verbosity:minimal /p:Configuration=Release /p:Platform=${{ env.platform }}
+    - run: msbuild src/MacroQuest.sln /NoLogo /Verbosity:minimal /p:Configuration=Release /p:Platform=x64
       shell: pwsh
       working-directory: ./MacroQuest
