@@ -87,7 +87,7 @@ jobs:
         working-directory:  ${{ github.workspace }}/crates
         env:
           MACROQUEST_DIR: ${{ github.workspace }}//MacroQuest/
-      - run: cargo test --workspace --all-targets --all-features --doc
+      - run: cargo test --workspace --all-features --doc
         working-directory:  ${{ github.workspace }}/crates
         env:
           MACROQUEST_DIR: ${{ github.workspace }}//MacroQuest/
