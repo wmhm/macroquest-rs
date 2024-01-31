@@ -132,9 +132,9 @@ jobs:
       RUSTDOCFLAGS: -Dwarnings
     steps:
       - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@rustfmt
+      - uses: dtolnay/rust-toolchain@nightly
         with:
-          toolchain: nightly
+          components: rustfmt
       - run: cargo fmt --check --all
 
 
