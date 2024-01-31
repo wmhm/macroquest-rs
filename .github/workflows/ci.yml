@@ -5,7 +5,21 @@ on:
       - main
   pull_request:
 
+env:
+  RUSTFLAGS: -Dwarnings
+
 jobs:
+  test:
+    name: Clippy
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@clippy
+        with:
+          toolchain: nightly
+      - run: cargo clippy --workspace --all-targets --all-features
+
+
   doc:
     name: Documentation
     runs-on: ubuntu-latest
