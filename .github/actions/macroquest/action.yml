@@ -12,6 +12,31 @@ runs:
     - uses: microsoft/setup-msbuild@v1.1
       with:
         msbuild-architecture: x64
+    - name: Cache vcpkg
+      id: cache-vcpkg
+      uses: actions/cache@v3
+      with:
+        path: |
+          MacroQuest/contrib/vcpkg/buildtrees
+          MacroQuest/contrib/vcpkg/downloads
+          MacroQuest/contrib/vcpkg/installed
+          MacroQuest/contrib/vcpkg/packages
+          MacroQuest/contrib/vcpkg/vcpkg.exe
+          MacroQuest/contrib/vcpkg/vcpkg_mq_last_bootstrap*.txt
+        key: ${{ runner.os }}-vcpkg-x64-${{ github.run_id }}
+        restore-keys: |
+          ${{ runner.os }}-vcpkg-x64-
+          ${{ runner.os }}-vcpkg-
+    - name: Cache MacroQuest
+      id: cache-macroquest
+      uses: actions/cache@v3
+      with:
+        path: |
+          MacroQuest/build
+        key: ${{ runner.os }}-macroquest-x64-${{ github.run_id }}
+        restore-keys: |
+          ${{ runner.os }}-macroquest-x64-
+          ${{ runner.os }}-macroquest-vcpkg-
     - run: msbuild src/MacroQuest.sln /NoLogo /Verbosity:minimal /p:Configuration=Release /p:Platform=x64
       shell: pwsh
       working-directory: ./MacroQuest
