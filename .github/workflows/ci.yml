@@ -48,6 +48,11 @@ jobs:
         uses: dtolnay/rust-toolchain@clippy
         with:
           toolchain: nightly
+      - name: Cache Rust Dependencies
+        if: ${{ matrix.rust != 'nightly' }}
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: crates
       - run: cargo clippy --workspace --all-targets --all-features
         working-directory: ${{ github.workspace }}/crates
         env:
@@ -72,6 +77,11 @@ jobs:
       - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: ${{matrix.rust}}
+      - name: Cache Rust Dependencies
+        if: ${{ matrix.rust != 'nightly' }}
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: crates
       - run: cargo build --workspace --all-targets
         working-directory:  ${{ github.workspace }}/crates
         env:
