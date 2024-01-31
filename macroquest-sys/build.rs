@@ -1,8 +1,10 @@
 fn main() {
     println!("cargo:rerun-if-changed=build.rs");
-    println!("cargo:rerun-if-changed=include/eqlib.h");
     println!("cargo:rerun-if-changed=src/lib.rs");
+    println!("cargo:rerun-if-changed=include/eqlib.h");
     println!("cargo:rerun-if-changed=src/eqlib.cc");
+    println!("cargo:rerun-if-changed=include/mq.h");
+    println!("cargo:rerun-if-changed=src/mq.cc");
 
     let target_os = std::env::var("CARGO_CFG_TARGET_OS").unwrap();
 
@@ -14,7 +16,7 @@ fn main() {
             .std("c++17")
             .includes(mq_config.include_dirs())
             .define("NOMINMAX", None)
-            .file("src/eqlib.cc")
+            .files(["src/eqlib.cc", "src/mq.cc"])
             .compile("mqrust");
 
         mq_config.emit();

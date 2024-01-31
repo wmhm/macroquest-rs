@@ -40,6 +40,7 @@ fn main() {
     println!("cargo:rerun-if-env-changed=MACROQUEST_BUILD_PROFILE");
     println!("cargo:rerun-if-env-changed=MACROQUEST_DIR");
     println!("cargo:rerun-if-env-changed=MACROQUEST_BUILD_BIN_DIR");
+    println!("cargo:rerun-if-env-changed=MACROQUEST_BUILD_LIB_DIR");
     println!("cargo:rerun-if-changed=build.rs");
 
     let target_os = std::env::var("CARGO_CFG_TARGET_OS").unwrap();

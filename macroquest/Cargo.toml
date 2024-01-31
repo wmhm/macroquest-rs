@@ -8,8 +8,12 @@ license.workspace = true
 [dependencies]
 macroquest-macros = { workspace = true }
 macroquest-sys = { workspace = true, optional = true }
+cansi = { version = "2.2.1", optional = true }
 num_enum = "0.7.2"
 parking_lot = "0.12.1"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", optional = true }
+tracing-appender = { version = "0.2", optional = true }
 windows = { version = "0.*", features = [
     "Win32_Foundation",
     "Win32_System_SystemServices",
@@ -23,10 +27,12 @@ macroquest-build-config = { workspace = true }
 [features]
 default = ["bindings"]
 bindings = ["dep:macroquest-sys"]
+colors = ["dep:cansi"]
+logger = ["dep:tracing-subscriber", "dep:tracing-appender"]
 
 
 [package.metadata.docs.rs]
-features = []
+features = ["colors", "logger"]
 no-default-features = true
 targets = ["x86_64-pc-windows-msvc"]
 rustdoc-args = ["--cfg", "docsrs"]

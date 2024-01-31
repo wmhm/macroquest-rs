@@ -1,10 +1,9 @@
-use log::{debug, trace};
+use macroquest::log::{debug, trace};
 use macroquest::{eq, Plugin};
 
-const LOG_TARGET: &str = "MQRustSkeleton";
 const VERSION: &str = "1.0";
 
-#[macroquest::plugin]
+#[macroquest::plugin(logging(file))]
 struct MQRustSkeleton {}
 
 impl macroquest::Plugin for MQRustSkeleton {
@@ -13,88 +12,88 @@ impl macroquest::Plugin for MQRustSkeleton {
     }
 
     fn initialize(&mut self) {
-        debug!(target: LOG_TARGET, "Initializing version: {}", VERSION);
+        debug!(version = VERSION, "Initializing");
     }
 
     fn shutdown(&mut self) {
-        debug!(target: LOG_TARGET, "Shutting down");
+        debug!("Shutting down");
     }
 
     fn on_clean_ui(&mut self) {
-        trace!(target: LOG_TARGET, "UI cleaned");
+        trace!("UI cleaned");
     }
 
     fn on_reload_ui(&mut self) {
-        trace!(target: LOG_TARGET, "UI reloaded");
+        trace!("UI reloaded");
     }
 
     fn on_draw_hud(&mut self) {
-        trace!(target: LOG_TARGET, "HUD drawn");
+        trace!("HUD drawn");
     }
 
     fn on_set_game_state(&mut self, state: eq::GameState) {
-        trace!(target: LOG_TARGET, "Game state updated: {:?}", state);
+        trace!(?state, "Game state updated");
     }
 
     fn on_pulse(&mut self) {
-        trace!(target: LOG_TARGET, "Pulsed");
+        trace!("Pulsed");
     }
 
     fn on_write_chat_color(&mut self, line: &str, color: eq::ChatColor) {
-        trace!(target: LOG_TARGET, "WriteChatColor ({:?}): {}", color, line);
+        trace!(?color, %line, "WriteChatColor");
     }
 
     fn on_incoming_chat(&mut self, line: &str, color: eq::ChatColor) -> bool {
-        trace!(target: LOG_TARGET, "Chat ({:?}): {}", color, line);
+        trace!(?color, %line, "Chat");
 
         false
     }
 
     fn on_add_spawn(&mut self, spawn: &eq::Spawn) {
-        trace!(target: LOG_TARGET, "Spawn: {:?}", spawn);
+        trace!(?spawn, "Spawned");
     }
 
     fn on_remove_spawn(&mut self, spawn: &eq::Spawn) {
-        trace!(target: LOG_TARGET, "Despawn: {:?}", spawn);
+        trace!(?spawn, "Despawned");
     }
 
     fn on_add_ground_item(&mut self, item: &eq::GroundItem) {
-        trace!(target: LOG_TARGET, "GroundItem spawned: {:?}", item);
+        trace!(?item, "Ground item spawned");
     }
 
     fn on_remove_ground_item(&mut self, item: &eq::GroundItem) {
-        trace!(target: LOG_TARGET, "GroundItem despawned: {:?}", item);
+        trace!(?item, "Ground item despawned");
     }
 
     fn on_begin_zone(&mut self) {
-        trace!(target: LOG_TARGET, "Zoning begun");
+        trace!("Zoning started");
     }
 
     fn on_end_zone(&mut self) {
-        trace!(target: LOG_TARGET, "Zoning finished");
+        trace!("Zoning finished");
     }
 
     fn on_zoned(&mut self) {
-        trace!(target: LOG_TARGET, "Zoned");
+        trace!("Zoned");
     }
 
     fn on_update_imgui(&mut self) {
-        trace!(target: LOG_TARGET, "Rendering the IgGui overlay");
+        trace!("Rendering the IgGui overlay");
     }
 
     fn on_macro_start(&mut self, name: &str) {
-        trace!(target: LOG_TARGET, "Macro started: {}", name);
+        trace!(%name, "Macro started");
     }
 
     fn on_macro_stop(&mut self, name: &str) {
-        trace!(target: LOG_TARGET, "Macro stopped: {}", name);
+        trace!(%name, "Macro stopped");
     }
 
     fn on_plugin_load(&mut self, name: &str) {
-        trace!(target: LOG_TARGET, "Plugin loaded: {}", name);
+        trace!(%name, "Plugin loaded");
     }
 
     fn on_plugin_unload(&mut self, name: &str) {
-        trace!(target: LOG_TARGET, "Plugin unloaded: {}", name);
+        trace!(%name, "Plugin unloaded");
     }
 }

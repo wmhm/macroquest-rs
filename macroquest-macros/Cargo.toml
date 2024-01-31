@@ -11,6 +11,7 @@ proc-macro = true
 
 
 [dependencies]
+darling = "0.20.4"
 proc-macro2 = "1"
 quote = "1"
 syn = { version = "2", features = ["full"] }

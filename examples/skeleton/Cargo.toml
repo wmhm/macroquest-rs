@@ -8,8 +8,7 @@ license.workspace = true
 crate-type = ["cdylib"]
 
 [dependencies]
-macroquest = { workspace = true }
-log = "0.4"
+macroquest = { workspace = true, features = ["logger", "colors"] }
 
 [build-dependencies]
 macroquest-build-config = { workspace = true }

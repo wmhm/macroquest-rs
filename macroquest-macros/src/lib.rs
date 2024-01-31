@@ -1,14 +1,165 @@
+use std::path::PathBuf;
+
+use darling::ast::NestedMeta;
+use darling::util::Override;
+use darling::{Error, FromMeta};
 use proc_macro::TokenStream;
 use quote::{format_ident, quote, ToTokens};
 use syn::{parse_macro_input, ItemStruct};
 
+#[derive(Debug, Clone, FromMeta)]
+enum LevelFilter {
+    #[darling(rename = "off")]
+    Off,
+    #[darling(rename = "error")]
+    Error,
+    #[darling(rename = "warn")]
+    Warn,
+    #[darling(rename = "info")]
+    Info,
+    #[darling(rename = "debug")]
+    Debug,
+    #[darling(rename = "trace")]
+    Trace,
+}
+
+#[derive(Debug, Clone, FromMeta)]
+struct ConsoleLogging {
+    level: LevelFilter,
+}
+
+impl Default for ConsoleLogging {
+    fn default() -> Self {
+        ConsoleLogging {
+            level: LevelFilter::Debug,
+        }
+    }
+}
+
+impl ToTokens for ConsoleLogging {
+    fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
+        let level = match self.level {
+            LevelFilter::Off => quote! { ::macroquest::log::logger::LevelFilter::OFF },
+            LevelFilter::Error => quote! { ::macroquest::log::logger::LevelFilter::ERROR },
+            LevelFilter::Warn => quote! { ::macroquest::log::logger::LevelFilter::WARN },
+            LevelFilter::Info => quote! { ::macroquest::log::logger::LevelFilter::INFO },
+            LevelFilter::Debug => quote! { ::macroquest::log::logger::LevelFilter::DEBUG },
+            LevelFilter::Trace => quote! { ::macroquest::log::logger::LevelFilter::TRACE },
+        };
+
+        (quote! { Some(#level) }).to_tokens(tokens)
+    }
+}
+
+#[derive(Debug, Clone, FromMeta)]
+struct FileLogging {
+    level: Option<LevelFilter>,
+    filename: Option<PathBuf>,
+}
+
+impl FileLogging {
+    fn with_plugin_name(mut self, name: Option<String>) -> Self {
+        self.filename = self.filename.or_else(|| name.map(PathBuf::from));
+        self
+    }
+}
+
+impl Default for FileLogging {
+    fn default() -> Self {
+        FileLogging {
+            level: Some(LevelFilter::Debug),
+            filename: None,
+        }
+    }
+}
+
+impl ToTokens for FileLogging {
+    fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
+        let level = match self.level {
+            Some(LevelFilter::Off) => quote! { ::macroquest::log::logger::LevelFilter::OFF },
+            Some(LevelFilter::Error) => quote! { ::macroquest::log::logger::LevelFilter::ERROR },
+            Some(LevelFilter::Warn) => quote! { ::macroquest::log::logger::LevelFilter::WARN },
+            Some(LevelFilter::Info) => quote! { ::macroquest::log::logger::LevelFilter::INFO },
+            Some(LevelFilter::Debug) => quote! { ::macroquest::log::logger::LevelFilter::DEBUG },
+            Some(LevelFilter::Trace) => quote! { ::macroquest::log::logger::LevelFilter::TRACE },
+            None => quote! { ::macroquest::log::logger::LevelFilter::DEBUG },
+        };
+
+        let filename = self
+            .filename
+            .as_ref()
+            .expect("does not have a filename")
+            .to_string_lossy();
+
+        (quote! { Some((#level, #filename)) }).to_tokens(tokens)
+    }
+}
+
+#[derive(Debug, Default, FromMeta)]
+struct Logging {
+    console: Option<Override<ConsoleLogging>>,
+    file: Option<Override<FileLogging>>,
+}
+
+impl Logging {
+    fn with_plugin_name(mut self, name: Option<String>) -> Self {
+        self.file = self
+            .file
+            .map(|f| Override::Explicit(f.unwrap_or_default().with_plugin_name(name)));
+        self
+    }
+}
+
+impl ToTokens for Logging {
+    fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
+        let console = self
+            .console
+            .as_ref()
+            .map(|c| c.clone().unwrap_or_default())
+            .unwrap_or_default();
+
+        let file = self
+            .file
+            .as_ref()
+            .map(|f| f.clone().unwrap_or_default())
+            .unwrap_or_default();
+
+        (quote! {
+            ::macroquest::log::logger::init(#console, #file);
+        })
+        .to_tokens(tokens)
+    }
+}
+
+#[derive(Debug, FromMeta)]
+struct PluginArgs {
+    name: Option<String>,
+    logging: Option<Override<Logging>>,
+}
+
 #[proc_macro_attribute]
-pub fn plugin(_args: TokenStream, stream: TokenStream) -> TokenStream {
+pub fn plugin(args: TokenStream, stream: TokenStream) -> TokenStream {
+    let args = match NestedMeta::parse_meta_list(args.into()) {
+        Ok(v) => v,
+        Err(e) => return TokenStream::from(Error::from(e).write_errors()),
+    };
+
+    let mut args = match PluginArgs::from_list(&args) {
+        Ok(v) => v,
+        Err(e) => return TokenStream::from(e.write_errors()),
+    };
+
     let input = parse_macro_input!(stream as ItemStruct);
-    let mut output = proc_macro2::TokenStream::new();
+
+    if args.name.is_none() {
+        args.name = Some(input.ident.to_string())
+    }
 
     let plugin_t = format_ident!("{}", input.ident);
     let plugin = format_ident!("__{}", input.ident.to_string().to_uppercase());
+    let logging = args
+        .logging
+        .map(|l| l.unwrap_or_default().with_plugin_name(args.name.clone()));
 
     let eq_version_str = include_str!(concat!(env!("OUT_DIR"), "/eq_version.txt")).as_bytes();
 
@@ -31,7 +182,10 @@ pub fn plugin(_args: TokenStream, stream: TokenStream) -> TokenStream {
             use ::macroquest::windows::{DLL_PROCESS_ATTACH, DLL_PROCESS_DETACH};
 
             match call_reason {
-                DLL_PROCESS_ATTACH => #plugin.replace(Some(#plugin_t::new())),
+                DLL_PROCESS_ATTACH => {
+                    #logging
+                    #plugin.replace(Some(#plugin_t::new()))
+                }
                 DLL_PROCESS_DETACH => #plugin.replace(None),
                 _ => {}
             }
@@ -152,24 +306,10 @@ pub fn plugin(_args: TokenStream, stream: TokenStream) -> TokenStream {
         }
     };
 
+    let mut output = proc_macro2::TokenStream::new();
+
     input.to_tokens(&mut output);
     implementation.to_tokens(&mut output);
 
     TokenStream::from(output)
 }
-
-// fn eq_version() -> String {
-//     use std::ffi::CStr;
-//     use std::os::raw::c_char;
-
-//     #[link(name = "MQ2Main")]
-//     extern "C" {
-//         static gszVersion: [c_char; 32];
-//         static gszTime: [c_char; 32];
-//     }
-
-//     let date = unsafe { CStr::from_ptr(gszVersion.as_ptr()) };
-//     let time = unsafe { CStr::from_ptr(gszTime.as_ptr()) };
-
-//     format!("{} {}", date.to_str().unwrap(), time.to_str().unwrap())
-// }
