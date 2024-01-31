@@ -29,35 +29,6 @@ jobs:
         with:
           ref: rel-live
 
-  clippy:
-    name: Clippy
-    runs-on: windows-latest
-    needs: [macroquest]
-    strategy:
-      fail-fast: false
-    steps:
-      - name: Checkout macroquest-rs
-        uses: actions/checkout@v4
-        with:
-          path: ./crates
-      - name: Build MacroQuest
-        uses: ./crates/.github/actions/macroquest
-        with:
-          ref: ${{ needs.macroquest.outputs.commit }}
-      - name: Install Clippy
-        uses: dtolnay/rust-toolchain@clippy
-        with:
-          toolchain: nightly
-      - name: Cache Rust Dependencies
-        if: ${{ matrix.rust != 'nightly' }}
-        uses: Swatinem/rust-cache@v2
-        with:
-          workspaces: crates
-      - run: cargo clippy --workspace --all-targets --all-features
-        working-directory: ${{ github.workspace }}/crates
-        env:
-          MACROQUEST_DIR: ${{ github.workspace }}/MacroQuest/
-
   build:
     name: Rust ${{matrix.rust}}
     runs-on: windows-latest
@@ -120,6 +91,36 @@ jobs:
         working-directory:  ${{ github.workspace }}/crates
         env:
           MACROQUEST_DIR: ${{ github.workspace }}//MacroQuest/
+
+
+  clippy:
+    name: Clippy
+    runs-on: windows-latest
+    needs: [macroquest]
+    strategy:
+      fail-fast: false
+    steps:
+      - name: Checkout macroquest-rs
+        uses: actions/checkout@v4
+        with:
+          path: ./crates
+      - name: Build MacroQuest
+        uses: ./crates/.github/actions/macroquest
+        with:
+          ref: ${{ needs.macroquest.outputs.commit }}
+      - name: Install Clippy
+        uses: dtolnay/rust-toolchain@clippy
+        with:
+          toolchain: nightly
+      - name: Cache Rust Dependencies
+        if: ${{ matrix.rust != 'nightly' }}
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: crates
+      - run: cargo clippy --workspace --all-targets --all-features
+        working-directory: ${{ github.workspace }}/crates
+        env:
+          MACROQUEST_DIR: ${{ github.workspace }}/MacroQuest/
 
 
   doc:
