@@ -9,7 +9,32 @@ env:
   RUSTFLAGS: -Dwarnings
 
 jobs:
-  test:
+  build:
+    name: Rust ${{matrix.rust}}
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        rust: [stable, beta, nightly]
+    steps:
+      - name: Checkout macroquest-rs
+        uses: actions/checkout@v4
+        with:
+          path: ./crates
+      - name: Build MacroQuest
+        uses: ./crates/.github/actions/macroquest
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{matrix.rust}}
+      - run: cargo build --workspace --all-targets
+        working-directory: ./crates
+        env:
+          MACROQUEST_DIR: ../MacroQuest/
+      - run: cargo build --workspace --all-targets --all-features
+        working-directory: ./crates
+        env:
+          MACROQUEST_DIR: ../MacroQuest/
+
+  clippy:
     name: Clippy
     runs-on: windows-latest
     strategy:
