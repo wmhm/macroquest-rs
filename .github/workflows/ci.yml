@@ -4,6 +4,8 @@ on:
     branches:
       - main
   pull_request:
+  schedule:
+    - cron: "30 1 * * *"
 
 env:
   RUSTFLAGS: -Dwarnings
