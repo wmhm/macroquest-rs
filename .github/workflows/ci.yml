@@ -13,7 +13,7 @@ jobs:
     name: Clippy
     runs-on: windows-latest
     env:
-      MACROQUEST_DIR: clippy
+      WITHOUT_MACROQUEST_HACK: 1
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@clippy
