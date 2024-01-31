@@ -15,12 +15,7 @@ use crate::ffi;
 /// a Plugin implementation to implement only the ones that they actually care
 /// about, while leaving the no-op implementations to cover any other hook.
 #[allow(unused_variables)]
-pub trait Plugin {
-    /// This is called to create the instance of the plugin, it should setup
-    /// any basic data structures or other state, but shouldn't generally handle
-    /// initialization.
-    fn new() -> Self;
-
+pub trait Plugin: Default {
     /// This is called once on plugin initialization and can be considered the
     /// startup routine for the plugin.
     fn initialize(&mut self) {}

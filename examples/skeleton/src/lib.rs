@@ -1,16 +1,13 @@
+use macroquest::eq;
 use macroquest::log::{debug, trace};
-use macroquest::{eq, Plugin};
 
 const VERSION: &str = "1.0";
 
 #[macroquest::plugin(logging(file))]
+#[derive(Default)]
 struct MQRustSkeleton {}
 
 impl macroquest::Plugin for MQRustSkeleton {
-    fn new() -> Self {
-        MQRustSkeleton {}
-    }
-
     fn initialize(&mut self) {
         debug!(version = VERSION, "Initializing");
     }
