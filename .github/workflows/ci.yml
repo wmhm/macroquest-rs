@@ -123,6 +123,21 @@ jobs:
           MACROQUEST_DIR: ${{ github.workspace }}/MacroQuest/
 
 
+  fmt:
+    name: Code Formatting
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+    env:
+      RUSTDOCFLAGS: -Dwarnings
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@rustfmt
+        with:
+          toolchain: nightly
+      - run: cargo fmt --check --all
+
+
   doc:
     name: Documentation
     runs-on: ubuntu-latest
