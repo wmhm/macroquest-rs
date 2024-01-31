@@ -22,6 +22,7 @@ runs:
     - name: Get MacroQuest Commit
       id: macroquest-commit
       run: echo "macroquest-commit=$(git rev-parse HEAD)" >> $GITHUB_OUPUT
+      working-directory: ./MacroQuest
       shell: bash
     - name: Restore MacroQuest Cache
       id: cache-macroquest-restore
