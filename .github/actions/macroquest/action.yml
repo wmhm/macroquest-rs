@@ -36,7 +36,6 @@ runs:
       with:
         msbuild-architecture: x64
     - name: Cache vcpkg
-      if: steps.cache-macroquest-restore.outputs.cache-hit != 'true'
       id: cache-vcpkg
       uses: actions/cache@v3
       with:
