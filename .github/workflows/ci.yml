@@ -26,6 +26,8 @@ jobs:
       - name: Build MacroQuest
         id: build-macroquest
         uses: ./crates/.github/actions/macroquest
+        with:
+          ref: rel-live
 
   clippy:
     name: Clippy
