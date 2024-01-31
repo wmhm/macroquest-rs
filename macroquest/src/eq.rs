@@ -1,9 +1,12 @@
+//!
+
 use std::fmt;
 
 use num_enum::{FromPrimitive, IntoPrimitive};
 
 use crate::ffi;
 
+#[allow(missing_docs)]
 #[derive(Debug, Eq, PartialEq, FromPrimitive, IntoPrimitive)]
 #[repr(i32)]
 pub enum GameState {
@@ -19,6 +22,7 @@ pub enum GameState {
     Unknown(i32),
 }
 
+#[allow(missing_docs)]
 #[derive(Debug, Eq, PartialEq, FromPrimitive, IntoPrimitive)]
 #[repr(i32)]
 pub enum ChatColor {
@@ -170,8 +174,10 @@ pub enum ChatColor {
     Unknown(i32),
 }
 
+#[allow(missing_docs)]
 pub struct Spawn<'a>(pub(crate) &'a ffi::eqlib::PlayerClient);
 
+#[allow(missing_docs)]
 impl<'a> Spawn<'a> {
     getter!(name -> &str);
 }
@@ -182,8 +188,10 @@ impl<'a> fmt::Debug for Spawn<'a> {
     }
 }
 
+#[allow(missing_docs)]
 pub struct GroundItem<'a>(pub(crate) &'a ffi::eqlib::EQGroundItem);
 
+#[allow(missing_docs)]
 impl<'a> GroundItem<'a> {
     getter!(name -> &str);
 }

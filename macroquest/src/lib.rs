@@ -1,3 +1,6 @@
+//!
+
+#![warn(missing_docs)]
 #![warn(clippy::cargo)]
 #![warn(clippy::correctness)]
 #![warn(clippy::suspicious)]
@@ -78,6 +81,7 @@ mod pluginapi;
 pub mod windows;
 
 mod macros {
+    #[allow(missing_docs)]
     #[macro_export]
     macro_rules! println {
         () => {};
