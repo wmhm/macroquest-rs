@@ -45,7 +45,8 @@ jobs:
         uses: ./crates/.github/actions/macroquest
         with:
           ref: ${{ needs.macroquest.outputs.commit }}
-      - uses: dtolnay/rust-toolchain@master
+      - name: Fetch Rust Toolchain
+        uses: dtolnay/rust-toolchain@master
         with:
           toolchain: ${{matrix.rust}}
       - name: Cache Rust Dependencies
@@ -75,7 +76,8 @@ jobs:
         uses: ./crates/.github/actions/macroquest
         with:
           ref: ${{ needs.macroquest.outputs.commit }}
-      - uses: dtolnay/rust-toolchain@stable
+      - name: Fetch Rust Toolchain
+        uses: dtolnay/rust-toolchain@stable
       - name: Cache Rust Dependencies
         uses: Swatinem/rust-cache@v2
         with:
@@ -131,8 +133,10 @@ jobs:
     env:
       RUSTDOCFLAGS: -Dwarnings
     steps:
-      - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@nightly
+      - name: Checkout macroquest-rs
+        uses: actions/checkout@v4
+      - name: Fetch Rust Toolchain
+        uses: dtolnay/rust-toolchain@nightly
         with:
           components: rustfmt
       - run: cargo fmt --check --all
@@ -146,11 +150,14 @@ jobs:
     env:
       RUSTDOCFLAGS: -Dwarnings
     steps:
-      - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@nightly
+      - name: Checkout macroquest-rs
+        uses: actions/checkout@v4
+      - name: Fetch Rust Toolchain
+        uses: dtolnay/rust-toolchain@nightly
         with:
           targets: x86_64-pc-windows-msvc
-      - uses: dtolnay/install@cargo-docs-rs
+      - name: Fetch cargo docs-rs
+        uses: dtolnay/install@cargo-docs-rs
       - run: cargo docs-rs -p macroquest-build-config
       - run: cargo docs-rs -p macroquest-macros
       - run: cargo docs-rs -p macroquest
