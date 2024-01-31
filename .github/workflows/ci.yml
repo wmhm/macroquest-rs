@@ -30,7 +30,7 @@ jobs:
           ref: rel-live
 
   build:
-    name: Rust ${{matrix.rust}}
+    name: Build - ${{matrix.rust}}
     runs-on: windows-latest
     needs: [macroquest]
     strategy:
