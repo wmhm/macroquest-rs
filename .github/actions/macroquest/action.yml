@@ -46,7 +46,7 @@ runs:
           MacroQuest/contrib/vcpkg/packages
           MacroQuest/contrib/vcpkg/vcpkg.exe
           MacroQuest/contrib/vcpkg/vcpkg_mq_last_bootstrap*.txt
-        key: ${{ runner.os }}-vcpkg-x64-${{ github.run_id }}
+        key: ${{ runner.os }}-vcpkg-x64-${{ steps.macroquest-commit.outputs.macroquest-commit }}
         restore-keys: |
           ${{ runner.os }}-vcpkg-x64-
           ${{ runner.os }}-vcpkg-
