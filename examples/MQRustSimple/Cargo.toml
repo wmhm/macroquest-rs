@@ -1,6 +1,6 @@
 [package]
-name = "mqrustskeleton"
-description = "An example Skeleton of a MacroQuest plugin"
+name = "MQRustSimple"
+description = "An example of a simple MacroQuest plugin"
 readme = "README.md"
 categories = ["gaming"]
 version.workspace = true

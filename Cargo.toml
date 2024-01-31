@@ -5,7 +5,7 @@ members = [
     "macroquest-build-config",
     "macroquest-macros",
     "macroquest-sys",
-    "examples/skeleton",
+    "examples/MQRustSimple",
 ]
 
 [workspace.package]

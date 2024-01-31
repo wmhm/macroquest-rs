@@ -1,3 +1,4 @@
+#![allow(non_snake_case)]
 #![warn(clippy::cargo)]
 #![warn(clippy::correctness)]
 #![warn(clippy::suspicious)]
@@ -13,9 +14,9 @@ const VERSION: &str = "1.0";
 
 #[macroquest::plugin(logging(file))]
 #[derive(Default)]
-struct MQRustSkeleton {}
+struct MQRustSimple {}
 
-impl macroquest::Plugin for MQRustSkeleton {
+impl macroquest::Plugin for MQRustSimple {
     fn initialize(&mut self) {
         debug!(version = VERSION, "Initializing");
     }

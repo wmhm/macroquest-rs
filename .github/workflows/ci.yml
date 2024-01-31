@@ -88,7 +88,7 @@ jobs:
         working-directory:  ${{ github.workspace }}/crates
         env:
           MACROQUEST_DIR: ${{ github.workspace }}//MacroQuest/
-      - run: cargo test --workspace --exclude 'mqrust*' --all-features --doc
+      - run: cargo test --workspace --exclude 'MQRust*' --all-features --doc
         working-directory:  ${{ github.workspace }}/crates
         env:
           MACROQUEST_DIR: ${{ github.workspace }}//MacroQuest/
