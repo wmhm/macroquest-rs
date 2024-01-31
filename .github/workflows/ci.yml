@@ -12,6 +12,8 @@ jobs:
   test:
     name: Clippy
     runs-on: windows-latest
+    strategy:
+      fail-fast: false
     steps:
       - name: Checkout macroquest-rs
         uses: actions/checkout@v4
@@ -24,14 +26,16 @@ jobs:
         with:
           toolchain: nightly
       - run: cargo clippy --workspace --all-targets --all-features
-        working-directory: ./crates
+        working-directory: ${{ github.workspace }}/crates
         env:
-          MACROQUEST_DIR: ../MacroQuest/
+          MACROQUEST_DIR: ${{ github.workspace }}/MacroQuest/
 
 
   doc:
     name: Documentation
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
     env:
       RUSTDOCFLAGS: -Dwarnings
     steps:
