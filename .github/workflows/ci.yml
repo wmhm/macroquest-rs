@@ -12,6 +12,8 @@ jobs:
   test:
     name: Clippy
     runs-on: windows-latest
+    env:
+      MACROQUEST_DIR: clippy
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@clippy
