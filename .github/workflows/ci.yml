@@ -157,4 +157,6 @@ jobs:
           targets: x86_64-pc-windows-msvc
       - name: Fetch cargo docs-rs
         uses: dtolnay/install@cargo-docs-rs
-      - run: cargo docs-rs -p macroquest-build-config -p macroquest-macros -p macroquest
+      - run: cargo docs-rs -p macroquest-build-config
+      - run: cargo docs-rs -p macroquest-macros
+      - run: cargo docs-rs -p macroquest
