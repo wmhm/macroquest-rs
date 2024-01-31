@@ -16,7 +16,8 @@ jobs:
       - uses: actions/checkout@v4
         with:
           path: ./crates
-      - uses: ./crates/.github/actions/macroquest
+      - name: Build MacroQuest
+        uses: ./crates/.github/actions/macroquest
       - uses: dtolnay/rust-toolchain@clippy
         with:
           toolchain: nightly
