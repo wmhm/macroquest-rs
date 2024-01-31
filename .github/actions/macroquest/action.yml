@@ -13,5 +13,5 @@ runs:
       with:
         msbuild-architecture: x64
     - run: msbuild src/MacroQuest.sln /NoLogo /Verbosity:minimal /p:Configuration=Release /p:Platform=${{ env.platform }}
-      shell: bash
+      shell: pwsh
       working-directory: ./MacroQuest
