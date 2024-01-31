@@ -1,2 +1,3 @@
 msrv = "1.75.0"
 doc-valid-idents = ["MacroQuest", "MQ2Main", "ImGui"]
+allowed-duplicate-crates = ["windows-targets"]

@@ -1,9 +1,13 @@
 [package]
 name = "macroquest-build-config"
 description = "Build configuration for the MacroQuest ecosystem"
+readme = "README.md"
+categories = ["gaming", "development-tools::build-utils"]
 version.workspace = true
 edition.workspace = true
 license.workspace = true
+repository.workspace = true
+keywords.workspace = true
 
 
 [dependencies]

@@ -1,3 +1,4 @@
+#![warn(clippy::cargo)]
 #![warn(clippy::correctness)]
 #![warn(clippy::suspicious)]
 #![warn(clippy::complexity)]
