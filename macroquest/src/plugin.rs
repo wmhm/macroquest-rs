@@ -15,26 +15,20 @@
 //! Use the low level API to create a basic, but useless, plugin.
 //!
 //! ```
-//! use std::sync::OnceLock;
-//!
-//! use macroquest::log::trace;
-//! use macroquest::plugin::Reason;
-//!
-//! const PKG_NAME: &str = "MyRustModule";
-//!
+//! # use std::sync::OnceLock;
+//! # use macroquest::log::trace;
+//! # use macroquest::plugin::Reason;
 //! static DATA: OnceLock<String> = OnceLock::new();
 //!
 //! #[macroquest::plugin::main]
-//! fn main(reason: Reason) {
+//! fn pmain(reason: Reason) {
 //!     match reason {
 //!         Reason::Load => {
-//!             trace!(module = PKG_NAME, "module loaded");
+//!             trace!("module loaded");
 //!
 //!             DATA.set(String::new());
 //!         }
-//!         Reason::Unload => {
-//!             trace!(module = PKG_NAME, "module unloaded");
-//!         }
+//!         Reason::Unload => trace!("module unloaded"),
 //!     };
 //! }
 //! ```

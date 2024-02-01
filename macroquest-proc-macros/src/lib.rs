@@ -21,12 +21,11 @@ mod plugin;
 /// data structures, etc) that needs to happen prior to any of the MacroQuest
 /// functions being called.
 ///
-/// The wrapped function must have one of the following type signatures:
+/// The wrapped function must take a single parameter, a `Reason`, and can
+/// return one of:
 ///
-/// ```ignore
-/// fn(Reason)
-/// fn(Reason) -> bool
-/// ```
+///   - `()`
+///   - [`std::primitive::bool`]
 ///
 /// If a [`false`](std::primitive::bool)-ey value is returned, then the DLL will
 /// be immediately unloaded.
@@ -36,36 +35,39 @@ mod plugin;
 /// A simple ``main`` function that can never fail and will always load the
 /// DLL.
 ///
-/// ```ignore
-/// use macroquest::log::trace;
-/// use macroquest::plugin::Reason;
-///
+/// ```
+/// # use macroquest::{log::trace, plugin::Reason};
+/// # use macroquest_proc_macros::plugin_main as main;
 /// #[main]
-/// fn main(reason: Reason) {
+/// fn pmain(reason: Reason) {
 ///     match reason {
 ///         Reason::Load => trace!("module loaded"),
-///         Reason::Unload => trace!("module unloaded"),
+///         Reason::Unload => trace!("module unload"),
 ///     }
 /// }
+///
 /// ```
 ///
 /// A slightly more complex ``main`` function that could return
 /// [`false`](std::primitive::bool) if it wasn't able to initialize the module
 /// fully.
 ///
-/// ```ignore
-/// use macroquest::log::trace;
-/// use macroquest::plugin::Reason;
-///
+/// ```
+/// # use macroquest::{log::trace, plugin::Reason};
+/// # use macroquest_proc_macros::plugin_main as main;
+/// # fn check_if_can_allocate() -> bool { false }
 /// #[main]
-/// fn main(reason: Reason) -> bool {
-///     match reason {
-///         Reason::Load => {
-///             trace!("module loaded");
-///             true  // Or false if we want to unload the module immediately
+/// fn pmain(reason: Reason) -> bool {
+///     if let Reason::Load = reason {
+///         trace!("module loaded");
+///
+///         // If this fails, we need to just unload the module
+///         if !check_if_can_allocate() {
+///             return false;
 ///         }
-///         Reason::Unload => trace!("module unloaded"),
 ///     }
+///
+///     true
 /// }
 /// ```
 ///
