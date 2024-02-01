@@ -1,4 +1,11 @@
-doc-valid-idents = ["EverQuest", "MacroQuest", "MQNext", "MQ2Main", "ImGui"]
+doc-valid-idents = [
+    "EverQuest",
+    "MacroQuest",
+    "MacroQuest2",
+    "MQNext",
+    "MQ2Main",
+    "ImGui",
+]
 allowed-duplicate-crates = [
     "windows-targets",
     "windows_aarch64_gnullvm",
