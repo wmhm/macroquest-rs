@@ -95,3 +95,33 @@ mod macros {
         };
     }
 }
+
+/// Detects whether we're currently running on "MQNext".
+///
+/// This function is always going to return [`true`](std::primitive::bool) as we
+/// only support MQNext (which is now generally known as MacroQuest).
+///
+/// This is most useful for future proofing the ``IsBuiltForNext`` symbol that
+/// plugins need to export.
+#[must_use]
+pub const fn is_mq_next() -> bool {
+    true
+}
+
+/// An EverQuest version (build date + time) with trailing null byte.
+pub type EQVersion = [u8; 21];
+
+/// The version of EverQuest that this crate is built against.
+///
+/// This returns a byte string that of the format ``Jan 02 2006 15:04:05``
+/// followed by a null byte. This is the date and time that the ``eqgame.exe``
+/// binary was built, which MacroQuest (and thus us) use as a stand in for a
+/// version number for EverQuest itself.
+///
+/// This is most useful for the ``EverQuestVersion`` symbol that plugins need to
+/// export to tell MacroQuest if they were compiled for a different version of
+/// EverQuest.
+#[must_use]
+pub const fn eq_version() -> EQVersion {
+    *include!(concat!(env!("OUT_DIR"), "/eq_version.rs"))
+}

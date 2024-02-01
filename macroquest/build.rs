@@ -1,3 +1,7 @@
+use std::env;
+use std::fs;
+use std::path::Path;
+
 fn main() {
     println!("cargo:rerun-if-changed=build.rs");
     println!("cargo:rerun-if-changed=include/eqlib.h");
@@ -9,6 +13,13 @@ fn main() {
 
     // We can only be built for windows
     if target_os == "windows" {
-        macroquest_build_config::BuildConfig::load().emit();
+        let config = macroquest_build_config::BuildConfig::load();
+
+        config.emit();
+
+        // Write out the EQVersion string
+        let out_dir = env::var_os("OUT_DIR").unwrap();
+        let dest_path = Path::new(&out_dir).join("eq_version.rs");
+        fs::write(dest_path, format!("b\"{}\\0\"", config.eq_version())).unwrap();
     }
 }
