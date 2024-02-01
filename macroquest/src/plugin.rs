@@ -20,7 +20,7 @@
 //! # use macroquest::plugin::Reason;
 //! static DATA: OnceLock<String> = OnceLock::new();
 //!
-//! macroquest::plugin::premable!();
+//! macroquest::plugin::preamble!();
 //!
 //! #[macroquest::plugin::main]
 //! fn pmain(reason: Reason) {
