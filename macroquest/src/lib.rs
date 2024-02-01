@@ -103,6 +103,7 @@ mod macros {
 ///
 /// This is most useful for future proofing the ``IsBuiltForNext`` symbol that
 /// plugins need to export.
+#[doc(alias = "IsBuiltForNext")]
 #[must_use]
 pub const fn is_mq_next() -> bool {
     true
@@ -121,6 +122,7 @@ pub type EQVersion = [u8; 21];
 /// This is most useful for the ``EverQuestVersion`` symbol that plugins need to
 /// export to tell MacroQuest if they were compiled for a different version of
 /// EverQuest.
+#[doc(alias = "EverQuestVersion")]
 #[must_use]
 pub const fn eq_version() -> EQVersion {
     *include!(concat!(env!("OUT_DIR"), "/eq_version.rs"))
