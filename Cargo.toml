@@ -6,6 +6,7 @@ members = [
     "macroquest-proc-macros",
     "macroquest-build-config",
     "macroquest-macros",
+    "examples/MQRustLowLevel",
     "examples/MQRustSimple",
 ]
 
