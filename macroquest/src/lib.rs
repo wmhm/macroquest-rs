@@ -110,7 +110,20 @@ pub const fn is_mq_next() -> bool {
 }
 
 /// An EverQuest version (build date + time) with trailing null byte.
-pub type EQVersion = [u8; 21];
+#[repr(transparent)]
+pub struct EQVersion([u8; 21]);
+
+impl EQVersion {
+    // Return the build date portion of the EQVersion
+    pub fn build_date(&self) -> &str {
+        std::str::from_utf8(&self.0[0..11]).unwrap()
+    }
+
+    // Return the build time portion of the EQVersion
+    pub fn build_time(&self) -> &str {
+        std::str::from_utf8(&self.0[12..20]).unwrap()
+    }
+}
 
 /// The version of EverQuest that this crate is built against.
 ///
@@ -125,5 +138,26 @@ pub type EQVersion = [u8; 21];
 #[doc(alias = "EverQuestVersion")]
 #[must_use]
 pub const fn eq_version() -> EQVersion {
-    *include!(concat!(env!("OUT_DIR"), "/eq_version.rs"))
+    EQVersion(*include!(concat!(env!("OUT_DIR"), "/eq_version.rs")))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_eq_version_build_date() {
+        assert_eq!(
+            EQVersion(*b"Jan 02 2006 15:04:05\0").build_date(),
+            "Jan 02 2006"
+        );
+    }
+
+    #[test]
+    fn test_eq_version_build_time() {
+        assert_eq!(
+            EQVersion(*b"Jan 02 2006 15:04:05\0").build_time(),
+            "15:04:05"
+        );
+    }
 }
