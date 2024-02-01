@@ -3,6 +3,7 @@
 use std::fmt;
 
 use num_enum::{FromPrimitive, IntoPrimitive};
+use ref_cast::RefCast;
 
 use crate::ffi;
 
@@ -175,28 +176,44 @@ pub enum ChatColor {
 }
 
 #[allow(missing_docs)]
-pub struct Spawn<'a>(pub(crate) &'a ffi::eqlib::PlayerClient);
+#[derive(RefCast)]
+#[repr(transparent)]
+pub struct Spawn(ffi::eqlib::PlayerClient);
 
 #[allow(missing_docs)]
-impl<'a> Spawn<'a> {
+impl Spawn {
     getter!(name -> &str);
 }
 
-impl<'a> fmt::Debug for Spawn<'a> {
+impl AsRef<Spawn> for ffi::eqlib::PlayerClient {
+    fn as_ref(&self) -> &Spawn {
+        Spawn::ref_cast(self)
+    }
+}
+
+impl fmt::Debug for Spawn {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("Spawn").field("name", &self.name()).finish()
     }
 }
 
 #[allow(missing_docs)]
-pub struct GroundItem<'a>(pub(crate) &'a ffi::eqlib::EQGroundItem);
+#[derive(RefCast)]
+#[repr(transparent)]
+pub struct GroundItem(ffi::eqlib::EQGroundItem);
 
 #[allow(missing_docs)]
-impl<'a> GroundItem<'a> {
+impl GroundItem {
     getter!(name -> &str);
 }
 
-impl<'a> fmt::Debug for GroundItem<'a> {
+impl AsRef<GroundItem> for ffi::eqlib::EQGroundItem {
+    fn as_ref(&self) -> &GroundItem {
+        GroundItem::ref_cast(self)
+    }
+}
+
+impl fmt::Debug for GroundItem {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("GroundItem")
             .field("name", &self.name())

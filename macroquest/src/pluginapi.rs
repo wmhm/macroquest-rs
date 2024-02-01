@@ -242,44 +242,44 @@ impl<T: Plugin> PluginHandler<T> {
         }
     }
 
-    pub unsafe fn on_add_spawn(&self, ptr: *const ffi::eqlib::PlayerClient) {
-        match ptr.as_ref() {
-            Some(ffi_item) => {
-                let item = Spawn(ffi_item);
-                hook!(self, on_add_spawn, &item);
-            }
-            None => todo!("figure out error handling"),
-        }
+    pub unsafe fn on_add_spawn(&self, _ptr: *const ffi::eqlib::PlayerClient) {
+        // match ptr.as_ref() {
+        //     Some(ffi_item) => {
+        //         let item = Spawn(ffi_item);
+        //         hook!(self, on_add_spawn, &item);
+        //     }
+        //     None => todo!("figure out error handling"),
+        // }
     }
 
-    pub unsafe fn on_remove_spawn(&self, ptr: *const ffi::eqlib::PlayerClient) {
-        match ptr.as_ref() {
-            Some(ffi_item) => {
-                let item = Spawn(ffi_item);
-                hook!(self, on_remove_spawn, &item);
-            }
-            None => todo!("figure out error handling"),
-        }
+    pub unsafe fn on_remove_spawn(&self, _ptr: *const ffi::eqlib::PlayerClient) {
+        // match ptr.as_ref() {
+        //     Some(ffi_item) => {
+        //         let item = Spawn(ffi_item);
+        //         hook!(self, on_remove_spawn, &item);
+        //     }
+        //     None => todo!("figure out error handling"),
+        // }
     }
 
-    pub unsafe fn on_add_ground_item(&self, ptr: *const ffi::eqlib::EQGroundItem) {
-        match ptr.as_ref() {
-            Some(ffi_item) => {
-                let item = GroundItem(ffi_item);
-                hook!(self, on_add_ground_item, &item);
-            }
-            None => todo!("figure out error handling"),
-        }
+    pub unsafe fn on_add_ground_item(&self, _ptr: *const ffi::eqlib::EQGroundItem) {
+        // match ptr.as_ref() {
+        //     Some(ffi_item) => {
+        //         let item = GroundItem(ffi_item);
+        //         hook!(self, on_add_ground_item, &item);
+        //     }
+        //     None => todo!("figure out error handling"),
+        // }
     }
 
-    pub unsafe fn on_remove_ground_item(&self, ptr: *const ffi::eqlib::EQGroundItem) {
-        match ptr.as_ref() {
-            Some(ffi_item) => {
-                let item = GroundItem(ffi_item);
-                hook!(self, on_remove_ground_item, &item);
-            }
-            None => todo!("figure out error handling"),
-        }
+    pub unsafe fn on_remove_ground_item(&self, _ptr: *const ffi::eqlib::EQGroundItem) {
+        // match ptr.as_ref() {
+        //     Some(ffi_item) => {
+        //         let item = GroundItem(ffi_item);
+        //         hook!(self, on_remove_ground_item, &item);
+        //     }
+        //     None => todo!("figure out error handling"),
+        // }
     }
 }
 
