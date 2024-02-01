@@ -68,48 +68,79 @@ impl Hook {
     }
 
     fn to_tokens_simple_hook(&self, tokens: &mut proc_macro2::TokenStream) {
-        let mq_hook_name = format_ident!("{}", self.opts.kind.to_string());
+        let mq_hook_name_s = self.opts.kind.to_string();
+        let mq_hook_name = format_ident!("{}", mq_hook_name_s);
         let hook_fn_name = &self.hook.sig.ident;
 
         quote! {
             #[no_mangle]
             pub extern "C" fn #mq_hook_name() {
-                #hook_fn_name()
+                let result = ::std::panic::catch_unwind(|| {
+                    #hook_fn_name()
+                });
+
+                match result {
+                    Ok(r) => r,
+                    Err(error) => {
+                        ::macroquest::log::error!(?error, hook = #mq_hook_name_s, "caught an unwind");
+                    }
+                }
             }
         }
         .to_tokens(tokens);
     }
 
     fn to_tokens_str_hook(&self, tokens: &mut proc_macro2::TokenStream) {
-        let mq_hook_name = format_ident!("{}", self.opts.kind.to_string());
+        let mq_hook_name_s = self.opts.kind.to_string();
+        let mq_hook_name = format_ident!("{}", mq_hook_name_s);
         let hook_fn_name = &self.hook.sig.ident;
 
         quote! {
             #[no_mangle]
             pub extern "C" fn #mq_hook_name(ptr: *const ::std::os::raw::c_char) {
-                let c_str = unsafe { ::std::ffi::CStr::from_ptr(ptr) };
-                let r_str = c_str.to_string_lossy();
-                #hook_fn_name(r_str.as_ref())
+                let result = ::std::panic::catch_unwind(|| {
+                    let c_str = unsafe { ::std::ffi::CStr::from_ptr(ptr) };
+                    let r_str = c_str.to_string_lossy();
+                    #hook_fn_name(r_str.as_ref())
+                });
+
+                match result {
+                    Ok(r) => r,
+                    Err(error) => {
+                        ::macroquest::log::error!(?error, hook = #mq_hook_name_s, "caught an unwind");
+                    }
+                }
             }
         }
         .to_tokens(tokens);
     }
 
     fn to_tokens_gamestate_hook(&self, tokens: &mut proc_macro2::TokenStream) {
-        let mq_hook_name = format_ident!("{}", self.opts.kind.to_string());
+        let mq_hook_name_s = self.opts.kind.to_string();
+        let mq_hook_name = format_ident!("{}", mq_hook_name_s);
         let hook_fn_name = &self.hook.sig.ident;
 
         quote! {
             #[no_mangle]
             pub extern "C" fn #mq_hook_name(c_state: i32) {
-                #hook_fn_name(::macroquest::eq::GameState::from(c_state))
+                let result = ::std::panic::catch_unwind(|| {
+                    #hook_fn_name(::macroquest::eq::GameState::from(c_state))
+                });
+
+                match result {
+                    Ok(r) => r,
+                    Err(error) => {
+                        ::macroquest::log::error!(?error, hook = #mq_hook_name_s, "caught an unwind");
+                    }
+                }
             }
         }
         .to_tokens(tokens);
     }
 
     fn to_tokens_write_chat_hook(&self, tokens: &mut proc_macro2::TokenStream) {
-        let mq_hook_name = format_ident!("{}", self.opts.kind.to_string());
+        let mq_hook_name_s = self.opts.kind.to_string();
+        let mq_hook_name = format_ident!("{}", mq_hook_name_s);
         let hook_fn_name = &self.hook.sig.ident;
 
         quote! {
@@ -119,16 +150,26 @@ impl Hook {
                 color: i32,
                 _filter: i32,
             ) {
-                let c_str = unsafe { ::std::ffi::CStr::from_ptr(ptr) };
-                let r_str = c_str.to_string_lossy();
-                #hook_fn_name(r_str.as_ref(), ::macroquest::eq::ChatColor::from(color))
+                let result = ::std::panic::catch_unwind(|| {
+                    let c_str = unsafe { ::std::ffi::CStr::from_ptr(ptr) };
+                    let r_str = c_str.to_string_lossy();
+                    #hook_fn_name(r_str.as_ref(), ::macroquest::eq::ChatColor::from(color))
+                });
+
+                match result {
+                    Ok(r) => r,
+                    Err(error) => {
+                        ::macroquest::log::error!(?error, hook = #mq_hook_name_s, "caught an unwind");
+                    }
+                }
             }
         }
         .to_tokens(tokens);
     }
 
     fn to_tokens_incoming_chat_hook(&self, tokens: &mut proc_macro2::TokenStream) {
-        let mq_hook_name = format_ident!("{}", self.opts.kind.to_string());
+        let mq_hook_name_s = self.opts.kind.to_string();
+        let mq_hook_name = format_ident!("{}", mq_hook_name_s);
         let hook_fn_name = &self.hook.sig.ident;
 
         quote! {
@@ -137,16 +178,27 @@ impl Hook {
                 ptr: *const ::std::os::raw::c_char,
                 color: u32,
             ) -> bool {
-                let c_str = unsafe { ::std::ffi::CStr::from_ptr(ptr) };
-                let r_str = c_str.to_string_lossy();
-                #hook_fn_name(r_str.as_ref(), ::macroquest::eq::ChatColor::from(color as i32))
+                let result = ::std::panic::catch_unwind(|| {
+                    let c_str = unsafe { ::std::ffi::CStr::from_ptr(ptr) };
+                    let r_str = c_str.to_string_lossy();
+                    #hook_fn_name(r_str.as_ref(), ::macroquest::eq::ChatColor::from(color as i32))
+                });
+
+                match result {
+                    Ok(r) => r,
+                    Err(error) => {
+                        ::macroquest::log::error!(?error, hook = #mq_hook_name_s, "caught an unwind");
+                        false
+                    }
+                }
             }
         }
         .to_tokens(tokens);
     }
 
     fn to_tokens_spawn_hook(&self, tokens: &mut proc_macro2::TokenStream) {
-        let mq_hook_name = format_ident!("{}", self.opts.kind.to_string());
+        let mq_hook_name_s = self.opts.kind.to_string();
+        let mq_hook_name = format_ident!("{}", mq_hook_name_s);
         let hook_fn_name = &self.hook.sig.ident;
 
         quote! {
@@ -154,15 +206,25 @@ impl Hook {
             pub extern "C" fn #mq_hook_name(
                 pc: &::macroquest::ffi::eqlib::PlayerClient,
             ) {
-                let spawn = ::std::convert::AsRef::<::macroquest::eq::Spawn>::as_ref(pc);
-                #hook_fn_name(spawn)
+                let result = ::std::panic::catch_unwind(|| {
+                    let spawn = ::std::convert::AsRef::<::macroquest::eq::Spawn>::as_ref(pc);
+                    #hook_fn_name(spawn)
+                });
+
+                match result {
+                    Ok(r) => r,
+                    Err(error) => {
+                        ::macroquest::log::error!(?error, hook = #mq_hook_name_s, "caught an unwind");
+                    }
+                }
             }
         }
         .to_tokens(tokens);
     }
 
     fn to_tokens_grounditem_hook(&self, tokens: &mut proc_macro2::TokenStream) {
-        let mq_hook_name = format_ident!("{}", self.opts.kind.to_string());
+        let mq_hook_name_s = self.opts.kind.to_string();
+        let mq_hook_name = format_ident!("{}", mq_hook_name_s);
         let hook_fn_name = &self.hook.sig.ident;
 
         quote! {
@@ -170,8 +232,17 @@ impl Hook {
             pub extern "C" fn #mq_hook_name(
                 eq_item: &::macroquest::ffi::eqlib::EQGroundItem,
             ) {
-                let item = ::std::convert::AsRef::<::macroquest::eq::GroundItem>::as_ref(eq_item);
-                #hook_fn_name(item)
+                let result = ::std::panic::catch_unwind(|| {
+                    let item = ::std::convert::AsRef::<::macroquest::eq::GroundItem>::as_ref(eq_item);
+                    #hook_fn_name(item)
+                });
+
+                match result {
+                    Ok(r) => r,
+                    Err(error) => {
+                        ::macroquest::log::error!(?error, hook = #mq_hook_name_s, "caught an unwind");
+                    }
+                }
             }
         }
         .to_tokens(tokens);

@@ -23,21 +23,32 @@ impl ToTokens for PluginMain {
 
             #[no_mangle]
             extern "system" fn DllMain(_: *mut (), c_reason: u32, _: *mut ()) -> bool {
-                use ::std::convert::TryFrom;
-
                 use ::macroquest::log::error;
-                use ::macroquest::plugin::{Reason, MainResult};
 
-                let rvalue = match Reason::try_from(c_reason) {
-                    Ok(reason) => Into::<MainResult>::into(#main_fn_name(reason)),
-                    Err(_) => {
-                        error!(reason = c_reason, "unknown reason in DllMain");
+                let result = ::std::panic::catch_unwind(|| {
+                    use ::std::convert::TryFrom;
 
-                        MainResult::Bool(false)
+                    use ::macroquest::plugin::{Reason, MainResult};
+
+                    let rvalue = match Reason::try_from(c_reason) {
+                        Ok(reason) => Into::<MainResult>::into(#main_fn_name(reason)),
+                        Err(_) => {
+                            error!(reason = c_reason, "unknown reason in DllMain");
+
+                            MainResult::Bool(false)
+                        }
+                    };
+
+                    rvalue.into()
+                });
+
+                match result {
+                    Ok(r) => r,
+                    Err(error) => {
+                        error!(?error, hook = "PluginMain", "caught an unwind");
+                        false
                     }
-                };
-
-                rvalue.into()
+                }
             }
         }
         .to_tokens(tokens);
