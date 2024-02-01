@@ -60,33 +60,34 @@ pub enum Reason {
 /// as pub because the [`main`] macro will generate code that uses it within the
 /// user's own crate.
 #[doc(hidden)]
-pub enum PluginMainResult {
+pub enum MainResult {
     Unit,
     Bool(bool),
 }
 
-/// Adapt a given [`PluginMainResult`] into a bool for return to the OS when
+/// Adapt a given [`MainResult`] into a bool for return to the OS when
 /// Windows calls the ``DllMain`` function.
 ///
 /// If this returns [`false`](std::primitive::bool) then the module will be
 /// unloaded immediately.
-impl From<PluginMainResult> for bool {
+impl From<MainResult> for bool {
     fn from(value: PluginMainResult) -> Self {
         match value {
-            PluginMainResult::Unit => true,
-            PluginMainResult::Bool(b) => b,
+            MainResult::Unit => true,
+            MainResult::Bool(b) => b,
         }
     }
 }
 
-impl From<()> for PluginMainResult {
+impl From<()> for MainResult {
+    #[allow(clippy::ignored_unit_patterns)]
     fn from(_: ()) -> Self {
-        PluginMainResult::Unit
+        MainResult::Unit
     }
 }
 
-impl From<bool> for PluginMainResult {
+impl From<bool> for MainResult {
     fn from(value: bool) -> Self {
-        PluginMainResult::Bool(value)
+        MainResult::Bool(value)
     }
 }

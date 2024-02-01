@@ -25,14 +25,14 @@ impl ToTokens for PluginMain {
                 use ::std::convert::TryFrom;
 
                 use ::macroquest::log::error;
-                use ::macroquest::plugin::{Reason, PluginMainResult};
+                use ::macroquest::plugin::{Reason, MainResult};
 
                 let rvalue = match Reason::try_from(c_reason) {
-                    Ok(reason) => Into::<PluginMainResult>::into(#main_fn_name(reason)),
+                    Ok(reason) => Into::<MainResult>::into(#main_fn_name(reason)),
                     Err(_) => {
                         error!(reason = c_reason, "unknown reason in DllMain");
 
-                        PluginMainResult::Bool(false)
+                        MainResult::Bool(false)
                     }
                 };
 
