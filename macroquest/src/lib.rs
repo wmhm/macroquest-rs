@@ -114,12 +114,12 @@ pub const fn is_mq_next() -> bool {
 pub struct EQVersion([u8; 21]);
 
 impl EQVersion {
-    // Return the build date portion of the EQVersion
+    /// Return the build date portion of the EQVersion
     pub fn build_date(&self) -> &str {
         std::str::from_utf8(&self.0[0..11]).unwrap()
     }
 
-    // Return the build time portion of the EQVersion
+    /// Return the build time portion of the EQVersion
     pub fn build_time(&self) -> &str {
         std::str::from_utf8(&self.0[12..20]).unwrap()
     }
