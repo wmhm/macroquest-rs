@@ -71,7 +71,7 @@ pub enum MainResult {
 /// If this returns [`false`](std::primitive::bool) then the module will be
 /// unloaded immediately.
 impl From<MainResult> for bool {
-    fn from(value: PluginMainResult) -> Self {
+    fn from(value: MainResult) -> Self {
         match value {
             MainResult::Unit => true,
             MainResult::Bool(b) => b,
