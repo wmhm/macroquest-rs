@@ -17,10 +17,10 @@ const PKG_NAME: &str = env!("CARGO_PKG_NAME");
 fn main(reason: Reason) {
     match reason {
         Reason::Load => {
-            trace!(module = PKG_NAME, "module loaded")
+            trace!(module = PKG_NAME, "module loaded");
         }
         Reason::Unload => {
-            trace!(module = PKG_NAME, "module unloaded")
+            trace!(module = PKG_NAME, "module unloaded");
         }
     };
 }

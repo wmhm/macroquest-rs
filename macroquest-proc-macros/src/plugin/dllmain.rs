@@ -18,6 +18,7 @@ impl ToTokens for PluginMain {
         let main_fn_name = &self.0.sig.ident;
 
         quote! {
+            #[allow(clippy::needless_pass_by_value)]
             #main_fn
 
             #[no_mangle]
