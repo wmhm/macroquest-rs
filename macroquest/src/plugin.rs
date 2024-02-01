@@ -40,7 +40,7 @@
 //!     trace!("plugin initialized")
 //! }
 //!
-//! #[macroquest::plugin::hook(IncomingChat)]
+//! #[macroquest::plugin::hook(OnIncomingChat)]
 //! fn incoming_chat(line: &str, color: ChatColor) -> bool {
 //!     trace!(?line, ?color, "got a new line of chat");
 //!
