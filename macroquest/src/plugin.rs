@@ -18,6 +18,7 @@
 //! # use std::sync::OnceLock;
 //! # use macroquest::log::trace;
 //! # use macroquest::plugin::Reason;
+//! # use macroquest::eq::ChatColor;
 //! static DATA: OnceLock<String> = OnceLock::new();
 //!
 //! macroquest::plugin::preamble!();
@@ -32,6 +33,18 @@
 //!         }
 //!         Reason::Unload => trace!("module unloaded"),
 //!     };
+//! }
+//!
+//! #[macroquest::plugin::hook(InitializePlugin)]
+//! fn initialize() {
+//!     trace!("plugin initialized")
+//! }
+//!
+//! #[macroquest::plugin::hook(IncomingChat)]
+//! fn incoming_chat(line: &str, color: ChatColor) -> bool {
+//!     trace!(?line, ?color, "got a new line of chat");
+//!
+//!     false
 //! }
 //! ```
 

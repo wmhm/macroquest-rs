@@ -154,7 +154,7 @@ pub fn plugin_main(_attr: TokenStream, item: TokenStream) -> TokenStream {
 /// # use macroquest::log::trace;
 /// # use macroquest_proc_macros::plugin_hook as hook;
 /// #[hook(OnWriteChatColor)]
-/// fn my_init_hook(line: &str, color: macroquest::eq::ChatColor) {
+/// fn my_write_chat_color_hook(line: &str, color: macroquest::eq::ChatColor) {
 ///     trace!(?line, ?color, "WriteChatColor called")
 /// }
 /// ```
@@ -165,7 +165,7 @@ pub fn plugin_main(_attr: TokenStream, item: TokenStream) -> TokenStream {
 /// # use macroquest::log::trace;
 /// # use macroquest_proc_macros::plugin_hook as hook;
 /// #[hook(OnAddSpawn)]
-/// fn my_init_hook(spawn: &macroquest::eq::Spawn) {
+/// fn my_add_spawn_hook(spawn: &macroquest::eq::Spawn) {
 ///     trace!(?spawn, "new spawn")
 /// }
 /// ```
@@ -176,7 +176,7 @@ pub fn plugin_main(_attr: TokenStream, item: TokenStream) -> TokenStream {
 /// # use macroquest::log::trace;
 /// # use macroquest_proc_macros::plugin_hook as hook;
 /// #[hook(OnAddGroundItem)]
-/// fn my_init_hook(item: &macroquest::eq::GroundItem) {
+/// fn my_add_ground_item_hook(item: &macroquest::eq::GroundItem) {
 ///     trace!(?item, "new ground spawn")
 /// }
 /// ```
