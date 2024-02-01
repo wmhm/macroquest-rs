@@ -20,6 +20,8 @@
 //! # use macroquest::plugin::Reason;
 //! static DATA: OnceLock<String> = OnceLock::new();
 //!
+//! macroquest::plugin::premable!();
+//!
 //! #[macroquest::plugin::main]
 //! fn pmain(reason: Reason) {
 //!     match reason {
@@ -37,7 +39,7 @@ use num_enum::TryFromPrimitive;
 use windows::Win32::System::SystemServices::{DLL_PROCESS_ATTACH, DLL_PROCESS_DETACH};
 
 #[doc(inline)]
-pub use macroquest_proc_macros::plugin_main as main;
+pub use macroquest_proc_macros::{plugin_main as main, plugin_preamble as preamble};
 
 /// Describes the reason that the plugin ``main`` function is being called.
 #[derive(Debug, Eq, PartialEq, TryFromPrimitive)]

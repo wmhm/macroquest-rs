@@ -12,6 +12,35 @@ use quote::quote;
 
 mod plugin;
 
+/// Emit the symbols that mark this crate as a MacroQuest plugin.
+///
+/// Every MacroQuest plugin requires two symbols:
+///
+///   - A ``IsBuiltForNext`` ([`std::primitive::bool`]) symbol to indicate that
+///     this plugin has been built for "MQNext" (aka MacroQuest) rather than the
+///     now defunct "MQ2" (aka MacroQuest2).
+///   - A ``EverQuestVersion`` (`const c_char[]`) symbol to indicate what
+///     version of EverQuest this plugin has been built against.
+///
+/// This macro emits the ``pub static`` variables for these symbols, with the
+/// correct values, to allow this crate to be loaded as a MacroQuest plugin.
+
+// NOTE: It's kind of silly to have this as a proc macro when a regular macro
+//       would work just as fine. However, we can't export a regular macro from
+//       a proc macro crate, and we need a crate to hold the macro so it doesn't
+//       end up at the root of the crate.
+#[proc_macro]
+pub fn plugin_preamble(_item: TokenStream) -> TokenStream {
+    quote! {
+        #[no_mangle]
+        pub static IsBuiltForNext: bool = ::macroquest::is_mq_next();
+
+        #[no_mangle]
+        pub static EverQuestVersion: ::macroquest::EQVersion = ::macroquest::eq_version();
+    }
+    .into()
+}
+
 /// Defines the ``PluginMain`` entry point for this plugin.
 ///
 /// The ``PluginMain`` entry point is the first thing and last thing that will
