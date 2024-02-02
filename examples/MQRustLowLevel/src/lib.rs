@@ -1,5 +1,6 @@
 #![allow(non_snake_case)]
 #![allow(unused_variables)]
+#![allow(clippy::needless_pass_by_value)]
 #![warn(clippy::cargo)]
 #![warn(clippy::correctness)]
 #![warn(clippy::suspicious)]
