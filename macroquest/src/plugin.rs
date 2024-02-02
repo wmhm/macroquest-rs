@@ -22,7 +22,7 @@
 //!
 //! #[macroquest::plugin::hooks]
 //! impl Plugin for MyPlugin {
-//!     fn on_incoming_chat(&self, line: &str, color: ChatColor) -> bool {
+//!     fn incoming_chat(&self, line: &str, color: ChatColor) -> bool {
 //!         let mut l = self.last.write().unwrap();
 //!         *l = Some(line.to_string());
 //!
@@ -179,7 +179,7 @@ pub trait Plugin {
     /// One purpose of this function is to allow you to destroy any custom
     /// windows that you have created and cleanup any UI items that need to be
     /// removed.
-    fn on_clean_ui(&self) {}
+    fn clean_ui(&self) {}
 
     /// This is called once just after the UI system is loaded. Most commonly
     /// this happens when a `/loadskin` command is issued, but it also occurs
@@ -187,7 +187,7 @@ pub trait Plugin {
     ///
     /// One purpose of this function is to allow you to recreate any custom
     /// windows that you have setup.
-    fn on_reload_ui(&self) {}
+    fn reload_ui(&self) {}
 
     /// This is called each time the Heads Up Display (HUD) is drawn. The HUD is
     /// responsible for the net status and packet loss bar.
@@ -198,7 +198,7 @@ pub trait Plugin {
     /// Because the net status is updated frequently, it is recommended to have
     /// a timer or counter at the start of this call to limit the amount of
     /// times the code in this section is executed.
-    fn on_draw_hud(&self) {}
+    fn draw_hud(&self) {}
 
     /// This is called when the [`crate::eq::GameState`] changes. It is
     /// also called once after the plugin is initialized.
@@ -207,12 +207,12 @@ pub trait Plugin {
     /// [`crate::eq::GameState`] enum. The most commonly used of these is
     /// [`crate::eq::GameState::InGame`].
     ///
-    /// When zoning, this is called once after [`Plugin::on_begin_zone()`],
-    /// [`Plugin::on_remove_spawn()`], and [`Plugin::on_remove_ground_item()`]
-    /// are all done, and then called once again after [`Plugin::on_end_zone()`]
-    /// and [`Plugin::on_add_spawn()`] are done but prior to
-    /// [`Plugin::on_add_ground_item()`] and [`Plugin::on_zoned()`].
-    fn on_set_game_state(&self, state: eq::GameState) {}
+    /// When zoning, this is called once after [`Plugin::begin_zone()`],
+    /// [`Plugin::remove_spawn()`], and [`Plugin::remove_ground_item()`]
+    /// are all done, and then called once again after [`Plugin::end_zone()`]
+    /// and [`Plugin::add_spawn()`] are done but prior to
+    /// [`Plugin::add_ground_item()`] and [`Plugin::zoned()`].
+    fn game_state(&self, state: eq::GameState) {}
 
     /// This is called each time MQ2 goes through its heartbeat (pulse)
     /// function.
@@ -220,30 +220,30 @@ pub trait Plugin {
     /// Because this happens very frequently, it is recommended to have a timer
     /// or counter at the start of this call to limit the amount of times the
     /// code in this section is executed.
-    fn on_pulse(&self) {}
+    fn pulse(&self) {}
 
     /// This is called each time `WriteChatColor` is called (whether by
     /// MQ2Main or by any plugin). This can be considered the "when outputting
     /// text from MQ" callback.
     ///
     /// This ignores filters on display, so if they are needed either implement
-    /// them in this section or see [`Plugin::on_incoming_chat()`] where filters
+    /// them in this section or see [`Plugin::incoming_chat()`] where filters
     /// are already handled.
     ///
     /// If `CEverQuest::dsp_chat` is not called, and events are required,
     /// they'll need to be implemented here as well. Otherwise, see
-    /// [`Plugin::on_incoming_chat()`] where that is already handled.
+    /// [`Plugin::incoming_chat()`] where that is already handled.
     ///
     /// For a list of color values, see the [`crate::eq::ChatColor`] enum.
-    fn on_write_chat_color(&self, line: &str, color: eq::ChatColor) {}
+    fn write_chat(&self, line: &str, color: eq::ChatColor) {}
 
     /// This is called each time a line of chat is shown. It occurs after MQ
     /// filters and chat events have been handled.  If you need to know when
-    /// MQ2 has sent chat, consider using [`Plugin::on_write_chat_color()`]
+    /// MQ2 has sent chat, consider using [`Plugin::write_chat()`]
     /// instead.
     ///
     /// For a list of color values, see the [`crate::eq::ChatColor`] enum.
-    fn on_incoming_chat(&self, line: &str, color: eq::ChatColor) -> bool {
+    fn incoming_chat(&self, line: &str, color: eq::ChatColor) -> bool {
         false
     }
 
@@ -252,52 +252,52 @@ pub trait Plugin {
     /// initializes.
     ///
     /// When zoning, this is called for all spawns in the zone after
-    /// [`Plugin::on_end_zone()`] is called and before [`Plugin::on_zoned()`] is
+    /// [`Plugin::end_zone()`] is called and before [`Plugin::zoned()`] is
     /// called.
-    fn on_add_spawn(&self, spawn: &eq::Spawn) {}
+    fn add_spawn(&self, spawn: &eq::Spawn) {}
 
     /// This is called each time a spawn is removed from a zone (ie, something
     /// despawns or is killed). It is NOT called when a plugin shuts down.
     ///
     /// When zoning, this is called for all spawns in the zone after
-    /// [`Plugin::on_begin_zone()`] is called.
-    fn on_remove_spawn(&self, spawn: &eq::Spawn) {}
+    /// [`Plugin::begin_zone()`] is called.
+    fn remove_spawn(&self, spawn: &eq::Spawn) {}
 
     /// This is called each time a ground item is added to a zone (ie, something
     /// spawns). It is also called for each existing ground item when a plugin
     /// first initializes.
     ///
     /// When zoning, this is called for all ground items in the zone after
-    /// [`Plugin::on_end_zone()`] is called and before [`Plugin::on_zoned()`] is
+    /// [`Plugin::end_zone()`] is called and before [`Plugin::zoned()`] is
     /// called.
-    fn on_add_ground_item(&self, item: &eq::GroundItem) {}
+    fn add_ground_item(&self, item: &eq::GroundItem) {}
 
     /// This is called each time a ground item is removed from a zone (ie,
     /// something despawns or is picked up). It is NOT called when a plugin
     /// shuts down.
     ///
     /// When zoning, this is called for all ground items in the zone after
-    /// [`Plugin::on_begin_zone()`] is called.
-    fn on_remove_ground_item(&self, item: &eq::GroundItem) {}
+    /// [`Plugin::begin_zone()`] is called.
+    fn remove_ground_item(&self, item: &eq::GroundItem) {}
 
     /// This is called just after entering a zone line and as the loading screen
     /// appears.
-    fn on_begin_zone(&self) {}
+    fn begin_zone(&self) {}
 
     /// This is called just after the loading screen, but prior to the zone
     /// being fully loaded.
     ///
-    /// This should occur before [`Plugin::on_add_spawn()`] and
-    /// [`Plugin::on_add_ground_item()`] are called. It always occurs before
-    /// [`Plugin::on_zoned()`] is called.
-    fn on_end_zone(&self) {}
+    /// This should occur before [`Plugin::add_spawn()`] and
+    /// [`Plugin::add_ground_item()`] are called. It always occurs before
+    /// [`Plugin::zoned()`] is called.
+    fn end_zone(&self) {}
 
     /// This is called after entering a new zone and the zone is considered
     /// "loaded."
     ///
-    /// It occurs after [`Plugin::on_end_zone()`], [`Plugin::on_add_spawn()`],
-    /// and [`Plugin::on_add_ground_item()`] have been called.
-    fn on_zoned(&self) {}
+    /// It occurs after [`Plugin::end_zone()`], [`Plugin::add_spawn()`],
+    /// and [`Plugin::add_ground_item()`] have been called.
+    fn zoned(&self) {}
 
     /// This is called each time that the ImGui overlay is rendered. Use this to
     /// render and update plugin specific widgets.
@@ -305,15 +305,15 @@ pub trait Plugin {
     /// Because this happens extremely frequently, it is recommended to move any
     /// actual work to a separate call and use this only for updating the
     /// display.
-    fn on_update_imgui(&self) {}
+    fn update_imgui(&self) {}
 
     /// This is called each time a macro starts (ex: `/mac somemacro.mac`),
     /// prior to launching the macro.
-    fn on_macro_start(&self, name: &str) {}
+    fn macro_start(&self, name: &str) {}
 
     /// This is called each time a macro stops (ex: `/endmac`), after the
     /// macro has ended.
-    fn on_macro_stop(&self, name: &str) {}
+    fn macro_stop(&self, name: &str) {}
 
     /// This is called each time a plugin is loaded
     /// (ex: `/plugin someplugin`), after the plugin has been loaded and any
@@ -324,7 +324,7 @@ pub trait Plugin {
     ///
     /// This is also called when THIS plugin is loaded, but initialization tasks
     /// should still be done in [`Plugin::initialize()`].
-    fn on_plugin_load(&self, name: &str) {}
+    fn plugin_load(&self, name: &str) {}
 
     /// This is called each time a plugin is unloaded
     /// (ex: `/plugin someplugin unload`), just prior to the plugin unloading.
@@ -333,5 +333,5 @@ pub trait Plugin {
     ///
     /// This is also called when THIS plugin is unloaded, but shutdown tasks
     /// should still be done in [`Plugin::shutdown()`].
-    fn on_plugin_unload(&self, name: &str) {}
+    fn plugin_unload(&self, name: &str) {}
 }

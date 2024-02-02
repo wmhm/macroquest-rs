@@ -13,43 +13,43 @@ enum Kind {
     InitializePlugin,
     #[strum(serialize = "shutdown", to_string = "ShutdownPlugin")]
     ShutdownPlugin,
-    #[strum(serialize = "on_clean_ui", to_string = "OnCleanUI")]
+    #[strum(serialize = "clean_ui", to_string = "OnCleanUI")]
     OnCleanUI,
-    #[strum(serialize = "on_reload_ui", to_string = "OnReloadUI")]
+    #[strum(serialize = "reload_ui", to_string = "OnReloadUI")]
     OnReloadUI,
-    #[strum(serialize = "on_draw_hud", to_string = "OnDrawHUD")]
+    #[strum(serialize = "draw_hud", to_string = "OnDrawHUD")]
     OnDrawHUD,
-    #[strum(serialize = "on_set_game_state", to_string = "SetGameState")]
+    #[strum(serialize = "game_state", to_string = "SetGameState")]
     SetGameState,
-    #[strum(serialize = "on_pulse", to_string = "OnPulse")]
+    #[strum(serialize = "pulse", to_string = "OnPulse")]
     OnPulse,
-    #[strum(serialize = "on_write_chat_color", to_string = "OnWriteChatColor")]
+    #[strum(serialize = "write_chat", to_string = "OnWriteChatColor")]
     OnWriteChatColor,
-    #[strum(serialize = "on_incoming_chat", to_string = "OnIncomingChat")]
+    #[strum(serialize = "incoming_chat", to_string = "OnIncomingChat")]
     OnIncomingChat,
-    #[strum(serialize = "on_add_spawn", to_string = "OnAddSpawn")]
+    #[strum(serialize = "add_spawn", to_string = "OnAddSpawn")]
     OnAddSpawn,
-    #[strum(serialize = "on_remove_spawn", to_string = "OnRemoveSpawn")]
+    #[strum(serialize = "remove_spawn", to_string = "OnRemoveSpawn")]
     OnRemoveSpawn,
-    #[strum(serialize = "on_add_ground_item", to_string = "OnAddGroundItem")]
+    #[strum(serialize = "add_ground_item", to_string = "OnAddGroundItem")]
     OnAddGroundItem,
-    #[strum(serialize = "on_remove_ground_item", to_string = "OnRemoveGroundItem")]
+    #[strum(serialize = "remove_ground_item", to_string = "OnRemoveGroundItem")]
     OnRemoveGroundItem,
-    #[strum(serialize = "on_begin_zone", to_string = "OnBeginZone")]
+    #[strum(serialize = "begin_zone", to_string = "OnBeginZone")]
     OnBeginZone,
-    #[strum(serialize = "on_end_zone", to_string = "OnEndZone")]
+    #[strum(serialize = "end_zone", to_string = "OnEndZone")]
     OnEndZone,
-    #[strum(serialize = "on_zoned", to_string = "OnZoned")]
+    #[strum(serialize = "zoned", to_string = "OnZoned")]
     OnZoned,
-    #[strum(serialize = "on_update_imgui", to_string = "OnUpdateImGui")]
+    #[strum(serialize = "update_imgui", to_string = "OnUpdateImGui")]
     OnUpdateImGui,
-    #[strum(serialize = "on_macro_start", to_string = "OnMacroStart")]
+    #[strum(serialize = "macro_start", to_string = "OnMacroStart")]
     OnMacroStart,
-    #[strum(serialize = "on_macro_stop", to_string = "OnMacroStop")]
+    #[strum(serialize = "macro_stop", to_string = "OnMacroStop")]
     OnMacroStop,
-    #[strum(serialize = "on_plugin_load", to_string = "OnLoadPlugin")]
+    #[strum(serialize = "plugin_load", to_string = "OnLoadPlugin")]
     OnLoadPlugin,
-    #[strum(serialize = "on_plugin_unload", to_string = "OnUnloadPlugin")]
+    #[strum(serialize = "plugin_unload", to_string = "OnUnloadPlugin")]
     OnUnloadPlugin,
 }
 

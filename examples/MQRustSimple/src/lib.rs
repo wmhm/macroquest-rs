@@ -20,43 +20,43 @@ impl Plugin for MQRustSimple {
 
     fn shutdown(&self) {}
 
-    fn on_clean_ui(&self) {}
+    fn clean_ui(&self) {}
 
-    fn on_reload_ui(&self) {}
+    fn reload_ui(&self) {}
 
-    fn on_draw_hud(&self) {}
+    fn draw_hud(&self) {}
 
-    fn on_pulse(&self) {}
+    fn pulse(&self) {}
 
-    fn on_begin_zone(&self) {}
+    fn begin_zone(&self) {}
 
-    fn on_end_zone(&self) {}
+    fn end_zone(&self) {}
 
-    fn on_zoned(&self) {}
+    fn zoned(&self) {}
 
-    fn on_update_imgui(&self) {}
+    fn update_imgui(&self) {}
 
-    fn on_set_game_state(&self, state: eq::GameState) {}
+    fn game_state(&self, state: eq::GameState) {}
 
-    fn on_write_chat_color(&self, line: &str, color: eq::ChatColor) {}
+    fn write_chat(&self, line: &str, color: eq::ChatColor) {}
 
-    fn on_incoming_chat(&self, line: &str, color: eq::ChatColor) -> bool {
+    fn incoming_chat(&self, line: &str, color: eq::ChatColor) -> bool {
         false
     }
 
-    fn on_add_spawn(&self, spawn: &eq::Spawn) {}
+    fn add_spawn(&self, spawn: &eq::Spawn) {}
 
-    fn on_remove_spawn(&self, spawn: &eq::Spawn) {}
+    fn remove_spawn(&self, spawn: &eq::Spawn) {}
 
-    fn on_add_ground_item(&self, item: &eq::GroundItem) {}
+    fn add_ground_item(&self, item: &eq::GroundItem) {}
 
-    fn on_remove_ground_item(&self, item: &eq::GroundItem) {}
+    fn remove_ground_item(&self, item: &eq::GroundItem) {}
 
-    fn on_macro_start(&self, name: &str) {}
+    fn macro_start(&self, name: &str) {}
 
-    fn on_macro_stop(&self, name: &str) {}
+    fn macro_stop(&self, name: &str) {}
 
-    fn on_plugin_load(&self, name: &str) {}
+    fn plugin_load(&self, name: &str) {}
 
-    fn on_plugin_unload(&self, name: &str) {}
+    fn plugin_unload(&self, name: &str) {}
 }
