@@ -1,6 +1,5 @@
 #![allow(non_snake_case)]
 #![allow(unused_variables)]
-#![allow(clippy::needless_pass_by_value)]
 #![warn(clippy::cargo)]
 #![warn(clippy::correctness)]
 #![warn(clippy::suspicious)]
@@ -44,15 +43,18 @@ fn reload_ui() {}
 #[macroquest::plugin::hook(OnDrawHUD)]
 fn draw_hud() {}
 
+#[allow(clippy::needless_pass_by_value)]
 #[macroquest::plugin::hook(SetGameState)]
 fn gamestate(state: GameState) {}
 
 #[macroquest::plugin::hook(OnPulse)]
 fn pulse() {}
 
+#[allow(clippy::needless_pass_by_value)]
 #[macroquest::plugin::hook(OnWriteChatColor)]
 fn write_chat(line: &str, color: ChatColor) {}
 
+#[allow(clippy::needless_pass_by_value)]
 #[macroquest::plugin::hook(OnIncomingChat)]
 fn incoming_chat(line: &str, color: ChatColor) -> bool {
     false
