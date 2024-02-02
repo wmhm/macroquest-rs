@@ -118,7 +118,7 @@ impl EQVersion {
     ///
     /// # Panics
     ///
-    /// Panics if the [`EQVersion`]` is not valid utf8.
+    /// Panics if the [`EQVersion`] is not valid utf8.
     #[must_use]
     pub fn build_date(&self) -> &str {
         std::str::from_utf8(&self.0[0..11]).unwrap()
