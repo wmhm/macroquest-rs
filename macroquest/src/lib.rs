@@ -69,14 +69,10 @@ pub mod ffi {
     }
 }
 
-pub use crate::pluginapi::{Plugin, PluginHandler};
-
 pub mod eq;
 pub mod log;
 pub mod mq;
 pub mod plugin;
-
-mod pluginapi;
 
 #[doc(hidden)]
 pub mod windows;
