@@ -41,14 +41,27 @@ pub fn plugin_preamble(_item: TokenStream) -> TokenStream {
     .into()
 }
 
-/// Defines the ``PluginMain`` entry point for this plugin.
+/// Defines the main entry point for this plugin.
 ///
-/// The ``PluginMain`` entry point is the first thing and last thing that will
-/// be called (and in fact, is called by Windows, not MacroQuest) when the DLL
-/// for this plugin is loaded and unloaded. It can be used to do any very basic
-/// setup (such as creating the underlying plugin object, or creating static
-/// data structures, etc) that needs to happen prior to any of the MacroQuest
-/// functions being called.
+/// This can decorate either a struct or a function, and it **MUST** be the
+/// last attribute specified for either.
+///
+/// The preferred approach is to decorate a struct, as that forms the higher
+/// level API for plugins. When used in this manner, it will automatically
+/// generate a ``main`` function that will call `New::new()` on the type
+/// and then set the global static named `PLUGIN` to that newly created object.
+///
+/// The wrapped struct must implement the `New` trait, however that trait has
+/// a blanket implementation for [`std::default::Default`] and implementing or
+/// deriving [`std::default::Default`] should be preferred.
+///
+/// When decorating a function, it will be  the main entry point for the built
+/// DLL, and it will be the first thing and last thing that will be called (and
+/// in fact, is called by Windows, not MacroQuest) when the DLL for this plugin
+/// is loaded and unloaded. It can be used to do any very basic setup (such as
+/// creating the underlying plugin object, or creating static data structures,
+/// etc) that needs to happen prior to any of the MacroQuest functions being
+/// called.
 ///
 /// The wrapped function must take a single parameter, a `Reason`, and can
 /// return one of:
@@ -60,6 +73,35 @@ pub fn plugin_preamble(_item: TokenStream) -> TokenStream {
 /// be immediately unloaded.
 ///
 /// # Examples
+///
+/// A basic plugin struct with no members.
+///
+/// ```
+/// # use macroquest::{log::trace, plugin::Reason};
+/// # use macroquest_proc_macros::plugin_main as main;
+/// #[derive(Debug, Default)]
+/// #[main]
+/// struct MyPlugin;
+/// ```
+///
+/// A plugin struct that uses the `New` trait to specialize the behavior when
+/// creating for use (versus other uses of [`std::default::Default`]).
+///
+/// ```
+/// # use macroquest::{log::trace, plugin::{Reason, New}};
+/// # use macroquest_proc_macros::plugin_main as main;
+/// #[derive(Debug)]
+/// #[main]
+/// struct MyPlugin {
+///     data: Vec<String>,
+/// }
+///
+/// impl New for MyPlugin {
+///     fn new() -> Self {
+///         MyPlugin { data: vec![String::from("initial data")] }
+///     }
+/// }
+/// ```
 ///
 /// A simple ``main`` function that can never fail and will always load the
 /// DLL.

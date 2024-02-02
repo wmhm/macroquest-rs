@@ -5,12 +5,19 @@
 //! whenever certain events occur. Plugins may implement any number of these
 //! functions to implement their functionality.
 //!
-//! The following hooks are supported:
-//!
-//!   - ``PluginMain``: Called when the DLL is either loaded or unloaded from
-//!     memory (see [`main`] for more information).
-//!
 //! # Examples
+//!
+//! Use the high level API to create a basic, but useless, plugin.
+//!
+//! ```
+//! # use macroquest::log::trace;
+//! # use macroquest::eq::ChatColor;
+//! #[derive(Debug, Default)]
+//! #[macroquest::plugin::main]
+//! struct MyPlugin {
+//!     last: Option<String>,
+//! }
+//! ```
 //!
 //! Use the low level API to create a basic, but useless, plugin.
 //!
@@ -106,5 +113,25 @@ impl From<()> for MainResult {
 impl From<bool> for MainResult {
     fn from(value: bool) -> Self {
         MainResult::Bool(value)
+    }
+}
+
+/// Provides a way to create new instances of a plugin type.
+///
+/// When using plugin types and the high level plugin API, this trait is used
+/// when creating the global instance of the Plugin type.
+///
+/// This trait has a blanket implementation for [`std::default::Default`] and
+/// implementing that trait should be preferred unless you need different
+/// behavior specific to when creating the global instance of the plugin type
+/// for loading into MacroQuest.
+pub trait New {
+    /// Creates the new instance of the plugin type.
+    fn new() -> Self;
+}
+
+impl<T: Default> New for T {
+    fn new() -> Self {
+        Self::default()
     }
 }

@@ -1,26 +1,92 @@
-use quote::{quote, ToTokens};
+use convert_case::{Case, Casing};
+use quote::{format_ident, quote, ToTokens};
 use syn::parse::{Parse, ParseStream};
-use syn::ItemFn;
+use syn::{ItemFn, ItemStruct, Token};
 
-pub(crate) struct PluginMain(ItemFn);
+enum Kind {
+    Function(ItemFn),
+    Struct(ItemStruct),
+}
+
+pub(crate) struct PluginMain {
+    kind: Kind,
+}
 
 impl Parse for PluginMain {
     fn parse(input: ParseStream) -> syn::Result<Self> {
-        let fn_: ItemFn = input.parse()?;
+        let lookahead = input.lookahead1();
+        let kind = if lookahead.peek(Token![fn]) {
+            input.parse::<ItemFn>().map(Kind::Function)
+        } else if lookahead.peek(Token![struct]) {
+            input.parse::<ItemStruct>().map(Kind::Struct)
+        } else {
+            Err(lookahead.error())
+        }?;
 
-        Ok(PluginMain(fn_))
+        Ok(PluginMain { kind })
     }
 }
 
 impl ToTokens for PluginMain {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
-        let main_fn = &self.0;
-        let main_fn_name = &self.0.sig.ident;
+        let main_fn_name = match &self.kind {
+            Kind::Function(main_fn) => {
+                quote! {
+                    #[allow(clippy::needless_pass_by_value)]
+                    #main_fn
+                }
+                .to_tokens(tokens);
+
+                main_fn.sig.ident.clone()
+            }
+            Kind::Struct(plugin_struct) => {
+                let mut plugin_struct = plugin_struct.clone();
+                let main_fn_name = format_ident!(
+                    "__{}",
+                    plugin_struct
+                        .ident
+                        .to_string()
+                        .as_str()
+                        .to_case(Case::Snake)
+                );
+                let plugin_name = &plugin_struct.ident;
+
+                let where_clause = plugin_struct.generics.make_where_clause();
+                where_clause
+                    .predicates
+                    .push(syn::parse2(quote!(#plugin_name: ::macroquest::plugin::New)).unwrap());
+
+                quote! {
+                    macroquest::plugin::preamble!();
+                    static PLUGIN: ::std::sync::OnceLock<#plugin_name> = ::std::sync::OnceLock::new();
+
+                    #plugin_struct
+
+                    #[allow(clippy::needless_pass_by_value)]
+                    fn #main_fn_name(reason: ::macroquest::plugin::Reason) -> bool {
+                        use ::macroquest::plugin::{Reason, New};
+                        use ::macroquest::log::error;
+
+                        match reason {
+                            Reason::Load => {
+                                match PLUGIN.set(#plugin_name::new()) {
+                                    Ok(_) => true,
+                                    Err(error) => {
+                                        error!(?error, "there was already a PLUGIN set");
+                                        false
+                                    }
+                                }
+                            }
+                            Reason::Unload => true,
+                        }
+                    }
+                }.to_tokens(tokens);
+
+                main_fn_name
+            }
+        };
 
         quote! {
-            #[allow(clippy::needless_pass_by_value)]
-            #main_fn
-
             #[no_mangle]
             extern "system" fn DllMain(_: *mut (), c_reason: u32, _: *mut ()) -> bool {
                 use ::macroquest::log::error;
