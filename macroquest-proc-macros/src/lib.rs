@@ -88,7 +88,7 @@ pub fn plugin_preamble(_item: TokenStream) -> TokenStream {
 /// creating for use (versus other uses of [`std::default::Default`]).
 ///
 /// ```
-/// # use macroquest::{log::trace, plugin::{Reason, New}};
+/// # use macroquest::{log::trace, plugin::{Reason, New, Plugin}};
 /// # use macroquest_proc_macros::plugin_main as main;
 /// #[derive(Debug)]
 /// #[main]
@@ -101,6 +101,8 @@ pub fn plugin_preamble(_item: TokenStream) -> TokenStream {
 ///         MyPlugin { data: vec![String::from("initial data")] }
 ///     }
 /// }
+///
+/// # impl Plugin for MyPlugin {}
 /// ```
 ///
 /// A simple ``main`` function that can never fail and will always load the
