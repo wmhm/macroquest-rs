@@ -165,10 +165,12 @@ impl<T: Default> New for T {
 pub trait Plugin {
     /// This is called once on plugin initialization and can be considered the
     /// startup routine for the plugin.
+    #[doc(alias = "InitializePlugin")]
     fn initialize(&self) {}
 
     /// This is called once when the plugin has been asked to shutdown. The
     /// plugin has not actually shut down until this completes.
+    #[doc(alias = "ShutdownPlugin")]
     fn shutdown(&self) {}
 
     /// This is called once just before the shutdown of the UI system and each
@@ -179,6 +181,7 @@ pub trait Plugin {
     /// One purpose of this function is to allow you to destroy any custom
     /// windows that you have created and cleanup any UI items that need to be
     /// removed.
+    #[doc(alias = "OnCleanUI")]
     fn clean_ui(&self) {}
 
     /// This is called once just after the UI system is loaded. Most commonly
@@ -187,6 +190,7 @@ pub trait Plugin {
     ///
     /// One purpose of this function is to allow you to recreate any custom
     /// windows that you have setup.
+    #[doc(alias = "OnReloadUI")]
     fn reload_ui(&self) {}
 
     /// This is called each time the Heads Up Display (HUD) is drawn. The HUD is
@@ -198,6 +202,7 @@ pub trait Plugin {
     /// Because the net status is updated frequently, it is recommended to have
     /// a timer or counter at the start of this call to limit the amount of
     /// times the code in this section is executed.
+    #[doc(alias = "OnDrawHUD")]
     fn draw_hud(&self) {}
 
     /// This is called when the [`crate::eq::GameState`] changes. It is
@@ -212,6 +217,7 @@ pub trait Plugin {
     /// are all done, and then called once again after [`Plugin::end_zone()`]
     /// and [`Plugin::add_spawn()`] are done but prior to
     /// [`Plugin::add_ground_item()`] and [`Plugin::zoned()`].
+    #[doc(alias = "SetGameState")]
     fn game_state(&self, state: eq::GameState) {}
 
     /// This is called each time MQ2 goes through its heartbeat (pulse)
@@ -220,6 +226,7 @@ pub trait Plugin {
     /// Because this happens very frequently, it is recommended to have a timer
     /// or counter at the start of this call to limit the amount of times the
     /// code in this section is executed.
+    #[doc(alias = "OnPulse")]
     fn pulse(&self) {}
 
     /// This is called each time `WriteChatColor` is called (whether by
@@ -235,6 +242,7 @@ pub trait Plugin {
     /// [`Plugin::incoming_chat()`] where that is already handled.
     ///
     /// For a list of color values, see the [`crate::eq::ChatColor`] enum.
+    #[doc(alias = "OnWriteChatColor")]
     fn write_chat(&self, line: &str, color: eq::ChatColor) {}
 
     /// This is called each time a line of chat is shown. It occurs after MQ
@@ -243,6 +251,7 @@ pub trait Plugin {
     /// instead.
     ///
     /// For a list of color values, see the [`crate::eq::ChatColor`] enum.
+    #[doc(alias = "OnIncomingChat")]
     fn incoming_chat(&self, line: &str, color: eq::ChatColor) -> bool {
         false
     }
@@ -254,6 +263,7 @@ pub trait Plugin {
     /// When zoning, this is called for all spawns in the zone after
     /// [`Plugin::end_zone()`] is called and before [`Plugin::zoned()`] is
     /// called.
+    #[doc(alias = "OnAddSpawn")]
     fn add_spawn(&self, spawn: &eq::Spawn) {}
 
     /// This is called each time a spawn is removed from a zone (ie, something
@@ -261,6 +271,7 @@ pub trait Plugin {
     ///
     /// When zoning, this is called for all spawns in the zone after
     /// [`Plugin::begin_zone()`] is called.
+    #[doc(alias = "OnRemoveSpawn")]
     fn remove_spawn(&self, spawn: &eq::Spawn) {}
 
     /// This is called each time a ground item is added to a zone (ie, something
@@ -270,6 +281,7 @@ pub trait Plugin {
     /// When zoning, this is called for all ground items in the zone after
     /// [`Plugin::end_zone()`] is called and before [`Plugin::zoned()`] is
     /// called.
+    #[doc(alias = "OnAddGroundItem")]
     fn add_ground_item(&self, item: &eq::GroundItem) {}
 
     /// This is called each time a ground item is removed from a zone (ie,
@@ -278,10 +290,12 @@ pub trait Plugin {
     ///
     /// When zoning, this is called for all ground items in the zone after
     /// [`Plugin::begin_zone()`] is called.
+    #[doc(alias = "OnRemoveGroundItem")]
     fn remove_ground_item(&self, item: &eq::GroundItem) {}
 
     /// This is called just after entering a zone line and as the loading screen
     /// appears.
+    #[doc(alias = "OnBeginZone")]
     fn begin_zone(&self) {}
 
     /// This is called just after the loading screen, but prior to the zone
@@ -290,6 +304,7 @@ pub trait Plugin {
     /// This should occur before [`Plugin::add_spawn()`] and
     /// [`Plugin::add_ground_item()`] are called. It always occurs before
     /// [`Plugin::zoned()`] is called.
+    #[doc(alias = "OnEndZone")]
     fn end_zone(&self) {}
 
     /// This is called after entering a new zone and the zone is considered
@@ -297,6 +312,7 @@ pub trait Plugin {
     ///
     /// It occurs after [`Plugin::end_zone()`], [`Plugin::add_spawn()`],
     /// and [`Plugin::add_ground_item()`] have been called.
+    #[doc(alias = "OnZoned")]
     fn zoned(&self) {}
 
     /// This is called each time that the ImGui overlay is rendered. Use this to
@@ -305,14 +321,17 @@ pub trait Plugin {
     /// Because this happens extremely frequently, it is recommended to move any
     /// actual work to a separate call and use this only for updating the
     /// display.
+    #[doc(alias = "OnUpdateImGui")]
     fn update_imgui(&self) {}
 
     /// This is called each time a macro starts (ex: `/mac somemacro.mac`),
     /// prior to launching the macro.
+    #[doc(alias = "OnMacroStart")]
     fn macro_start(&self, name: &str) {}
 
     /// This is called each time a macro stops (ex: `/endmac`), after the
     /// macro has ended.
+    #[doc(alias = "OnMacroStop")]
     fn macro_stop(&self, name: &str) {}
 
     /// This is called each time a plugin is loaded
@@ -324,6 +343,7 @@ pub trait Plugin {
     ///
     /// This is also called when THIS plugin is loaded, but initialization tasks
     /// should still be done in [`Plugin::initialize()`].
+    #[doc(alias = "OnLoadPlugin")]
     fn plugin_load(&self, name: &str) {}
 
     /// This is called each time a plugin is unloaded
@@ -333,5 +353,6 @@ pub trait Plugin {
     ///
     /// This is also called when THIS plugin is unloaded, but shutdown tasks
     /// should still be done in [`Plugin::shutdown()`].
+    #[doc(alias = "OnUnloadPlugin")]
     fn plugin_unload(&self, name: &str) {}
 }
