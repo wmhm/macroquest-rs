@@ -234,7 +234,7 @@ pub fn plugin_hook(attr: TokenStream, item: TokenStream) -> TokenStream {
 /// Defines the plugin hooks for an `impl Plugin` block.
 ///
 /// Whenever implementing a `macroquest::plugin::Plugin` trait, decorating it
-/// with the [`hooks`](`plugin_hooks`) macro will cause all of the implemented
+/// with the [`hooks`](`macro@plugin_hooks`) macro will cause all of the implemented
 /// methods to emit the macroquest hook functions.
 ///
 /// # Examples
