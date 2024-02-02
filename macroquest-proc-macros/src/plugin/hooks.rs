@@ -83,7 +83,7 @@ impl ToTokens for Hooks {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
         self.body.to_tokens(tokens);
 
-        for hook in self.implemented.iter() {
+        for hook in &self.implemented {
             let plugin_hook_name = &hook.sig.ident;
             let Ok(kind) = Kind::from_str(hook.sig.ident.to_string().as_str()) else {
                 abort!(hook, "The hook must be a supported MacroQuest hook");
@@ -99,57 +99,53 @@ impl ToTokens for Hooks {
                 | Kind::OnBeginZone
                 | Kind::OnEndZone
                 | Kind::OnZoned
-                | Kind::OnUpdateImGui) => self.to_tokens_simple_hook(
+                | Kind::OnUpdateImGui) => Hooks::to_tokens_simple_hook(
                     plugin_hook_name,
-                    format_ident!("{}", kind.to_string()),
+                    &format_ident!("{}", kind.to_string()),
                     tokens,
                 ),
-                kind @ Kind::SetGameState => self.to_tokens_gamestate_hook(
+                kind @ Kind::SetGameState => Hooks::to_tokens_gamestate_hook(
                     plugin_hook_name,
-                    format_ident!("{}", kind.to_string()),
+                    &format_ident!("{}", kind.to_string()),
                     tokens,
                 ),
-                kind @ Kind::OnWriteChatColor => self.to_tokens_writechatcolor_hook(
+                kind @ Kind::OnWriteChatColor => Hooks::to_tokens_writechatcolor_hook(
                     plugin_hook_name,
-                    format_ident!("{}", kind.to_string()),
+                    &format_ident!("{}", kind.to_string()),
                     tokens,
                 ),
-                kind @ Kind::OnIncomingChat => self.to_tokens_incomingchat_hook(
+                kind @ Kind::OnIncomingChat => Hooks::to_tokens_incomingchat_hook(
                     plugin_hook_name,
-                    format_ident!("{}", kind.to_string()),
+                    &format_ident!("{}", kind.to_string()),
                     tokens,
                 ),
                 kind @ (Kind::OnMacroStart
                 | Kind::OnMacroStop
                 | Kind::OnLoadPlugin
-                | Kind::OnUnloadPlugin) => self.to_tokens_str_hook(
+                | Kind::OnUnloadPlugin) => Hooks::to_tokens_str_hook(
                     plugin_hook_name,
-                    format_ident!("{}", kind.to_string()),
+                    &format_ident!("{}", kind.to_string()),
                     tokens,
                 ),
-                kind @ (Kind::OnAddSpawn | Kind::OnRemoveSpawn) => self.to_tokens_spawn_hook(
+                kind @ (Kind::OnAddSpawn | Kind::OnRemoveSpawn) => Hooks::to_tokens_spawn_hook(
                     plugin_hook_name,
-                    format_ident!("{}", kind.to_string()),
+                    &format_ident!("{}", kind.to_string()),
                     tokens,
                 ),
-                kind @ (Kind::OnAddGroundItem | Kind::OnRemoveGroundItem) => self
-                    .to_tokens_grounditem_hook(
+                kind @ (Kind::OnAddGroundItem | Kind::OnRemoveGroundItem) => {
+                    Hooks::to_tokens_grounditem_hook(
                         plugin_hook_name,
-                        format_ident!("{}", kind.to_string()),
+                        &format_ident!("{}", kind.to_string()),
                         tokens,
-                    ),
+                    );
+                }
             };
         }
     }
 }
 
 impl Hooks {
-    fn to_tokens_simple_hook(
-        &self,
-        name: &Ident,
-        hook: Ident,
-        tokens: &mut proc_macro2::TokenStream,
-    ) {
+    fn to_tokens_simple_hook(name: &Ident, hook: &Ident, tokens: &mut proc_macro2::TokenStream) {
         let outer_name = format_ident!("__plugin_{}", name);
         let hook_name = format_ident!("{}", hook.to_string());
         quote! {
@@ -164,12 +160,7 @@ impl Hooks {
         .to_tokens(tokens);
     }
 
-    fn to_tokens_gamestate_hook(
-        &self,
-        name: &Ident,
-        hook: Ident,
-        tokens: &mut proc_macro2::TokenStream,
-    ) {
+    fn to_tokens_gamestate_hook(name: &Ident, hook: &Ident, tokens: &mut proc_macro2::TokenStream) {
         let outer_name = format_ident!("__plugin_{}", name);
         let hook_name = format_ident!("{}", hook.to_string());
         quote! {
@@ -185,9 +176,8 @@ impl Hooks {
     }
 
     fn to_tokens_writechatcolor_hook(
-        &self,
         name: &Ident,
-        hook: Ident,
+        hook: &Ident,
         tokens: &mut proc_macro2::TokenStream,
     ) {
         let outer_name = format_ident!("__plugin_{}", name);
@@ -205,9 +195,8 @@ impl Hooks {
     }
 
     fn to_tokens_incomingchat_hook(
-        &self,
         name: &Ident,
-        hook: Ident,
+        hook: &Ident,
         tokens: &mut proc_macro2::TokenStream,
     ) {
         let outer_name = format_ident!("__plugin_{}", name);
@@ -227,7 +216,7 @@ impl Hooks {
         .to_tokens(tokens);
     }
 
-    fn to_tokens_str_hook(&self, name: &Ident, hook: Ident, tokens: &mut proc_macro2::TokenStream) {
+    fn to_tokens_str_hook(name: &Ident, hook: &Ident, tokens: &mut proc_macro2::TokenStream) {
         let outer_name = format_ident!("__plugin_{}", name);
         let hook_name = format_ident!("{}", hook.to_string());
         quote! {
@@ -242,12 +231,7 @@ impl Hooks {
         .to_tokens(tokens);
     }
 
-    fn to_tokens_spawn_hook(
-        &self,
-        name: &Ident,
-        hook: Ident,
-        tokens: &mut proc_macro2::TokenStream,
-    ) {
+    fn to_tokens_spawn_hook(name: &Ident, hook: &Ident, tokens: &mut proc_macro2::TokenStream) {
         let outer_name = format_ident!("__plugin_{}", name);
         let hook_name = format_ident!("{}", hook.to_string());
         quote! {
@@ -263,9 +247,8 @@ impl Hooks {
     }
 
     fn to_tokens_grounditem_hook(
-        &self,
         name: &Ident,
-        hook: Ident,
+        hook: &Ident,
         tokens: &mut proc_macro2::TokenStream,
     ) {
         let outer_name = format_ident!("__plugin_{}", name);
