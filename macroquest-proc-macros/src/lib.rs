@@ -230,3 +230,33 @@ pub fn plugin_hook(attr: TokenStream, item: TokenStream) -> TokenStream {
         Err(e) => e.into_compile_error().into(),
     }
 }
+
+/// Defines the plugin hooks for an `impl Plugin` block.
+///
+/// Whenever implementing a `macroquest::plugin::Plugin` trait, decorating it
+/// with the [`hooks`](`plugin_hooks`) macro will cause all of the implemented
+/// methods to emit the macroquest hook functions.
+///
+/// # Examples
+///
+/// Basic example of implementing a few `Plugin` methods.
+/// ```
+/// # use macroquest::eq;
+/// # use macroquest::plugin::Plugin;
+/// # use macroquest_proc_macros::plugin_hooks as hooks;
+/// # use std::sync::OnceLock;
+/// # static PLUGIN: OnceLock<MyPlugin> = OnceLock::new();
+/// struct MyPlugin;
+///
+/// #[hooks]
+/// impl Plugin for MyPlugin {
+///     fn initialize(&self) {}
+/// }
+/// ```
+#[proc_macro_attribute]
+#[proc_macro_error]
+pub fn plugin_hooks(_attr: TokenStream, item: TokenStream) -> TokenStream {
+    let hooks = syn::parse_macro_input!(item as plugin::hooks::Hooks);
+
+    quote! { #hooks }.into()
+}

@@ -48,6 +48,14 @@ impl ToTokens for PluginMain {
                         .as_str()
                         .to_case(Case::Snake)
                 );
+                let type_assertion_name = format_ident!(
+                    "__assert_{}_implements_plugin_trait",
+                    plugin_struct
+                        .ident
+                        .to_string()
+                        .as_str()
+                        .to_case(Case::Snake)
+                );
                 let plugin_name = &plugin_struct.ident;
 
                 let where_clause = plugin_struct.generics.make_where_clause();
@@ -60,6 +68,10 @@ impl ToTokens for PluginMain {
                     static PLUGIN: ::std::sync::OnceLock<#plugin_name> = ::std::sync::OnceLock::new();
 
                     #plugin_struct
+
+                    // If the plugin type doesn't implement the Plugin trait, then this
+                    // function will trigger a compile error.
+                    fn #type_assertion_name(_: #plugin_name) where #plugin_name: ::macroquest::plugin::Plugin {}
 
                     fn #main_fn_name(reason: ::macroquest::plugin::Reason) -> bool {
                         use ::macroquest::plugin::{Reason, New};

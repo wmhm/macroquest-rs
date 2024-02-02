@@ -8,7 +8,6 @@ use syn::parse::{Parse, ParseStream};
 use syn::{Ident, ItemFn};
 
 #[derive(Debug, PartialEq, EnumString, strum::Display)]
-
 enum Kind {
     InitializePlugin,
     ShutdownPlugin,
@@ -34,7 +33,6 @@ enum Kind {
 }
 
 #[derive(Debug)]
-
 pub(crate) struct HookOpts {
     kind: Kind,
 }
