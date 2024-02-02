@@ -22,8 +22,6 @@
 //!
 //! #[macroquest::plugin::hooks]
 //! impl Plugin for MyPlugin {
-//!     fn initialize(&self) {}
-//!
 //!     fn incoming_chat(&self, line: &str, color: ChatColor) -> bool {
 //!         let l = self.last.write().unwrap();
 //!         *l = Some(line.to_string())
