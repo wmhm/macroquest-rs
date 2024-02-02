@@ -77,11 +77,12 @@ pub fn plugin_preamble(_item: TokenStream) -> TokenStream {
 /// A basic plugin struct with no members.
 ///
 /// ```
-/// # use macroquest::{log::trace, plugin::Reason};
+/// # use macroquest::{log::trace, plugin::Reason, plugin::Plugin};
 /// # use macroquest_proc_macros::plugin_main as main;
 /// #[derive(Debug, Default)]
 /// #[main]
 /// struct MyPlugin;
+/// # impl Plugin for MyPlugin {}
 /// ```
 ///
 /// A plugin struct that uses the `New` trait to specialize the behavior when
