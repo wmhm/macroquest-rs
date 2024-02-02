@@ -7,7 +7,7 @@
 #![warn(clippy::pedantic)]
 
 use proc_macro::TokenStream;
-use proc_macro_error::proc_macro_error;
+use proc_macro_error::{abort_call_site, proc_macro_error};
 use quote::quote;
 
 mod plugin;
@@ -30,7 +30,12 @@ mod plugin;
 //       a proc macro crate, and we need a crate to hold the macro so it doesn't
 //       end up at the root of the crate.
 #[proc_macro]
-pub fn plugin_preamble(_item: TokenStream) -> TokenStream {
+#[proc_macro_error]
+pub fn plugin_preamble(item: TokenStream) -> TokenStream {
+    if !item.is_empty() {
+        abort_call_site!("arguments are not supported")
+    }
+
     quote! {
         #[no_mangle]
         pub static IsBuiltForNext: bool = ::macroquest::is_mq_next();
@@ -105,7 +110,11 @@ pub fn plugin_preamble(_item: TokenStream) -> TokenStream {
 #[doc(alias = "DllMain")]
 #[proc_macro_attribute]
 #[proc_macro_error]
-pub fn plugin_main(_attr: TokenStream, item: TokenStream) -> TokenStream {
+pub fn plugin_main(attr: TokenStream, item: TokenStream) -> TokenStream {
+    if !attr.is_empty() {
+        abort_call_site!("arguments are not supported")
+    }
+
     let main = syn::parse_macro_input!(item as plugin::dllmain::PluginMain);
 
     quote! { #main }.into()
@@ -236,7 +245,11 @@ pub fn plugin_hook(attr: TokenStream, item: TokenStream) -> TokenStream {
 /// ```
 #[proc_macro_attribute]
 #[proc_macro_error]
-pub fn plugin_create(_attr: TokenStream, item: TokenStream) -> TokenStream {
+pub fn plugin_create(attr: TokenStream, item: TokenStream) -> TokenStream {
+    if !attr.is_empty() {
+        abort_call_site!("arguments are not supported")
+    }
+
     let plugin = syn::parse_macro_input!(item as plugin::create::Plugin);
 
     quote! { #plugin }.into()
@@ -266,7 +279,11 @@ pub fn plugin_create(_attr: TokenStream, item: TokenStream) -> TokenStream {
 /// ```
 #[proc_macro_attribute]
 #[proc_macro_error]
-pub fn plugin_hooks(_attr: TokenStream, item: TokenStream) -> TokenStream {
+pub fn plugin_hooks(attr: TokenStream, item: TokenStream) -> TokenStream {
+    if !attr.is_empty() {
+        abort_call_site!("arguments are not supported")
+    }
+
     let hooks = syn::parse_macro_input!(item as plugin::hooks::Hooks);
 
     quote! { #hooks }.into()
