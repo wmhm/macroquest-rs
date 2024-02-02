@@ -10,9 +10,8 @@
 
 use macroquest::eq;
 use macroquest::plugin::Plugin;
-
+#[macroquest::plugin::create]
 #[derive(Debug, Default)]
-#[macroquest::plugin::main]
 struct MQRustSimple {}
 
 #[macroquest::plugin::hooks]

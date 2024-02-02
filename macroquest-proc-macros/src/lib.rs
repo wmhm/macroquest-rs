@@ -43,19 +43,7 @@ pub fn plugin_preamble(_item: TokenStream) -> TokenStream {
 
 /// Defines the main entry point for this plugin.
 ///
-/// This can decorate either a struct or a function, and it **MUST** be the
-/// last attribute specified for either.
-///
-/// The preferred approach is to decorate a struct, as that forms the higher
-/// level API for plugins. When used in this manner, it will automatically
-/// generate a ``main`` function that will call `New::new()` on the type
-/// and then set the global static named `PLUGIN` to that newly created object.
-///
-/// The wrapped struct must implement the `New` trait, however that trait has
-/// a blanket implementation for [`std::default::Default`] and implementing or
-/// deriving [`std::default::Default`] should be preferred.
-///
-/// When decorating a function, it will be  the main entry point for the built
+/// The function decorated by this will be  the main entry point for the built
 /// DLL, and it will be the first thing and last thing that will be called (and
 /// in fact, is called by Windows, not MacroQuest) when the DLL for this plugin
 /// is loaded and unloaded. It can be used to do any very basic setup (such as
@@ -73,38 +61,6 @@ pub fn plugin_preamble(_item: TokenStream) -> TokenStream {
 /// be immediately unloaded.
 ///
 /// # Examples
-///
-/// A basic plugin struct with no members.
-///
-/// ```
-/// # use macroquest::{log::trace, plugin::Reason, plugin::Plugin};
-/// # use macroquest_proc_macros::plugin_main as main;
-/// #[derive(Debug, Default)]
-/// #[main]
-/// struct MyPlugin;
-/// # impl Plugin for MyPlugin {}
-/// ```
-///
-/// A plugin struct that uses the `New` trait to specialize the behavior when
-/// creating for use (versus other uses of [`std::default::Default`]).
-///
-/// ```
-/// # use macroquest::{log::trace, plugin::{Reason, New, Plugin}};
-/// # use macroquest_proc_macros::plugin_main as main;
-/// #[derive(Debug)]
-/// #[main]
-/// struct MyPlugin {
-///     data: Vec<String>,
-/// }
-///
-/// impl New for MyPlugin {
-///     fn new() -> Self {
-///         MyPlugin { data: vec![String::from("initial data")] }
-///     }
-/// }
-///
-/// # impl Plugin for MyPlugin {}
-/// ```
 ///
 /// A simple ``main`` function that can never fail and will always load the
 /// DLL.
@@ -232,6 +188,58 @@ pub fn plugin_hook(attr: TokenStream, item: TokenStream) -> TokenStream {
         Ok(hook) => quote! { #hook }.into(),
         Err(e) => e.into_compile_error().into(),
     }
+}
+
+/// Defines a Plugin type and sets up the main function to create it.
+///
+/// This will ensure that the Plugin type implements all of the required traits
+/// and sets up the `PluginMain` so that when the DLL is loaded, an instance of
+/// the given type is created and stored in a static variable named `PLUGIN`.
+///
+/// The type that this decorates must implement both the `New` trait and the
+/// `Plugin` trait, however it is recommended to implement the `Default` trait
+/// and let the blanket trait for `New` rather than implementing `New` directly.
+///
+/// # Examples
+///
+/// A basic plugin struct with no members.
+///
+/// ```
+/// # use macroquest::{log::trace, plugin::Reason, plugin::Plugin};
+/// # use macroquest_proc_macros::plugin_create as create;
+/// #[derive(Debug, Default)]
+/// #[create]
+/// struct MyPlugin;
+///
+/// impl Plugin for MyPlugin {}
+/// ```
+///
+/// A plugin struct that uses the `New` trait to specialize the behavior when
+/// creating for use (versus other uses of [`std::default::Default`]).
+///
+/// ```
+/// # use macroquest::{log::trace, plugin::{Reason, New, Plugin}};
+/// # use macroquest_proc_macros::plugin_create as create;
+/// #[derive(Debug)]
+/// #[create]
+/// struct MyPlugin {
+///     data: Vec<String>,
+/// }
+///
+/// impl New for MyPlugin {
+///     fn new() -> Self {
+///         MyPlugin { data: vec![String::from("initial data")] }
+///     }
+/// }
+///
+/// # impl Plugin for MyPlugin {}
+/// ```
+#[proc_macro_attribute]
+#[proc_macro_error]
+pub fn plugin_create(_attr: TokenStream, item: TokenStream) -> TokenStream {
+    let plugin = syn::parse_macro_input!(item as plugin::create::Plugin);
+
+    quote! { #plugin }.into()
 }
 
 /// Defines the plugin hooks for an `impl Plugin` block.

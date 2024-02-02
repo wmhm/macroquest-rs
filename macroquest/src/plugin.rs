@@ -15,7 +15,7 @@
 //! # use macroquest::plugin::Plugin;
 //! # use std::sync::RwLock;
 //! #[derive(Debug, Default)]
-//! #[macroquest::plugin::main]
+//! #[macroquest::plugin::create]
 //! struct MyPlugin {
 //!     last: RwLock<Option<String>>,
 //! }
@@ -72,7 +72,8 @@ use windows::Win32::System::SystemServices::{DLL_PROCESS_ATTACH, DLL_PROCESS_DET
 
 #[doc(inline)]
 pub use macroquest_proc_macros::{
-    plugin_hook as hook, plugin_hooks as hooks, plugin_main as main, plugin_preamble as preamble,
+    plugin_create as create, plugin_hook as hook, plugin_hooks as hooks, plugin_main as main,
+    plugin_preamble as preamble,
 };
 
 use crate::eq;
