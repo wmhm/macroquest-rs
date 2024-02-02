@@ -32,7 +32,6 @@ impl ToTokens for PluginMain {
         let main_fn_name = match &self.kind {
             Kind::Function(main_fn) => {
                 quote! {
-                    #[allow(clippy::needless_pass_by_value)]
                     #main_fn
                 }
                 .to_tokens(tokens);
@@ -62,7 +61,6 @@ impl ToTokens for PluginMain {
 
                     #plugin_struct
 
-                    #[allow(clippy::needless_pass_by_value)]
                     fn #main_fn_name(reason: ::macroquest::plugin::Reason) -> bool {
                         use ::macroquest::plugin::{Reason, New};
                         use ::macroquest::log::error;

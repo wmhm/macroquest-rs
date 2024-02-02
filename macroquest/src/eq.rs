@@ -8,7 +8,7 @@ use ref_cast::RefCast;
 use crate::ffi;
 
 #[allow(missing_docs)]
-#[derive(Debug, Eq, PartialEq, FromPrimitive, IntoPrimitive)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq, FromPrimitive, IntoPrimitive)]
 #[repr(i32)]
 pub enum GameState {
     PreCharacterSelect = -1,
@@ -24,7 +24,7 @@ pub enum GameState {
 }
 
 #[allow(missing_docs)]
-#[derive(Debug, Eq, PartialEq, FromPrimitive, IntoPrimitive)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq, FromPrimitive, IntoPrimitive)]
 #[repr(i32)]
 pub enum ChatColor {
     Say = chat_color!(1),

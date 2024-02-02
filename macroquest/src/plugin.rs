@@ -64,7 +64,7 @@ pub use macroquest_proc_macros::{
 };
 
 /// Describes the reason that the plugin ``main`` function is being called.
-#[derive(Debug, Eq, PartialEq, TryFromPrimitive)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq, TryFromPrimitive)]
 #[repr(u32)]
 pub enum Reason {
     /// The DLL is being loaded into memory

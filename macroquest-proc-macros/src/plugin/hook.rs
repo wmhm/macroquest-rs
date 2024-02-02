@@ -122,7 +122,6 @@ impl Hook {
 
         quote! {
             #[no_mangle]
-            #[allow(clippy::needless_pass_by_value)]
             pub extern "C" fn #mq_hook_name(c_state: i32) {
                 let result = ::std::panic::catch_unwind(|| {
                     #hook_fn_name(::macroquest::eq::GameState::from(c_state))
@@ -146,7 +145,6 @@ impl Hook {
 
         quote! {
             #[no_mangle]
-            #[allow(clippy::needless_pass_by_value)]
             pub unsafe extern "C" fn #mq_hook_name(
                 ptr: *const ::std::os::raw::c_char,
                 color: i32,
@@ -176,7 +174,6 @@ impl Hook {
 
         quote! {
             #[no_mangle]
-            #[allow(clippy::needless_pass_by_value)]
             pub unsafe extern "C" fn #mq_hook_name(
                 ptr: *const ::std::os::raw::c_char,
                 color: u32,
