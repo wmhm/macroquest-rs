@@ -12,10 +12,24 @@
 //! ```
 //! # use macroquest::log::trace;
 //! # use macroquest::eq::ChatColor;
+//! # use macroquest::plugin::Plugin;
+//! # use std::sync::RwLock;
 //! #[derive(Debug, Default)]
 //! #[macroquest::plugin::main]
 //! struct MyPlugin {
-//!     last: Option<String>,
+//!     last: RwLock<Option<String>>,
+//! }
+//!
+//! #[macroquest::plugin::hooks]
+//! impl Plugin for MyPlugin {
+//!     fn initialize(&self) {}
+//!
+//!     fn incoming_chat(&self, line: &str, color: ChatColor) -> bool {
+//!         let l = self.last.write().unwrap();
+//!         *l = Some(line.to_string())
+//!
+//!         false
+//!     }
 //! }
 //! ```
 //!
