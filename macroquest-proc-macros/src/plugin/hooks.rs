@@ -128,11 +128,13 @@ impl ToTokens for Hooks {
                     &format_ident!("{}", kind.to_string()),
                     tokens,
                 ),
-                kind @ (Kind::OnAddSpawn | Kind::OnRemoveSpawn) => Hooks::to_tokens_spawn_hook(
-                    plugin_hook_name,
-                    &format_ident!("{}", kind.to_string()),
-                    tokens,
-                ),
+                kind @ (Kind::OnAddSpawn | Kind::OnRemoveSpawn) => {
+                    Hooks::to_tokens_spawn_hook(
+                        plugin_hook_name,
+                        &format_ident!("{}", kind.to_string()),
+                        tokens,
+                    )
+                }
                 kind @ (Kind::OnAddGroundItem | Kind::OnRemoveGroundItem) => {
                     Hooks::to_tokens_grounditem_hook(
                         plugin_hook_name,
@@ -146,7 +148,11 @@ impl ToTokens for Hooks {
 }
 
 impl Hooks {
-    fn to_tokens_simple_hook(name: &Ident, hook: &Ident, tokens: &mut proc_macro2::TokenStream) {
+    fn to_tokens_simple_hook(
+        name: &Ident,
+        hook: &Ident,
+        tokens: &mut proc_macro2::TokenStream,
+    ) {
         let outer_name = format_ident!("__plugin_{}", name);
         let hook_name = format_ident!("{}", hook.to_string());
         quote! {
@@ -161,7 +167,11 @@ impl Hooks {
         .to_tokens(tokens);
     }
 
-    fn to_tokens_gamestate_hook(name: &Ident, hook: &Ident, tokens: &mut proc_macro2::TokenStream) {
+    fn to_tokens_gamestate_hook(
+        name: &Ident,
+        hook: &Ident,
+        tokens: &mut proc_macro2::TokenStream,
+    ) {
         let outer_name = format_ident!("__plugin_{}", name);
         let hook_name = format_ident!("{}", hook.to_string());
         quote! {
@@ -217,7 +227,11 @@ impl Hooks {
         .to_tokens(tokens);
     }
 
-    fn to_tokens_str_hook(name: &Ident, hook: &Ident, tokens: &mut proc_macro2::TokenStream) {
+    fn to_tokens_str_hook(
+        name: &Ident,
+        hook: &Ident,
+        tokens: &mut proc_macro2::TokenStream,
+    ) {
         let outer_name = format_ident!("__plugin_{}", name);
         let hook_name = format_ident!("{}", hook.to_string());
         quote! {
@@ -232,7 +246,11 @@ impl Hooks {
         .to_tokens(tokens);
     }
 
-    fn to_tokens_spawn_hook(name: &Ident, hook: &Ident, tokens: &mut proc_macro2::TokenStream) {
+    fn to_tokens_spawn_hook(
+        name: &Ident,
+        hook: &Ident,
+        tokens: &mut proc_macro2::TokenStream,
+    ) {
         let outer_name = format_ident!("__plugin_{}", name);
         let hook_name = format_ident!("{}", hook.to_string());
         quote! {

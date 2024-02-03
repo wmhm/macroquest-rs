@@ -25,7 +25,8 @@ fn eq_version(dir: &Path) -> Result<String, Box<dyn std::error::Error>> {
     Ok(unsafe {
         let lib = libloading::Library::new(dir.join("release/MQ2Main.dll"))?;
 
-        let version_ptr: libloading::Symbol<*const c_char> = lib.get(b"gszVersion\0")?;
+        let version_ptr: libloading::Symbol<*const c_char> =
+            lib.get(b"gszVersion\0")?;
         let version = CStr::from_ptr(*version_ptr).to_str()?;
 
         let time_ptr: libloading::Symbol<*const c_char> = lib.get(b"gszTime\0")?;
@@ -66,7 +67,8 @@ fn main() {
     }
     else {
         // Compute our Build Configuration
-        let mq_profile = env::var("MACROQUEST_BUILD_PROFILE").unwrap_or_else(|_| "release".into());
+        let mq_profile =
+            env::var("MACROQUEST_BUILD_PROFILE").unwrap_or_else(|_| "release".into());
         let mq_root_dir = PathBuf::from(
             env::var_os("MACROQUEST_DIR")
                 .expect("Must set MACROQUEST_DIR to the root of a MacroQuest checkout"),

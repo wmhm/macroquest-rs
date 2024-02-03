@@ -1,3 +1,4 @@
+max_width = 88
 enum_discrim_align_threshold = 20
 control_brace_style = "ClosingNextLine"
 format_code_in_doc_comments = true

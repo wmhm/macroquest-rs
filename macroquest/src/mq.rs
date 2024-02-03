@@ -125,8 +125,9 @@ impl io::Write for ConsoleWriter {
         let mut written = 0;
 
         if let Some(raw) = buf.split_inclusive(|c| *c == b'\n').nth(0) {
-            let line = std::str::from_utf8(raw)
-                .map_err(|e| io::Error::new(io::ErrorKind::InvalidInput, e.to_string()))?;
+            let line = std::str::from_utf8(raw).map_err(|e| {
+                io::Error::new(io::ErrorKind::InvalidInput, e.to_string())
+            })?;
 
             write_chat(colorize(line.trim_end_matches('\n')));
             written += raw.len();

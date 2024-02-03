@@ -17,8 +17,10 @@ pub mod logger {
     #[cfg(not(feature = "colors"))]
     const SHOULD_COLOR: bool = false;
 
-    pub fn init<F>(console_filter: Option<LevelFilter>, file_opts: Option<(LevelFilter, F)>)
-    where
+    pub fn init<F>(
+        console_filter: Option<LevelFilter>,
+        file_opts: Option<(LevelFilter, F)>,
+    ) where
         F: Into<String>,
     {
         let console_layer = console_filter.map(|filter| {

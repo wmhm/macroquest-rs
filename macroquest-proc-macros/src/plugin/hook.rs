@@ -263,7 +263,10 @@ impl ToTokens for Hook {
             | Kind::OnEndZone
             | Kind::OnZoned
             | Kind::OnUpdateImGui => self.to_tokens_simple_hook(tokens),
-            Kind::OnMacroStart | Kind::OnMacroStop | Kind::OnLoadPlugin | Kind::OnUnloadPlugin => {
+            Kind::OnMacroStart
+            | Kind::OnMacroStop
+            | Kind::OnLoadPlugin
+            | Kind::OnUnloadPlugin => {
                 self.to_tokens_str_hook(tokens);
             }
             Kind::SetGameState => self.to_tokens_gamestate_hook(tokens),
