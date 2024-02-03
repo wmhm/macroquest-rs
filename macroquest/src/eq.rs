@@ -4,6 +4,7 @@ use std::fmt;
 
 use num_enum::{FromPrimitive, IntoPrimitive};
 use ref_cast::RefCast;
+use static_assertions::assert_not_impl_any;
 
 use crate::ffi;
 
@@ -220,6 +221,12 @@ impl fmt::Debug for GroundItem {
             .finish()
     }
 }
+
+// Most of the types that we get out of EverQuest cannot be assumed to be valid
+// if they're accessed anywhere but the main thread, because otherwise EverQuest
+// might be mutating them.
+assert_not_impl_any!(Spawn: Send, Sync);
+assert_not_impl_any!(GroundItem: Send, Sync);
 
 mod macros {
     macro_rules! chat_color {
