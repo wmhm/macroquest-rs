@@ -180,7 +180,14 @@ impl Hook {
                 let result = ::std::panic::catch_unwind(|| {
                     let c_str = ::std::ffi::CStr::from_ptr(ptr);
                     let r_str = c_str.to_string_lossy();
-                    #hook_fn_name(r_str.as_ref(), ::macroquest::eq::ChatColor::from(color as i32))
+
+                    let Ok(color) = i32::try_from(color)
+                    else {
+                        ::macroquest::log::error!("color parameter couldn't convert to i32 from u32");
+                        return false;
+                    };
+
+                    #hook_fn_name(r_str.as_ref(), ::macroquest::eq::ChatColor::from(color))
                 });
 
                 match result {
