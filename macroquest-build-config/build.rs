@@ -53,7 +53,8 @@ fn main() {
             profile: String::from("docs build"),
             bin_dir: PathBuf::from("docs build"),
         }
-    } else if target_os != "windows" {
+    }
+    else if target_os != "windows" {
         // If we're building for a non windows platform, then we synthesize a
         // build configuration
         BuildConfig {
@@ -62,7 +63,8 @@ fn main() {
             profile: String::from("non windows build"),
             bin_dir: PathBuf::from("non windows build"),
         }
-    } else {
+    }
+    else {
         // Compute our Build Configuration
         let mq_profile = env::var("MACROQUEST_BUILD_PROFILE").unwrap_or_else(|_| "release".into());
         let mq_root_dir = PathBuf::from(

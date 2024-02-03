@@ -85,7 +85,8 @@ impl ToTokens for Hooks {
 
         for hook in &self.implemented {
             let plugin_hook_name = &hook.sig.ident;
-            let Ok(kind) = Kind::from_str(hook.sig.ident.to_string().as_str()) else {
+            let Ok(kind) = Kind::from_str(hook.sig.ident.to_string().as_str())
+            else {
                 abort!(hook, "The hook must be a supported MacroQuest hook");
             };
 
