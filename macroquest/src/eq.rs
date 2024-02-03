@@ -175,6 +175,7 @@ pub enum Channel {
     Unknown(i32),
 }
 
+#[allow(clippy::derivable_impls)]
 impl Default for Channel {
     fn default() -> Self {
         Channel::Default
