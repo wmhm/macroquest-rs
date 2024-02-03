@@ -66,7 +66,7 @@ impl ToTokens for Plugin {
 
             // If the plugin type doesn't implement the New and Plugin traits,
             // then this function will trigger a compile error.
-            fn #type_assertion_name(_: #plugin_name) where #plugin_name: ::macroquest::plugin::New + ::macroquest::plugin::Plugin {}
+            fn #type_assertion_name(_: #plugin_name) where #plugin_name: ::macroquest::plugin::New + ::macroquest::plugin::Hooks {}
 
             macroquest::plugin::preamble!();
 

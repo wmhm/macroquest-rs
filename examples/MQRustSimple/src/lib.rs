@@ -9,13 +9,13 @@
 #![warn(clippy::pedantic)]
 
 use macroquest::eq;
-use macroquest::plugin::Plugin;
+use macroquest::plugin::Hooks;
 #[macroquest::plugin::create]
 #[derive(Debug, Default)]
 struct MQRustSimple {}
 
 #[macroquest::plugin::hooks]
-impl Plugin for MQRustSimple {
+impl Hooks for MQRustSimple {
     fn initialize(&self) {}
 
     fn shutdown(&self) {}

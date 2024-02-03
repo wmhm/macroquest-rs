@@ -206,7 +206,7 @@ pub fn plugin_hook(attr: TokenStream, item: TokenStream) -> TokenStream {
 /// the given type is created and stored in a static variable named `PLUGIN`.
 ///
 /// The type that this decorates must implement both the `New` trait and the
-/// `Plugin` trait, however it is recommended to implement the `Default` trait
+/// `Hooks` trait, however it is recommended to implement the `Default` trait
 /// and let the blanket trait for `New` rather than implementing `New` directly.
 ///
 /// # Examples
@@ -214,20 +214,20 @@ pub fn plugin_hook(attr: TokenStream, item: TokenStream) -> TokenStream {
 /// A basic plugin struct with no members.
 ///
 /// ```
-/// # use macroquest::{log::trace, plugin::Reason, plugin::Plugin};
+/// # use macroquest::{log::trace, plugin::Reason, plugin::Hooks};
 /// # use macroquest_proc_macros::plugin_create as create;
 /// #[derive(Debug, Default)]
 /// #[create]
 /// struct MyPlugin;
 ///
-/// impl Plugin for MyPlugin {}
+/// impl Hooks for MyPlugin {}
 /// ```
 ///
 /// A plugin struct that uses the `New` trait to specialize the behavior when
 /// creating for use (versus other uses of [`std::default::Default`]).
 ///
 /// ```
-/// # use macroquest::{log::trace, plugin::{Reason, New, Plugin}};
+/// # use macroquest::{log::trace, plugin::{Reason, New, Hooks}};
 /// # use macroquest_proc_macros::plugin_create as create;
 /// #[derive(Debug)]
 /// #[create]
@@ -241,7 +241,7 @@ pub fn plugin_hook(attr: TokenStream, item: TokenStream) -> TokenStream {
 ///     }
 /// }
 ///
-/// # impl Plugin for MyPlugin {}
+/// # impl Hooks for MyPlugin {}
 /// ```
 #[proc_macro_attribute]
 #[proc_macro_error]
@@ -255,25 +255,25 @@ pub fn plugin_create(attr: TokenStream, item: TokenStream) -> TokenStream {
     quote! { #plugin }.into()
 }
 
-/// Defines the plugin hooks for an `impl Plugin` block.
+/// Defines the plugin hooks for an `impl Hooks` block.
 ///
-/// Whenever implementing a `macroquest::plugin::Plugin` trait, decorating it
+/// Whenever implementing a `macroquest::plugin::Hooks` trait, decorating it
 /// with the [`hooks`](`macro@plugin_hooks`) macro will cause all of the implemented
 /// methods to emit the macroquest hook functions.
 ///
 /// # Examples
 ///
-/// Basic example of implementing a few `Plugin` methods.
+/// Basic example of implementing a few `Hooks` methods.
 /// ```
 /// # use macroquest::eq;
-/// # use macroquest::plugin::Plugin;
+/// # use macroquest::plugin::Hooks;
 /// # use macroquest_proc_macros::plugin_hooks as hooks;
 /// # use std::sync::OnceLock;
 /// # static PLUGIN: OnceLock<MyPlugin> = OnceLock::new();
 /// struct MyPlugin;
 ///
 /// #[hooks]
-/// impl Plugin for MyPlugin {
+/// impl Hooks for MyPlugin {
 ///     fn initialize(&self) {}
 /// }
 /// ```

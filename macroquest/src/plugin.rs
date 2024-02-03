@@ -12,7 +12,7 @@
 //! ```
 //! # use macroquest::log::trace;
 //! # use macroquest::eq::ChatColor;
-//! # use macroquest::plugin::Plugin;
+//! # use macroquest::plugin::Hooks;
 //! # use std::sync::RwLock;
 //! #[derive(Debug, Default)]
 //! #[macroquest::plugin::create]
@@ -21,7 +21,7 @@
 //! }
 //!
 //! #[macroquest::plugin::hooks]
-//! impl Plugin for MyPlugin {
+//! impl Hooks for MyPlugin {
 //!     fn incoming_chat(&self, line: &str, color: ChatColor) -> bool {
 //!         let mut l = self.last.write().unwrap();
 //!         *l = Some(line.to_string());
@@ -151,7 +151,7 @@ impl<T: Default> New for T {
     }
 }
 
-/// The Plugin trait implements the protocol that a MacroQuest plugin must
+/// The Hooks trait implements the protocol that a MacroQuest plugin must
 /// implement.
 ///
 /// For each process, there is one global plugin instance, created using the
@@ -159,10 +159,10 @@ impl<T: Default> New for T {
 /// dispatched to the instance methods of that plugin instance.
 ///
 /// All MacroQuest plugin hooks have a default, no-op implementation, allowing
-/// a Plugin implementation to implement only the ones that they actually care
+/// a Hooks implementation to implement only the ones that they actually care
 /// about, while leaving the no-op implementations to cover any other hook.
 #[allow(unused_variables)]
-pub trait Plugin {
+pub trait Hooks {
     /// This is called once on plugin initialization and can be considered the
     /// startup routine for the plugin.
     #[doc(alias = "InitializePlugin")]
@@ -212,11 +212,11 @@ pub trait Plugin {
     /// [`crate::eq::GameState`] enum. The most commonly used of these is
     /// [`crate::eq::GameState::InGame`].
     ///
-    /// When zoning, this is called once after [`Plugin::begin_zone()`],
-    /// [`Plugin::remove_spawn()`], and [`Plugin::remove_ground_item()`]
-    /// are all done, and then called once again after [`Plugin::end_zone()`]
-    /// and [`Plugin::add_spawn()`] are done but prior to
-    /// [`Plugin::add_ground_item()`] and [`Plugin::zoned()`].
+    /// When zoning, this is called once after [`Hooks::begin_zone()`],
+    /// [`Hooks::remove_spawn()`], and [`Hooks::remove_ground_item()`]
+    /// are all done, and then called once again after [`Hooks::end_zone()`]
+    /// and [`Hooks::add_spawn()`] are done but prior to
+    /// [`Hooks::add_ground_item()`] and [`Hooks::zoned()`].
     #[doc(alias = "SetGameState")]
     fn game_state(&self, state: eq::GameState) {}
 
@@ -234,12 +234,12 @@ pub trait Plugin {
     /// text from MQ" callback.
     ///
     /// This ignores filters on display, so if they are needed either implement
-    /// them in this section or see [`Plugin::incoming_chat()`] where filters
+    /// them in this section or see [`Hooks::incoming_chat()`] where filters
     /// are already handled.
     ///
     /// If `CEverQuest::dsp_chat` is not called, and events are required,
     /// they'll need to be implemented here as well. Otherwise, see
-    /// [`Plugin::incoming_chat()`] where that is already handled.
+    /// [`Hooks::incoming_chat()`] where that is already handled.
     ///
     /// For a list of color values, see the [`crate::eq::ChatColor`] enum.
     #[doc(alias = "OnWriteChatColor")]
@@ -247,7 +247,7 @@ pub trait Plugin {
 
     /// This is called each time a line of chat is shown. It occurs after MQ
     /// filters and chat events have been handled.  If you need to know when
-    /// MQ2 has sent chat, consider using [`Plugin::write_chat()`]
+    /// MQ2 has sent chat, consider using [`Hooks::write_chat()`]
     /// instead.
     ///
     /// For a list of color values, see the [`crate::eq::ChatColor`] enum.
@@ -261,7 +261,7 @@ pub trait Plugin {
     /// initializes.
     ///
     /// When zoning, this is called for all spawns in the zone after
-    /// [`Plugin::end_zone()`] is called and before [`Plugin::zoned()`] is
+    /// [`Hooks::end_zone()`] is called and before [`Hooks::zoned()`] is
     /// called.
     #[doc(alias = "OnAddSpawn")]
     fn add_spawn(&self, spawn: &eq::Spawn) {}
@@ -270,7 +270,7 @@ pub trait Plugin {
     /// despawns or is killed). It is NOT called when a plugin shuts down.
     ///
     /// When zoning, this is called for all spawns in the zone after
-    /// [`Plugin::begin_zone()`] is called.
+    /// [`Hooks::begin_zone()`] is called.
     #[doc(alias = "OnRemoveSpawn")]
     fn remove_spawn(&self, spawn: &eq::Spawn) {}
 
@@ -279,7 +279,7 @@ pub trait Plugin {
     /// first initializes.
     ///
     /// When zoning, this is called for all ground items in the zone after
-    /// [`Plugin::end_zone()`] is called and before [`Plugin::zoned()`] is
+    /// [`Hooks::end_zone()`] is called and before [`Hooks::zoned()`] is
     /// called.
     #[doc(alias = "OnAddGroundItem")]
     fn add_ground_item(&self, item: &eq::GroundItem) {}
@@ -289,7 +289,7 @@ pub trait Plugin {
     /// shuts down.
     ///
     /// When zoning, this is called for all ground items in the zone after
-    /// [`Plugin::begin_zone()`] is called.
+    /// [`Hooks::begin_zone()`] is called.
     #[doc(alias = "OnRemoveGroundItem")]
     fn remove_ground_item(&self, item: &eq::GroundItem) {}
 
@@ -301,17 +301,17 @@ pub trait Plugin {
     /// This is called just after the loading screen, but prior to the zone
     /// being fully loaded.
     ///
-    /// This should occur before [`Plugin::add_spawn()`] and
-    /// [`Plugin::add_ground_item()`] are called. It always occurs before
-    /// [`Plugin::zoned()`] is called.
+    /// This should occur before [`Hooks::add_spawn()`] and
+    /// [`Hooks::add_ground_item()`] are called. It always occurs before
+    /// [`Hooks::zoned()`] is called.
     #[doc(alias = "OnEndZone")]
     fn end_zone(&self) {}
 
     /// This is called after entering a new zone and the zone is considered
     /// "loaded."
     ///
-    /// It occurs after [`Plugin::end_zone()`], [`Plugin::add_spawn()`],
-    /// and [`Plugin::add_ground_item()`] have been called.
+    /// It occurs after [`Hooks::end_zone()`], [`Hooks::add_spawn()`],
+    /// and [`Hooks::add_ground_item()`] have been called.
     #[doc(alias = "OnZoned")]
     fn zoned(&self) {}
 
@@ -338,21 +338,21 @@ pub trait Plugin {
     /// (ex: `/plugin someplugin`), after the plugin has been loaded and any
     /// associated `-AutoExec.cfg` file have been launched.
     ///
-    /// This means it will be executed after the [`Plugin::initialize()`]
+    /// This means it will be executed after the [`Hooks::initialize()`]
     /// callback.
     ///
     /// This is also called when THIS plugin is loaded, but initialization tasks
-    /// should still be done in [`Plugin::initialize()`].
+    /// should still be done in [`Hooks::initialize()`].
     #[doc(alias = "OnLoadPlugin")]
     fn plugin_load(&self, name: &str) {}
 
     /// This is called each time a plugin is unloaded
     /// (ex: `/plugin someplugin unload`), just prior to the plugin unloading.
-    /// This means it will be executed prior to the [`Plugin::shutdown()`]
+    /// This means it will be executed prior to the [`Hooks::shutdown()`]
     /// callback.
     ///
     /// This is also called when THIS plugin is unloaded, but shutdown tasks
-    /// should still be done in [`Plugin::shutdown()`].
+    /// should still be done in [`Hooks::shutdown()`].
     #[doc(alias = "OnUnloadPlugin")]
     fn plugin_unload(&self, name: &str) {}
 }
