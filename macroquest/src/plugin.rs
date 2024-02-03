@@ -83,7 +83,7 @@ use crate::eq;
 #[repr(u32)]
 pub enum Reason {
     /// The DLL is being loaded into memory
-    Load = DLL_PROCESS_ATTACH,
+    Load   = DLL_PROCESS_ATTACH,
     /// The DLL is being unloaded from memory
     Unload = DLL_PROCESS_DETACH,
 }
