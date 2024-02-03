@@ -11,3 +11,4 @@ newline_style = "Unix"
 normalize_comments = true
 normalize_doc_attributes = true
 use_field_init_shorthand = true
+wrap_comments = true
