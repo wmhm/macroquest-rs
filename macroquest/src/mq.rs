@@ -13,15 +13,15 @@ static PATHS: OnceLock<Paths> = OnceLock::new();
 
 #[allow(missing_docs)]
 pub struct Paths<'a> {
-    root: &'a Path,
-    config: &'a Path,
-    ini: &'a Path,
-    macros: &'a Path,
-    logs: &'a Path,
+    root:        &'a Path,
+    config:      &'a Path,
+    ini:         &'a Path,
+    macros:      &'a Path,
+    logs:        &'a Path,
     crash_dumps: &'a Path,
-    plugins: &'a Path,
-    resources: &'a Path,
-    everquest: &'a Path,
+    plugins:     &'a Path,
+    resources:   &'a Path,
+    everquest:   &'a Path,
 }
 
 #[allow(missing_docs)]
@@ -75,15 +75,15 @@ impl<'a> Paths<'a> {
 #[allow(missing_docs)]
 pub fn paths() -> &'static Paths<'static> {
     PATHS.get_or_init(|| Paths {
-        root: Path::new(mqlib::get_path_MQRoot()),
-        config: Path::new(mqlib::get_path_Config()),
-        ini: Path::new(mqlib::get_path_MQini()),
-        macros: Path::new(mqlib::get_path_Macros()),
-        logs: Path::new(mqlib::get_path_Logs()),
+        root:        Path::new(mqlib::get_path_MQRoot()),
+        config:      Path::new(mqlib::get_path_Config()),
+        ini:         Path::new(mqlib::get_path_MQini()),
+        macros:      Path::new(mqlib::get_path_Macros()),
+        logs:        Path::new(mqlib::get_path_Logs()),
         crash_dumps: Path::new(mqlib::get_path_CrashDumps()),
-        plugins: Path::new(mqlib::get_path_Plugins()),
-        resources: Path::new(mqlib::get_path_Resources()),
-        everquest: Path::new(mqlib::get_path_EverQuest()),
+        plugins:     Path::new(mqlib::get_path_Plugins()),
+        resources:   Path::new(mqlib::get_path_Resources()),
+        everquest:   Path::new(mqlib::get_path_EverQuest()),
     })
 }
 

@@ -9,9 +9,9 @@ use serde::Serialize;
 #[derive(Debug, Serialize)]
 struct BuildConfig {
     eq_version: String,
-    profile: String,
-    root_dir: PathBuf,
-    bin_dir: PathBuf,
+    profile:    String,
+    root_dir:   PathBuf,
+    bin_dir:    PathBuf,
 }
 
 fn eq_version(dir: &Path) -> Result<String, Box<dyn std::error::Error>> {
@@ -49,9 +49,9 @@ fn main() {
         // If we're building on docs.rs then we synthesize a build configuration
         BuildConfig {
             eq_version: String::from("docs build"),
-            root_dir: PathBuf::from("docs build"),
-            profile: String::from("docs build"),
-            bin_dir: PathBuf::from("docs build"),
+            root_dir:   PathBuf::from("docs build"),
+            profile:    String::from("docs build"),
+            bin_dir:    PathBuf::from("docs build"),
         }
     }
     else if target_os != "windows" {
@@ -59,9 +59,9 @@ fn main() {
         // build configuration
         BuildConfig {
             eq_version: String::from("non windows build"),
-            root_dir: PathBuf::from("non windows build"),
-            profile: String::from("non windows build"),
-            bin_dir: PathBuf::from("non windows build"),
+            root_dir:   PathBuf::from("non windows build"),
+            profile:    String::from("non windows build"),
+            bin_dir:    PathBuf::from("non windows build"),
         }
     }
     else {

@@ -14,9 +14,9 @@ use serde::Deserialize;
 #[derive(Deserialize, Debug)]
 pub struct BuildConfig {
     eq_version: String,
-    profile: String,
-    root_dir: PathBuf,
-    bin_dir: PathBuf,
+    profile:    String,
+    root_dir:   PathBuf,
+    bin_dir:    PathBuf,
 }
 
 impl BuildConfig {

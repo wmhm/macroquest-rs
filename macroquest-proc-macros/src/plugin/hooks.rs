@@ -54,7 +54,7 @@ enum Kind {
 }
 
 pub(crate) struct Hooks {
-    body: ItemImpl,
+    body:        ItemImpl,
     implemented: Vec<ImplItemFn>,
 }
 
@@ -62,7 +62,7 @@ impl Parse for Hooks {
     fn parse(input: ParseStream) -> syn::Result<Self> {
         let plugin_impl: ItemImpl = input.parse()?;
         let mut hooks = Hooks {
-            body: plugin_impl.clone(),
+            body:        plugin_impl.clone(),
             implemented: vec![],
         };
 
