@@ -11,11 +11,13 @@ keywords.workspace = true
 
 
 [dependencies]
-macroquest-macros = { workspace = true }
 macroquest-sys = { workspace = true, optional = true }
+macroquest-proc-macros = { workspace = true }
+
 cansi = { version = "2.2.1", optional = true }
 num_enum = "0.7.2"
 parking_lot = "0.12.1"
+ref-cast = "1.0"
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", optional = true }
 tracing-appender = { version = "0.2", optional = true }

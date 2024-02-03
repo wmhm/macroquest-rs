@@ -1,3 +1,5 @@
+//!
+
 use std::borrow::Cow;
 use std::io;
 use std::marker::PhantomData;
@@ -9,6 +11,7 @@ use crate::ffi::mq as mqlib;
 
 static PATHS: OnceLock<Paths> = OnceLock::new();
 
+#[allow(missing_docs)]
 pub struct Paths<'a> {
     root: &'a Path,
     config: &'a Path,
@@ -21,6 +24,7 @@ pub struct Paths<'a> {
     everquest: &'a Path,
 }
 
+#[allow(missing_docs)]
 impl<'a> Paths<'a> {
     #[must_use]
     pub fn root(&self) -> &Path {
@@ -68,6 +72,7 @@ impl<'a> Paths<'a> {
     }
 }
 
+#[allow(missing_docs)]
 pub fn paths() -> &'static Paths<'static> {
     PATHS.get_or_init(|| Paths {
         root: Path::new(mqlib::get_path_MQRoot()),
@@ -82,6 +87,7 @@ pub fn paths() -> &'static Paths<'static> {
     })
 }
 
+#[allow(missing_docs)]
 pub fn write_chat_color<'a, S>(line: S, color: ChatColor)
 where
     S: Into<Cow<'a, str>>,
@@ -92,6 +98,7 @@ where
     }
 }
 
+#[allow(missing_docs)]
 pub fn write_chat<'a, S>(line: S)
 where
     S: Into<Cow<'a, str>>,
@@ -99,9 +106,11 @@ where
     write_chat_color(line, ChatColor::Default);
 }
 
+#[allow(missing_docs)]
 pub struct ConsoleWriter(PhantomData<()>);
 
 impl ConsoleWriter {
+    #[allow(missing_docs)]
     #[allow(clippy::new_without_default)]
     #[must_use]
     pub fn new() -> Self {

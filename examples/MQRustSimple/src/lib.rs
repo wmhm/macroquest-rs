@@ -1,4 +1,5 @@
 #![allow(non_snake_case)]
+#![allow(unused_variables)]
 #![warn(clippy::cargo)]
 #![warn(clippy::correctness)]
 #![warn(clippy::suspicious)]
@@ -8,98 +9,54 @@
 #![warn(clippy::pedantic)]
 
 use macroquest::eq;
-use macroquest::log::{debug, trace};
-
-const VERSION: &str = "1.0";
-
-#[macroquest::plugin(logging(file))]
-#[derive(Default)]
+use macroquest::plugin::Hooks;
+#[macroquest::plugin::create]
+#[derive(Debug, Default)]
 struct MQRustSimple {}
 
-impl macroquest::Plugin for MQRustSimple {
-    fn initialize(&mut self) {
-        debug!(version = VERSION, "Initializing");
-    }
+#[macroquest::plugin::hooks]
+impl Hooks for MQRustSimple {
+    fn initialize(&self) {}
 
-    fn shutdown(&mut self) {
-        debug!("Shutting down");
-    }
+    fn shutdown(&self) {}
 
-    fn on_clean_ui(&mut self) {
-        trace!("UI cleaned");
-    }
+    fn clean_ui(&self) {}
 
-    fn on_reload_ui(&mut self) {
-        trace!("UI reloaded");
-    }
+    fn reload_ui(&self) {}
 
-    fn on_draw_hud(&mut self) {
-        trace!("HUD drawn");
-    }
+    fn draw_hud(&self) {}
 
-    fn on_set_game_state(&mut self, state: eq::GameState) {
-        trace!(?state, "Game state updated");
-    }
+    fn pulse(&self) {}
 
-    fn on_pulse(&mut self) {
-        trace!("Pulsed");
-    }
+    fn begin_zone(&self) {}
 
-    fn on_write_chat_color(&mut self, line: &str, color: eq::ChatColor) {
-        trace!(?color, %line, "WriteChatColor");
-    }
+    fn end_zone(&self) {}
 
-    fn on_incoming_chat(&mut self, line: &str, color: eq::ChatColor) -> bool {
-        trace!(?color, %line, "Chat");
+    fn zoned(&self) {}
 
+    fn update_imgui(&self) {}
+
+    fn game_state(&self, state: eq::GameState) {}
+
+    fn write_chat(&self, line: &str, color: eq::ChatColor) {}
+
+    fn incoming_chat(&self, line: &str, color: eq::ChatColor) -> bool {
         false
     }
 
-    fn on_add_spawn(&mut self, spawn: &eq::Spawn) {
-        trace!(?spawn, "Spawned");
-    }
+    fn add_spawn(&self, spawn: &eq::Spawn) {}
 
-    fn on_remove_spawn(&mut self, spawn: &eq::Spawn) {
-        trace!(?spawn, "Despawned");
-    }
+    fn remove_spawn(&self, spawn: &eq::Spawn) {}
 
-    fn on_add_ground_item(&mut self, item: &eq::GroundItem) {
-        trace!(?item, "Ground item spawned");
-    }
+    fn add_ground_item(&self, item: &eq::GroundItem) {}
 
-    fn on_remove_ground_item(&mut self, item: &eq::GroundItem) {
-        trace!(?item, "Ground item despawned");
-    }
+    fn remove_ground_item(&self, item: &eq::GroundItem) {}
 
-    fn on_begin_zone(&mut self) {
-        trace!("Zoning started");
-    }
+    fn macro_start(&self, name: &str) {}
 
-    fn on_end_zone(&mut self) {
-        trace!("Zoning finished");
-    }
+    fn macro_stop(&self, name: &str) {}
 
-    fn on_zoned(&mut self) {
-        trace!("Zoned");
-    }
+    fn plugin_load(&self, name: &str) {}
 
-    fn on_update_imgui(&mut self) {
-        trace!("Rendering the IgGui overlay");
-    }
-
-    fn on_macro_start(&mut self, name: &str) {
-        trace!(%name, "Macro started");
-    }
-
-    fn on_macro_stop(&mut self, name: &str) {
-        trace!(%name, "Macro stopped");
-    }
-
-    fn on_plugin_load(&mut self, name: &str) {
-        trace!(%name, "Plugin loaded");
-    }
-
-    fn on_plugin_unload(&mut self, name: &str) {
-        trace!(%name, "Plugin unloaded");
-    }
+    fn plugin_unload(&self, name: &str) {}
 }

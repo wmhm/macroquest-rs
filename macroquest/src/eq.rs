@@ -1,10 +1,14 @@
+//!
+
 use std::fmt;
 
 use num_enum::{FromPrimitive, IntoPrimitive};
+use ref_cast::RefCast;
 
 use crate::ffi;
 
-#[derive(Debug, Eq, PartialEq, FromPrimitive, IntoPrimitive)]
+#[allow(missing_docs)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq, FromPrimitive, IntoPrimitive)]
 #[repr(i32)]
 pub enum GameState {
     PreCharacterSelect = -1,
@@ -19,7 +23,8 @@ pub enum GameState {
     Unknown(i32),
 }
 
-#[derive(Debug, Eq, PartialEq, FromPrimitive, IntoPrimitive)]
+#[allow(missing_docs)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq, FromPrimitive, IntoPrimitive)]
 #[repr(i32)]
 pub enum ChatColor {
     Say = chat_color!(1),
@@ -170,25 +175,45 @@ pub enum ChatColor {
     Unknown(i32),
 }
 
-pub struct Spawn<'a>(pub(crate) &'a ffi::eqlib::PlayerClient);
+#[allow(missing_docs)]
+#[derive(RefCast)]
+#[repr(transparent)]
+pub struct Spawn(ffi::eqlib::PlayerClient);
 
-impl<'a> Spawn<'a> {
+#[allow(missing_docs)]
+impl Spawn {
     getter!(name -> &str);
 }
 
-impl<'a> fmt::Debug for Spawn<'a> {
+impl AsRef<Spawn> for ffi::eqlib::PlayerClient {
+    fn as_ref(&self) -> &Spawn {
+        Spawn::ref_cast(self)
+    }
+}
+
+impl fmt::Debug for Spawn {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("Spawn").field("name", &self.name()).finish()
     }
 }
 
-pub struct GroundItem<'a>(pub(crate) &'a ffi::eqlib::EQGroundItem);
+#[allow(missing_docs)]
+#[derive(RefCast)]
+#[repr(transparent)]
+pub struct GroundItem(ffi::eqlib::EQGroundItem);
 
-impl<'a> GroundItem<'a> {
+#[allow(missing_docs)]
+impl GroundItem {
     getter!(name -> &str);
 }
 
-impl<'a> fmt::Debug for GroundItem<'a> {
+impl AsRef<GroundItem> for ffi::eqlib::EQGroundItem {
+    fn as_ref(&self) -> &GroundItem {
+        GroundItem::ref_cast(self)
+    }
+}
+
+impl fmt::Debug for GroundItem {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("GroundItem")
             .field("name", &self.name())
