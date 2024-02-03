@@ -133,7 +133,7 @@ impl ToTokens for Hooks {
                         plugin_hook_name,
                         &format_ident!("{}", kind.to_string()),
                         tokens,
-                    )
+                    );
                 }
                 kind @ (Kind::OnAddGroundItem | Kind::OnRemoveGroundItem) => {
                     Hooks::to_tokens_grounditem_hook(
