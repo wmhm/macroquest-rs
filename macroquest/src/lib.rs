@@ -10,8 +10,6 @@
 #![warn(clippy::pedantic)]
 #![cfg(target_os = "windows")]
 
-pub use macroquest_macros::plugin;
-
 #[cfg(not(docsrs))]
 #[doc(hidden)]
 pub use macroquest_sys as ffi;
@@ -73,9 +71,6 @@ pub mod eq;
 pub mod log;
 pub mod mq;
 pub mod plugin;
-
-#[doc(hidden)]
-pub mod windows;
 
 mod macros {
     #[allow(missing_docs)]

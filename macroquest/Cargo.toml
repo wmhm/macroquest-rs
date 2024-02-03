@@ -11,7 +11,6 @@ keywords.workspace = true
 
 
 [dependencies]
-macroquest-macros = { workspace = true }
 macroquest-sys = { workspace = true, optional = true }
 macroquest-proc-macros = { workspace = true }
 

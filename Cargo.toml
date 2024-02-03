@@ -5,7 +5,6 @@ members = [
     "macroquest-sys",
     "macroquest-proc-macros",
     "macroquest-build-config",
-    "macroquest-macros",
     "examples/MQRustLowLevel",
     "examples/MQRustSimple",
 ]
@@ -23,4 +22,3 @@ macroquest = { version = "0.1", path = "./macroquest" }
 macroquest-sys = { version = "0.1", path = "./macroquest-sys" }
 macroquest-proc-macros = { version = "0.1", path = "./macroquest-proc-macros" }
 macroquest-build-config = { version = "0.1", path = "./macroquest-build-config" }
-macroquest-macros = { version = "0.1", path = "./macroquest-macros" }
