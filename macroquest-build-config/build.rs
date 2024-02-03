@@ -1,8 +1,7 @@
-use std::env;
 use std::ffi::CStr;
-use std::fs;
 use std::os::raw::c_char;
 use std::path::{Path, PathBuf};
+use std::{env, fs};
 
 use serde::Serialize;
 
