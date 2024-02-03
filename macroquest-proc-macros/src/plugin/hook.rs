@@ -121,7 +121,7 @@ impl Hook {
 
         quote! {
             #[no_mangle]
-            pub extern "C" fn #mq_hook_name(c_state: i32) {
+            pub extern "C" fn #mq_hook_name(c_state: ::std::ffi::c_int) {
                 let result = ::std::panic::catch_unwind(|| {
                     #hook_fn_name(::macroquest::eq::GameState::from(c_state))
                 });
@@ -146,8 +146,8 @@ impl Hook {
             #[no_mangle]
             pub unsafe extern "C" fn #mq_hook_name(
                 ptr: *const ::std::os::raw::c_char,
-                color: i32,
-                _filter: i32,
+                color: ::std::ffi::c_int,
+                _filter: ::std::ffi::c_int,
             ) {
                 let result = ::std::panic::catch_unwind(|| {
                     let c_str =::std::ffi::CStr::from_ptr(ptr);
@@ -175,7 +175,7 @@ impl Hook {
             #[no_mangle]
             pub unsafe extern "C" fn #mq_hook_name(
                 ptr: *const ::std::os::raw::c_char,
-                color: u32,
+                color: ::std::ffi::c_ulong,
             ) -> bool {
                 let result = ::std::panic::catch_unwind(|| {
                     let c_str = ::std::ffi::CStr::from_ptr(ptr);
