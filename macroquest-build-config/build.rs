@@ -1,8 +1,7 @@
-use std::env;
 use std::ffi::CStr;
-use std::fs;
 use std::os::raw::c_char;
 use std::path::{Path, PathBuf};
+use std::{env, fs};
 
 use serde::Serialize;
 
@@ -10,9 +9,9 @@ use serde::Serialize;
 #[derive(Debug, Serialize)]
 struct BuildConfig {
     eq_version: String,
-    profile: String,
-    root_dir: PathBuf,
-    bin_dir: PathBuf,
+    profile:    String,
+    root_dir:   PathBuf,
+    bin_dir:    PathBuf,
 }
 
 fn eq_version(dir: &Path) -> Result<String, Box<dyn std::error::Error>> {
@@ -25,7 +24,8 @@ fn eq_version(dir: &Path) -> Result<String, Box<dyn std::error::Error>> {
     Ok(unsafe {
         let lib = libloading::Library::new(dir.join("release/MQ2Main.dll"))?;
 
-        let version_ptr: libloading::Symbol<*const c_char> = lib.get(b"gszVersion\0")?;
+        let version_ptr: libloading::Symbol<*const c_char> =
+            lib.get(b"gszVersion\0")?;
         let version = CStr::from_ptr(*version_ptr).to_str()?;
 
         let time_ptr: libloading::Symbol<*const c_char> = lib.get(b"gszTime\0")?;
@@ -49,22 +49,25 @@ fn main() {
         // If we're building on docs.rs then we synthesize a build configuration
         BuildConfig {
             eq_version: String::from("docs build"),
-            root_dir: PathBuf::from("docs build"),
-            profile: String::from("docs build"),
-            bin_dir: PathBuf::from("docs build"),
+            root_dir:   PathBuf::from("docs build"),
+            profile:    String::from("docs build"),
+            bin_dir:    PathBuf::from("docs build"),
         }
-    } else if target_os != "windows" {
+    }
+    else if target_os != "windows" {
         // If we're building for a non windows platform, then we synthesize a
         // build configuration
         BuildConfig {
             eq_version: String::from("non windows build"),
-            root_dir: PathBuf::from("non windows build"),
-            profile: String::from("non windows build"),
-            bin_dir: PathBuf::from("non windows build"),
+            root_dir:   PathBuf::from("non windows build"),
+            profile:    String::from("non windows build"),
+            bin_dir:    PathBuf::from("non windows build"),
         }
-    } else {
+    }
+    else {
         // Compute our Build Configuration
-        let mq_profile = env::var("MACROQUEST_BUILD_PROFILE").unwrap_or_else(|_| "release".into());
+        let mq_profile =
+            env::var("MACROQUEST_BUILD_PROFILE").unwrap_or_else(|_| "release".into());
         let mq_root_dir = PathBuf::from(
             env::var_os("MACROQUEST_DIR")
                 .expect("Must set MACROQUEST_DIR to the root of a MacroQuest checkout"),

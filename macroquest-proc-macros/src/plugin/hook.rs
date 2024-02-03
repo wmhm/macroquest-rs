@@ -41,7 +41,8 @@ impl Parse for HookOpts {
     fn parse(input: ParseStream) -> syn::Result<Self> {
         // We currently only support a single Hook, which has to be an ident
         let hook_n: Ident = input.parse()?;
-        let Ok(kind) = Kind::from_str(hook_n.to_string().as_str()) else {
+        let Ok(kind) = Kind::from_str(hook_n.to_string().as_str())
+        else {
             abort!(hook_n, "The hook must be a supported MacroQuest hook");
         };
 
@@ -262,7 +263,10 @@ impl ToTokens for Hook {
             | Kind::OnEndZone
             | Kind::OnZoned
             | Kind::OnUpdateImGui => self.to_tokens_simple_hook(tokens),
-            Kind::OnMacroStart | Kind::OnMacroStop | Kind::OnLoadPlugin | Kind::OnUnloadPlugin => {
+            Kind::OnMacroStart
+            | Kind::OnMacroStop
+            | Kind::OnLoadPlugin
+            | Kind::OnUnloadPlugin => {
                 self.to_tokens_str_hook(tokens);
             }
             Kind::SetGameState => self.to_tokens_gamestate_hook(tokens),

@@ -80,7 +80,6 @@ pub fn plugin_preamble(item: TokenStream) -> TokenStream {
 ///         Reason::Unload => trace!("module unload"),
 ///     }
 /// }
-///
 /// ```
 ///
 /// A slightly more complex ``main`` function that could return
@@ -105,7 +104,6 @@ pub fn plugin_preamble(item: TokenStream) -> TokenStream {
 ///     true
 /// }
 /// ```
-///
 #[doc(alias = "PluginMain")]
 #[doc(alias = "DllMain")]
 #[proc_macro_attribute]
@@ -237,7 +235,9 @@ pub fn plugin_hook(attr: TokenStream, item: TokenStream) -> TokenStream {
 ///
 /// impl New for MyPlugin {
 ///     fn new() -> Self {
-///         MyPlugin { data: vec![String::from("initial data")] }
+///         MyPlugin {
+///             data: vec![String::from("initial data")],
+///         }
 ///     }
 /// }
 ///
@@ -258,8 +258,8 @@ pub fn plugin_create(attr: TokenStream, item: TokenStream) -> TokenStream {
 /// Defines the plugin hooks for an `impl Hooks` block.
 ///
 /// Whenever implementing a `macroquest::plugin::Hooks` trait, decorating it
-/// with the [`hooks`](`macro@plugin_hooks`) macro will cause all of the implemented
-/// methods to emit the macroquest hook functions.
+/// with the [`hooks`](`macro@plugin_hooks`) macro will cause all of the
+/// implemented methods to emit the macroquest hook functions.
 ///
 /// # Examples
 ///
