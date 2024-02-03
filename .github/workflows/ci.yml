@@ -158,5 +158,4 @@ jobs:
         uses: dtolnay/install@cargo-docs-rs
       - run: cargo docs-rs -p macroquest-build-config
       - run: cargo docs-rs -p macroquest-proc-macros
-      - run: cargo docs-rs -p macroquest-macros
       - run: cargo docs-rs -p macroquest
