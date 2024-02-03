@@ -40,7 +40,7 @@ impl ToTokens for Plugin {
 
         let main = PluginMain::new(
             syn::parse2(quote! {
-                fn #main_fn_name(reason: ::macroquest::plugin::Reason) -> bool {
+                fn #main_fn_name(reason: ::macroquest::plugin::Reason) -> ::std::primitive::bool {
                     use ::macroquest::plugin::{Reason, New};
                     use ::macroquest::log::error;
 

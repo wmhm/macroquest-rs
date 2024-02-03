@@ -29,7 +29,11 @@ impl ToTokens for PluginMain {
             #main_fn
 
             #[no_mangle]
-            extern "system" fn DllMain(_: *mut (), c_reason: u32, _: *mut ()) -> bool {
+            extern "system" fn DllMain(
+                _: *mut (),
+                c_reason: ::std::primitive::u32,
+                _: *mut ()
+            ) -> ::std::primitive::bool {
                 use ::macroquest::log::error;
 
                 let result = ::std::panic::catch_unwind(|| {
@@ -38,8 +42,8 @@ impl ToTokens for PluginMain {
                     use ::macroquest::plugin::{Reason, MainResult};
 
                     let rvalue = match Reason::try_from(c_reason) {
-                        Ok(reason) => Into::<MainResult>::into(#main_fn_name(reason)),
-                        Err(_) => {
+                        ::std::result::Result::Ok(reason) => Into::<MainResult>::into(#main_fn_name(reason)),
+                        ::std::result::Result::Err(_) => {
                             error!(reason = c_reason, "unknown reason in DllMain");
 
                             MainResult::Bool(false)
@@ -50,8 +54,8 @@ impl ToTokens for PluginMain {
                 });
 
                 match result {
-                    Ok(r) => r,
-                    Err(error) => {
+                    ::std::result::Result::Ok(r) => r,
+                    ::std::result::Result::Err(error) => {
                         error!(?error, hook = "PluginMain", "caught an unwind");
                         false
                     }
