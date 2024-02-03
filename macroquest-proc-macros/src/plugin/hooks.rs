@@ -159,8 +159,8 @@ impl Hooks {
             #[::macroquest::plugin::hook(#hook_name)]
             fn #outer_name() {
                 match PLUGIN.get() {
-                    Some(plugin) => plugin.#name(),
-                    None => ::macroquest::log::error!("plugin never set"),
+                    ::std::option::Option::Some(plugin) => plugin.#name(),
+                    ::std::option::Option::None => ::macroquest::log::error!("plugin never set"),
                 }
             }
         }
@@ -178,8 +178,8 @@ impl Hooks {
             #[::macroquest::plugin::hook(#hook_name)]
             fn #outer_name(state: ::macroquest::eq::GameState) {
                 match PLUGIN.get() {
-                    Some(plugin) => plugin.#name(state),
-                    None => ::macroquest::log::error!("plugin never set"),
+                    ::std::option::Option::Some(plugin) => plugin.#name(state),
+                    ::std::option::Option::None => ::macroquest::log::error!("plugin never set"),
                 }
             }
         }
@@ -195,10 +195,10 @@ impl Hooks {
         let hook_name = format_ident!("{}", hook.to_string());
         quote! {
             #[::macroquest::plugin::hook(#hook_name)]
-            fn #outer_name(line: &str, color: ::macroquest::eq::ChatColor) {
+            fn #outer_name(line: &::std::primitive::str, color: ::macroquest::eq::ChatColor) {
                 match PLUGIN.get() {
-                    Some(plugin) => plugin.#name(line, color),
-                    None => ::macroquest::log::error!("plugin never set"),
+                    ::std::option::Option::Some(plugin) => plugin.#name(line, color),
+                    ::std::option::Option::None => ::macroquest::log::error!("plugin never set"),
                 }
             }
         }
@@ -214,10 +214,10 @@ impl Hooks {
         let hook_name = format_ident!("{}", hook.to_string());
         quote! {
             #[::macroquest::plugin::hook(#hook_name)]
-            fn #outer_name(line: &str, color: ::macroquest::eq::ChatColor) -> bool {
+            fn #outer_name(line: &::std::primitive::str, color: ::macroquest::eq::ChatColor) -> ::std::primitive::bool {
                 match PLUGIN.get() {
-                    Some(plugin) => plugin.#name(line, color),
-                    None => {
+                    ::std::option::Option::Some(plugin) => plugin.#name(line, color),
+                    ::std::option::Option::None => {
                         ::macroquest::log::error!("plugin never set");
                         false
                     }
@@ -236,10 +236,10 @@ impl Hooks {
         let hook_name = format_ident!("{}", hook.to_string());
         quote! {
             #[::macroquest::plugin::hook(#hook_name)]
-            fn #outer_name(value: &str) {
+            fn #outer_name(value: &::std::primitive::str) {
                 match PLUGIN.get() {
-                    Some(plugin) => plugin.#name(value),
-                    None => ::macroquest::log::error!("plugin never set"),
+                    ::std::option::Option::Some(plugin) => plugin.#name(value),
+                    ::std::option::Option::None => ::macroquest::log::error!("plugin never set"),
                 }
             }
         }
@@ -257,8 +257,8 @@ impl Hooks {
             #[::macroquest::plugin::hook(#hook_name)]
             fn #outer_name(spawn: &::macroquest::eq::Spawn) {
                 match PLUGIN.get() {
-                    Some(plugin) => plugin.#name(spawn),
-                    None => ::macroquest::log::error!("plugin never set"),
+                    ::std::option::Option::Some(plugin) => plugin.#name(spawn),
+                    ::std::option::Option::None => ::macroquest::log::error!("plugin never set"),
                 }
             }
         }
@@ -276,8 +276,8 @@ impl Hooks {
             #[::macroquest::plugin::hook(#hook_name)]
             fn #outer_name(item: &::macroquest::eq::GroundItem) {
                 match PLUGIN.get() {
-                    Some(plugin) => plugin.#name(item),
-                    None => ::macroquest::log::error!("plugin never set"),
+                    ::std::option::Option::Some(plugin) => plugin.#name(item),
+                    ::std::option::Option::None => ::macroquest::log::error!("plugin never set"),
                 }
             }
         }

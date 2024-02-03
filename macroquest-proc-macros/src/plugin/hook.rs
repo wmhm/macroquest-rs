@@ -79,8 +79,8 @@ impl Hook {
                 });
 
                 match result {
-                    Ok(r) => r,
-                    Err(error) => {
+                    ::std::result::Result::Ok(r) => r,
+                    ::std::result::Result::Err(error) => {
                         ::macroquest::log::error!(?error, hook = #mq_hook_name_s, "caught an unwind");
                     }
                 }
@@ -104,8 +104,8 @@ impl Hook {
                 });
 
                 match result {
-                    Ok(r) => r,
-                    Err(error) => {
+                    ::std::result::Result::Ok(r) => r,
+                    ::std::result::Result::Err(error) => {
                         ::macroquest::log::error!(?error, hook = #mq_hook_name_s, "caught an unwind");
                     }
                 }
@@ -121,14 +121,14 @@ impl Hook {
 
         quote! {
             #[no_mangle]
-            pub extern "C" fn #mq_hook_name(c_state: i32) {
+            pub extern "C" fn #mq_hook_name(c_state: ::std::ffi::c_int) {
                 let result = ::std::panic::catch_unwind(|| {
                     #hook_fn_name(::macroquest::eq::GameState::from(c_state))
                 });
 
                 match result {
-                    Ok(r) => r,
-                    Err(error) => {
+                    ::std::result::Result::Ok(r) => r,
+                    ::std::result::Result::Err(error) => {
                         ::macroquest::log::error!(?error, hook = #mq_hook_name_s, "caught an unwind");
                     }
                 }
@@ -146,8 +146,8 @@ impl Hook {
             #[no_mangle]
             pub unsafe extern "C" fn #mq_hook_name(
                 ptr: *const ::std::os::raw::c_char,
-                color: i32,
-                _filter: i32,
+                color: ::std::ffi::c_int,
+                _filter: ::std::ffi::c_int,
             ) {
                 let result = ::std::panic::catch_unwind(|| {
                     let c_str =::std::ffi::CStr::from_ptr(ptr);
@@ -156,8 +156,8 @@ impl Hook {
                 });
 
                 match result {
-                    Ok(r) => r,
-                    Err(error) => {
+                    ::std::result::Result::Ok(r) => r,
+                    ::std::result::Result::Err(error) => {
                         ::macroquest::log::error!(?error, hook = #mq_hook_name_s, "caught an unwind");
                     }
                 }
@@ -175,17 +175,24 @@ impl Hook {
             #[no_mangle]
             pub unsafe extern "C" fn #mq_hook_name(
                 ptr: *const ::std::os::raw::c_char,
-                color: u32,
-            ) -> bool {
+                color: ::std::ffi::c_ulong,
+            ) -> ::std::primitive::bool {
                 let result = ::std::panic::catch_unwind(|| {
                     let c_str = ::std::ffi::CStr::from_ptr(ptr);
                     let r_str = c_str.to_string_lossy();
-                    #hook_fn_name(r_str.as_ref(), ::macroquest::eq::ChatColor::from(color as i32))
+
+                    let ::std::result::Result::Ok(color) = ::std::primitive::i32::try_from(color)
+                    else {
+                        ::macroquest::log::error!("color parameter couldn't convert to i32 from u32");
+                        return false;
+                    };
+
+                    #hook_fn_name(r_str.as_ref(), ::macroquest::eq::ChatColor::from(color))
                 });
 
                 match result {
-                    Ok(r) => r,
-                    Err(error) => {
+                    ::std::result::Result::Ok(r) => r,
+                    ::std::result::Result::Err(error) => {
                         ::macroquest::log::error!(?error, hook = #mq_hook_name_s, "caught an unwind");
                         false
                     }
@@ -211,8 +218,8 @@ impl Hook {
                 });
 
                 match result {
-                    Ok(r) => r,
-                    Err(error) => {
+                    ::std::result::Result::Ok(r) => r,
+                    ::std::result::Result::Err(error) => {
                         ::macroquest::log::error!(?error, hook = #mq_hook_name_s, "caught an unwind");
                     }
                 }
@@ -237,8 +244,8 @@ impl Hook {
                 });
 
                 match result {
-                    Ok(r) => r,
-                    Err(error) => {
+                    ::std::result::Result::Ok(r) => r,
+                    ::std::result::Result::Err(error) => {
                         ::macroquest::log::error!(?error, hook = #mq_hook_name_s, "caught an unwind");
                     }
                 }
