@@ -38,9 +38,9 @@ impl Hooks for MQRustSimple {
 
     fn game_state(&self, state: eq::GameState) {}
 
-    fn write_chat(&self, line: &str, color: eq::ChatColor) {}
+    fn write_chat(&self, line: &str, channel: eq::Channel) {}
 
-    fn incoming_chat(&self, line: &str, color: eq::ChatColor) -> bool {
+    fn incoming_chat(&self, line: &str, channel: eq::Channel) -> bool {
         false
     }
 

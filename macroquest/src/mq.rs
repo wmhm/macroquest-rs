@@ -6,7 +6,7 @@ use std::marker::PhantomData;
 use std::path::Path;
 use std::sync::OnceLock;
 
-use crate::eq::ChatColor;
+use crate::eq::Channel;
 use crate::ffi::mq as mqlib;
 
 static PATHS: OnceLock<Paths> = OnceLock::new();
@@ -88,13 +88,13 @@ pub fn paths() -> &'static Paths<'static> {
 }
 
 #[allow(missing_docs)]
-pub fn write_chat_color<'a, S>(line: S, color: ChatColor)
+pub fn write_chat_channel<'a, S>(line: S, channel: Channel)
 where
     S: Into<Cow<'a, str>>,
 {
     match line.into() {
-        Cow::Borrowed(s) => mqlib::write_chat_color(s, color.into()),
-        Cow::Owned(s) => mqlib::write_chat_color(s.as_str(), color.into()),
+        Cow::Borrowed(s) => mqlib::write_chat_color(s, channel.into()),
+        Cow::Owned(s) => mqlib::write_chat_color(s.as_str(), channel.into()),
     }
 }
 
@@ -103,7 +103,7 @@ pub fn write_chat<'a, S>(line: S)
 where
     S: Into<Cow<'a, str>>,
 {
-    write_chat_color(line, ChatColor::Default);
+    write_chat_channel(line, Channel::default());
 }
 
 #[allow(missing_docs)]

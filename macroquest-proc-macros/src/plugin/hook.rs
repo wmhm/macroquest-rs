@@ -152,7 +152,7 @@ impl Hook {
                 let result = ::std::panic::catch_unwind(|| {
                     let c_str =::std::ffi::CStr::from_ptr(ptr);
                     let r_str = c_str.to_string_lossy();
-                    #hook_fn_name(r_str.as_ref(), ::macroquest::eq::ChatColor::from(color))
+                    #hook_fn_name(r_str.as_ref(), ::macroquest::eq::Channel::from(color))
                 });
 
                 match result {
@@ -187,7 +187,7 @@ impl Hook {
                         return false;
                     };
 
-                    #hook_fn_name(r_str.as_ref(), ::macroquest::eq::ChatColor::from(color))
+                    #hook_fn_name(r_str.as_ref(), ::macroquest::eq::Channel::from(color))
                 });
 
                 match result {

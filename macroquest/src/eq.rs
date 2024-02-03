@@ -26,8 +26,8 @@ pub enum GameState {
 #[allow(missing_docs)]
 #[derive(Copy, Clone, Debug, Eq, PartialEq, FromPrimitive, IntoPrimitive)]
 #[repr(i32)]
-pub enum ChatColor {
-    // All ChatColor members start at 256, but are logically starting from 1
+pub enum Channel {
+    ///
     Say                = 255 + 1,
     Tell               = 255 + 2,
     Group              = 255 + 3,
@@ -173,6 +173,12 @@ pub enum ChatColor {
 
     #[num_enum(catch_all)]
     Unknown(i32),
+}
+
+impl Default for Channel {
+    fn default() -> Self {
+        Channel::Default
+    }
 }
 
 #[allow(missing_docs)]

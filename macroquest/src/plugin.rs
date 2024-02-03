@@ -11,7 +11,7 @@
 //!
 //! ```
 //! # use macroquest::log::trace;
-//! # use macroquest::eq::ChatColor;
+//! # use macroquest::eq::Channel;
 //! # use macroquest::plugin::Hooks;
 //! # use std::sync::RwLock;
 //! #[derive(Debug, Default)]
@@ -22,7 +22,7 @@
 //!
 //! #[macroquest::plugin::hooks]
 //! impl Hooks for MyPlugin {
-//!     fn incoming_chat(&self, line: &str, color: ChatColor) -> bool {
+//!     fn incoming_chat(&self, line: &str, channel: Channel) -> bool {
 //!         let mut l = self.last.write().unwrap();
 //!         *l = Some(line.to_string());
 //!
@@ -37,7 +37,7 @@
 //! # use std::sync::OnceLock;
 //! # use macroquest::log::trace;
 //! # use macroquest::plugin::Reason;
-//! # use macroquest::eq::ChatColor;
+//! # use macroquest::eq::Channel;
 //! static DATA: OnceLock<String> = OnceLock::new();
 //!
 //! macroquest::plugin::preamble!();
@@ -60,8 +60,8 @@
 //! }
 //!
 //! #[macroquest::plugin::hook(OnIncomingChat)]
-//! fn incoming_chat(line: &str, color: ChatColor) -> bool {
-//!     trace!(?line, ?color, "got a new line of chat");
+//! fn incoming_chat(line: &str, channel: Channel) -> bool {
+//!     trace!(?line, ?channel, "got a new line of chat");
 //!
 //!     false
 //! }
@@ -244,18 +244,18 @@ pub trait Hooks {
     /// they'll need to be implemented here as well. Otherwise, see
     /// [`Hooks::incoming_chat()`] where that is already handled.
     ///
-    /// For a list of color values, see the [`crate::eq::ChatColor`] enum.
+    /// For a list of channel values, see the [`crate::eq::Channel`] enum.
     #[doc(alias = "OnWriteChatColor")]
-    fn write_chat(&self, line: &str, color: eq::ChatColor) {}
+    fn write_chat(&self, line: &str, channel: eq::Channel) {}
 
     /// This is called each time a line of chat is shown. It occurs after MQ
     /// filters and chat events have been handled.  If you need to know when
     /// MQ2 has sent chat, consider using [`Hooks::write_chat()`]
     /// instead.
     ///
-    /// For a list of color values, see the [`crate::eq::ChatColor`] enum.
+    /// For a list of channel values, see the [`crate::eq::Channel`] enum.
     #[doc(alias = "OnIncomingChat")]
-    fn incoming_chat(&self, line: &str, color: eq::ChatColor) -> bool {
+    fn incoming_chat(&self, line: &str, channel: eq::Channel) -> bool {
         false
     }
 
