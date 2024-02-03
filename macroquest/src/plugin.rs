@@ -72,7 +72,10 @@ use windows::Win32::System::SystemServices::{DLL_PROCESS_ATTACH, DLL_PROCESS_DET
 
 #[doc(inline)]
 pub use macroquest_proc_macros::{
-    plugin_create as create, plugin_hook as hook, plugin_hooks as hooks, plugin_main as main,
+    plugin_create as create,
+    plugin_hook as hook,
+    plugin_hooks as hooks,
+    plugin_main as main,
     plugin_preamble as preamble,
 };
 
