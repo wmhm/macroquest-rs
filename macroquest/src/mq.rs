@@ -3,7 +3,6 @@
 use std::borrow::Cow;
 use std::io;
 use std::path::Path;
-use std::sync::OnceLock;
 
 use cansi::{Color, Intensity};
 use once_cell::sync::Lazy;
@@ -12,9 +11,22 @@ use parking_lot::Mutex;
 use crate::eq::ChatColor;
 use crate::ffi::mq as mqlib;
 
-static PATHS: OnceLock<Paths> = OnceLock::new();
+static PATHS: Lazy<Paths> = Lazy::new(|| Paths {
+    root:        Path::new(mqlib::get_path_MQRoot()),
+    config:      Path::new(mqlib::get_path_Config()),
+    ini:         Path::new(mqlib::get_path_MQini()),
+    macros:      Path::new(mqlib::get_path_Macros()),
+    logs:        Path::new(mqlib::get_path_Logs()),
+    crash_dumps: Path::new(mqlib::get_path_CrashDumps()),
+    plugins:     Path::new(mqlib::get_path_Plugins()),
+    resources:   Path::new(mqlib::get_path_Resources()),
+    everquest:   Path::new(mqlib::get_path_EverQuest()),
+});
 
-#[allow(missing_docs)]
+/// The standard MacroQuest paths for the locations of various directories.
+///
+/// These paths should be used whenever interacting with the filesystem for a
+/// given type of file, rather than trying to compute these values directly.
 pub struct Paths<'a> {
     root:        &'a Path,
     config:      &'a Path,
@@ -27,67 +39,68 @@ pub struct Paths<'a> {
     everquest:   &'a Path,
 }
 
-#[allow(missing_docs)]
 impl<'a> Paths<'a> {
+    /// The MacroQuest root path (i.e. where MacroQuest itself resides).
     #[must_use]
     pub fn root(&self) -> &Path {
         self.root
     }
 
+    /// The directory for storing all MacroQuest related configuration files.
     #[must_use]
     pub fn config(&self) -> &Path {
         self.config
     }
 
+    /// The path to the `MacroQuest.ini` file.
     #[must_use]
     pub fn ini(&self) -> &Path {
         self.ini
     }
 
+    /// The directory for MacroQuest macros.
     #[must_use]
     pub fn macros(&self) -> &Path {
         self.macros
     }
 
+    /// The directory for writing log files to.
     #[must_use]
     pub fn logs(&self) -> &Path {
         self.logs
     }
 
+    /// The directory for writing crash dumps to.
     #[must_use]
     pub fn crash_dumps(&self) -> &Path {
         self.crash_dumps
     }
 
+    /// The directory for MacroQuest plugins.
     #[must_use]
     pub fn plugins(&self) -> &Path {
         self.plugins
     }
 
+    /// The directory for storing related resources (additional runtime files
+    /// for a plugin, script, macro, or other item that doesn't fit in another
+    /// category).
     #[must_use]
     pub fn resources(&self) -> &Path {
         self.resources
     }
 
+    /// The base directory for the current EverQuest installation.
     #[must_use]
     pub fn everquest(&self) -> &Path {
         self.everquest
     }
 }
 
-#[allow(missing_docs)]
+/// Gets the [`Paths`] for the current MacroQuest process.
+#[must_use]
 pub fn paths() -> &'static Paths<'static> {
-    PATHS.get_or_init(|| Paths {
-        root:        Path::new(mqlib::get_path_MQRoot()),
-        config:      Path::new(mqlib::get_path_Config()),
-        ini:         Path::new(mqlib::get_path_MQini()),
-        macros:      Path::new(mqlib::get_path_Macros()),
-        logs:        Path::new(mqlib::get_path_Logs()),
-        crash_dumps: Path::new(mqlib::get_path_CrashDumps()),
-        plugins:     Path::new(mqlib::get_path_Plugins()),
-        resources:   Path::new(mqlib::get_path_Resources()),
-        everquest:   Path::new(mqlib::get_path_EverQuest()),
-    })
+    &PATHS
 }
 
 /// Write a line of text into the MacroQuest console
