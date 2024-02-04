@@ -14,7 +14,8 @@ keywords.workspace = true
 macroquest-sys = { workspace = true, optional = true }
 macroquest-proc-macros = { workspace = true }
 
-cansi = { version = "2.2.1", optional = true }
+cansi = "2.2.1"
+memchr = "2"
 num_enum = "0.7.2"
 parking_lot = "0.12.1"
 ref-cast = "1.0"
@@ -34,7 +35,6 @@ macroquest-build-config = { workspace = true }
 [features]
 default = ["bindings"]
 bindings = ["dep:macroquest-sys"]
-colors = ["dep:cansi"]
 logger = ["dep:tracing-subscriber", "dep:tracing-appender"]
 
 
