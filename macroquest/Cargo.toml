@@ -32,6 +32,10 @@ windows = { version = "0.*", features = [
 macroquest-build-config = { workspace = true }
 
 
+[dev-dependencies]
+colored = "2"
+
+
 [features]
 default = ["bindings"]
 bindings = ["dep:macroquest-sys"]

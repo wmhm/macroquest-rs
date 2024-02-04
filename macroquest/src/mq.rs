@@ -105,6 +105,11 @@ where
     mqlib::write_chat_color(&colorize_line(line.into()), color.into());
 }
 
+/// Convert the standard 8 ANSI color codes into MacroQuest color codes
+///
+/// While MacroQuest has it's own color codes, the ANSI codes are far more
+/// standard and will have crates already available to make working with them
+/// easy.
 fn colorize_line<'a, S>(line: S) -> Cow<'a, str>
 where
     S: Into<Cow<'a, str>>,
@@ -189,5 +194,73 @@ impl io::Write for ConsoleWriter {
 
     fn flush(&mut self) -> io::Result<()> {
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use colored::Colorize;
+
+    use super::*;
+
+    #[test]
+    fn test_colorize_returns_borrowed_when_no_color() {
+        assert!(matches!(
+            colorize_line("this is a line with no formatting"),
+            Cow::Borrowed(..)
+        ));
+    }
+
+    #[test]
+    fn test_colorize_returns_same_when_no_color() {
+        assert_eq!(
+            colorize_line("this is a line with no formatting"),
+            "this is a line with no formatting"
+        );
+    }
+
+    #[test]
+    fn test_colorize_leaves_mq_colors_alone() {
+        assert_eq!(
+            colorize_line(
+                "\x07b\x07-b\x07g\x07-g\x07m\x07-m\x07o\x07-o\x07p\x07-p\x07r\x07-r\x07t\x07-t\x07u\x07-u\x07w\x07-w\x07y\x07-ysome text\x07x"
+            ),
+            "\x07b\x07-b\x07g\x07-g\x07m\x07-m\x07o\x07-o\x07p\x07-p\x07r\x07-r\x07t\x07-t\x07u\x07-u\x07w\x07-w\x07y\x07-ysome text\x07x"
+        );
+    }
+
+    #[test]
+    fn test_colorize_converts_ansi() {
+        use super::colorize_line as c;
+
+        assert_eq!(c("black".black().to_string()), "\x07bblack\x07x");
+        assert_eq!(c("black".black().dimmed().to_string()), "\x07-bblack\x07x");
+
+        assert_eq!(c("green".green().to_string()), "\x07ggreen\x07x");
+        assert_eq!(c("green".green().dimmed().to_string()), "\x07-ggreen\x07x");
+
+        assert_eq!(c("magenta".magenta().to_string()), "\x07pmagenta\x07x");
+        assert_eq!(
+            c("magenta".magenta().dimmed().to_string()),
+            "\x07-pmagenta\x07x"
+        );
+
+        assert_eq!(c("red".red().to_string()), "\x07rred\x07x");
+        assert_eq!(c("red".red().dimmed().to_string()), "\x07-rred\x07x");
+
+        assert_eq!(c("cyan".cyan().to_string()), "\x07tcyan\x07x");
+        assert_eq!(c("cyan".cyan().dimmed().to_string()), "\x07-tcyan\x07x");
+
+        assert_eq!(c("blue".blue().to_string()), "\x07ublue\x07x");
+        assert_eq!(c("blue".blue().dimmed().to_string()), "\x07-ublue\x07x");
+
+        assert_eq!(c("white".white().to_string()), "\x07wwhite\x07x");
+        assert_eq!(c("white".white().dimmed().to_string()), "\x07-wwhite\x07x");
+
+        assert_eq!(c("yellow".yellow().to_string()), "\x07oyellow\x07x");
+        assert_eq!(
+            c("yellow".yellow().dimmed().to_string()),
+            "\x07-oyellow\x07x"
+        );
     }
 }
