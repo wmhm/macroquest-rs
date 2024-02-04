@@ -2,11 +2,12 @@
 
 use std::borrow::Cow;
 use std::io;
-use std::marker::PhantomData;
 use std::path::Path;
 use std::sync::OnceLock;
 
 use cansi::{Color, Intensity};
+use once_cell::sync::Lazy;
+use parking_lot::Mutex;
 
 use crate::eq::ChatColor;
 use crate::ffi::mq as mqlib;
@@ -182,33 +183,69 @@ where
     }
 }
 
-#[allow(missing_docs)]
-pub struct ConsoleWriter(PhantomData<()>);
+trait ChatWriter {
+    fn write_chat<'a, S>(&self, line: S)
+    where
+        S: Into<Cow<'a, str>>;
+}
 
-impl ConsoleWriter {
-    #[allow(missing_docs)]
-    #[allow(clippy::new_without_default)]
-    #[must_use]
-    pub fn new() -> Self {
-        ConsoleWriter(PhantomData)
+struct MacroQuestChatWriter;
+
+impl ChatWriter for MacroQuestChatWriter {
+    fn write_chat<'a, S>(&self, line: S)
+    where
+        S: Into<Cow<'a, str>>,
+    {
+        write_chat(line);
     }
 }
 
-// TOOD: What if we get a partial line? we probably need to buff until we
-//       have a full line if so.
-impl io::Write for ConsoleWriter {
+struct InternalConsoleWriter<W: ChatWriter> {
+    writer: W,
+    buffer: Vec<u8>,
+}
+
+impl<W: ChatWriter> InternalConsoleWriter<W> {
+    #[must_use]
+    fn new(writer: W) -> Self {
+        InternalConsoleWriter {
+            writer,
+            buffer: Vec::new(),
+        }
+    }
+}
+
+impl<W: ChatWriter> io::Write for InternalConsoleWriter<W> {
     fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
+        // Validate that our incoming buffer is valid utf8, but we don't need to
+        // actually store this data anywhere, because we're only using this to
+        // validate.
+        std::str::from_utf8(buf)
+            .map_err(|e| io::Error::new(io::ErrorKind::InvalidInput, e.to_string()))?;
+
+        // Add our incoming data to the end of our buffer.
+        self.buffer.extend_from_slice(buf);
+
+        // Iterate over newline positions in our buffer, printing out each new
+        // line using `write_chat`.
         let mut written = 0;
+        for pos in memchr::memchr_iter(b'\n', &self.buffer) {
+            let line = &self.buffer[written..pos];
+            written = pos + 1;
 
-        if let Some(raw) = buf.split_inclusive(|c| *c == b'\n').nth(0) {
-            let line = std::str::from_utf8(raw).map_err(|e| {
-                io::Error::new(io::ErrorKind::InvalidInput, e.to_string())
-            })?;
+            // We need to turn our bytes into a &str so we can pass them into
+            // write_chat. It should not be possible for this to _not_ be valid
+            // utf8, as we've only added valid utf8 to our buffer.
+            let line = std::str::from_utf8(line).expect("invalid utf8 in buffer");
 
-            write_chat(line.trim_end_matches('\n'));
-            written += raw.len();
+            // Actually write our line of chat out.
+            self.writer.write_chat(line);
         }
 
+        // Remove our written bytes from our buffer
+        self.buffer.drain(..written);
+
+        // Return how many bytes we've written
         Ok(written)
     }
 
@@ -217,8 +254,54 @@ impl io::Write for ConsoleWriter {
     }
 }
 
+static CONSOLE: Lazy<Mutex<InternalConsoleWriter<MacroQuestChatWriter>>> =
+    Lazy::new(|| Mutex::new(InternalConsoleWriter::new(MacroQuestChatWriter)));
+
+/// A handle to the global console stream of the current MacroQuest process.
+///
+/// Each handle shares a global buffer of data to be written to the standard
+/// output stream.
+///
+/// Created by the [`console`] method.
+///
+/// # Note
+///
+/// The MacroQuest console *only* supports emitting whole lines at a time, and
+/// as such you must write at least whole lines to the console or the console
+/// writer will buffer until it receives a new line character.
+pub struct Console {}
+
+impl io::Write for Console {
+    fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
+        CONSOLE.lock().write(buf)
+    }
+
+    fn flush(&mut self) -> io::Result<()> {
+        CONSOLE.lock().flush()
+    }
+}
+
+/// Constructs a new handle to the console stream of the current MacroQuest
+/// process.
+///
+/// Each handle returned is a reference to a shared, global buffer whose access
+/// is synchronized via a mutex.
+///
+/// # Note
+///
+/// The MacroQuest console *only* supports emitting whole lines at a time, and
+/// as such you must write at least whole lines to the console or the console
+/// writer will buffer until it receives a new line character.
+#[must_use]
+pub fn console() -> Console {
+    Console {}
+}
+
 #[cfg(test)]
 mod tests {
+    use std::cell::RefCell;
+    use std::io::Write;
+
     use colored::Colorize;
 
     use super::*;
@@ -281,6 +364,53 @@ mod tests {
         assert_eq!(
             c("yellow".yellow().dimmed().to_string()),
             "\x07-oyellow\x07x"
+        );
+    }
+
+    struct TestChatWriter {
+        lines: RefCell<Vec<String>>,
+    }
+
+    impl ChatWriter for TestChatWriter {
+        fn write_chat<'a, S>(&self, line: S)
+        where
+            S: Into<Cow<'a, str>>,
+        {
+            let mut lines = self.lines.borrow_mut();
+            lines.push(line.into().to_string());
+        }
+    }
+
+    #[allow(clippy::unused_io_amount)]
+    #[test]
+    fn test_console_writer_writes_line() {
+        let mut console = InternalConsoleWriter {
+            writer: TestChatWriter {
+                lines: RefCell::new(Vec::new()),
+            },
+            buffer: Vec::new(),
+        };
+
+        console
+            .write_all(b"this is one line\nand this is another\n")
+            .unwrap();
+
+        console.write(b"this is a line without a new line").unwrap();
+
+        assert_eq!(
+            *console.writer.lines.borrow(),
+            &["this is one line", "and this is another"]
+        );
+
+        console.write(b"\n").unwrap();
+
+        assert_eq!(
+            *console.writer.lines.borrow(),
+            &[
+                "this is one line",
+                "and this is another",
+                "this is a line without a new line"
+            ]
         );
     }
 }

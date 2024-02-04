@@ -25,7 +25,7 @@ pub mod logger {
     {
         let console_layer = console_filter.map(|filter| {
             tracing_subscriber::fmt::layer()
-                .with_writer(mq::ConsoleWriter::new)
+                .with_writer(mq::console)
                 .event_format(
                     tracing_subscriber::fmt::format()
                         .with_ansi(SHOULD_COLOR)
