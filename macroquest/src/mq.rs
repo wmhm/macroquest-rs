@@ -336,6 +336,8 @@ mod tests {
     fn test_colorize_converts_ansi() {
         use super::colorize_line as c;
 
+        colored::control::set_override(true);
+
         assert_eq!(c("black".black().to_string()), "\x07bblack\x07x");
         assert_eq!(c("black".black().dimmed().to_string()), "\x07-bblack\x07x");
 
@@ -365,6 +367,8 @@ mod tests {
             c("yellow".yellow().dimmed().to_string()),
             "\x07-oyellow\x07x"
         );
+
+        colored::control::unset_override();
     }
 
     struct TestChatWriter {
