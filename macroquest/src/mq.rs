@@ -132,30 +132,17 @@ where
                             // Map the ANSI colors to the MacroQuest color codes.
                             //
                             // MacroQuest supports 10 color codes instead of the
-                            // standard 8, adding Purple and Orange. To support
-                            // these two colors we'll use a similiar color with the
-                            // blink ANSI code set.
+                            // standard 8, adding Purple and Orange, so we'll only
+                            // map the 8 standard ANSI codes.
                             match fg {
                                 Color::Black | Color::BrightBlack => "b",
                                 Color::Green | Color::BrightGreen => "g",
-                                Color::Magenta | Color::BrightMagenta => {
-                                    match m.blink {
-                                        // Purple is blinking Magenta.
-                                        Some(true) => "p",
-                                        // Otherwise, regular Magenta.
-                                        _ => "m",
-                                    }
-                                }
+                                Color::Magenta | Color::BrightMagenta => "p",
                                 Color::Red | Color::BrightRed => "r",
                                 Color::Cyan | Color::BrightCyan => "t",
                                 Color::Blue | Color::BrightBlue => "u",
                                 Color::White | Color::BrightWhite => "w",
-                                Color::Yellow | Color::BrightYellow => match m.blink {
-                                    // Orangle is blinking Yellow.
-                                    Some(true) => "o",
-                                    // Otherwise, regular Yellow.
-                                    _ => "y",
-                                },
+                                Color::Yellow | Color::BrightYellow => "o",
                             },
                             // The actual text wrapped by this ANSI color code.
                             m.text,
