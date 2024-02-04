@@ -8,7 +8,7 @@
 #![warn(clippy::style)]
 #![warn(clippy::pedantic)]
 
-use macroquest::eq::{Channel, GameState, GroundItem, Spawn};
+use macroquest::eq::{ChatColor, GameState, GroundItem, Spawn};
 use macroquest::log::trace;
 use macroquest::plugin::Reason;
 
@@ -50,10 +50,10 @@ fn gamestate(state: GameState) {}
 fn pulse() {}
 
 #[macroquest::plugin::hook(OnWriteChatColor)]
-fn write_chat(line: &str, channel: Channel) {}
+fn write_chat(line: &str, color: ChatColor) {}
 
 #[macroquest::plugin::hook(OnIncomingChat)]
-fn incoming_chat(line: &str, channel: Channel) -> bool {
+fn incoming_chat(line: &str, color: ChatColor) -> bool {
     false
 }
 

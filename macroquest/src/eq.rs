@@ -34,7 +34,7 @@ pub enum GameState {
 /// it gets printed with).
 #[derive(Copy, Clone, Debug, Eq, PartialEq, FromPrimitive, IntoPrimitive)]
 #[repr(i32)]
-pub enum Channel {
+pub enum ChatColor {
     /// Say
     Say                = 255 + 1,
     /// Tell
@@ -326,9 +326,9 @@ pub enum Channel {
 }
 
 #[allow(clippy::derivable_impls)]
-impl Default for Channel {
+impl Default for ChatColor {
     fn default() -> Self {
-        Channel::Default
+        ChatColor::Default
     }
 }
 

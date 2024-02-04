@@ -195,9 +195,9 @@ impl Hooks {
         let hook_name = format_ident!("{}", hook.to_string());
         quote! {
             #[::macroquest::plugin::hook(#hook_name)]
-            fn #outer_name(line: &::std::primitive::str, channel: ::macroquest::eq::Channel) {
+            fn #outer_name(line: &::std::primitive::str, color: ::macroquest::eq::ChatColor) {
                 match PLUGIN.get() {
-                    ::std::option::Option::Some(plugin) => plugin.#name(line, channel),
+                    ::std::option::Option::Some(plugin) => plugin.#name(line, color),
                     ::std::option::Option::None => ::macroquest::log::error!("plugin never set"),
                 }
             }
@@ -214,9 +214,9 @@ impl Hooks {
         let hook_name = format_ident!("{}", hook.to_string());
         quote! {
             #[::macroquest::plugin::hook(#hook_name)]
-            fn #outer_name(line: &::std::primitive::str, channel: ::macroquest::eq::Channel) -> ::std::primitive::bool {
+            fn #outer_name(line: &::std::primitive::str, color: ::macroquest::eq::ChatColor) -> ::std::primitive::bool {
                 match PLUGIN.get() {
-                    ::std::option::Option::Some(plugin) => plugin.#name(line, channel),
+                    ::std::option::Option::Some(plugin) => plugin.#name(line, color),
                     ::std::option::Option::None => {
                         ::macroquest::log::error!("plugin never set");
                         false
