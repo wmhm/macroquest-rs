@@ -89,7 +89,17 @@ pub fn paths() -> &'static Paths<'static> {
     })
 }
 
-#[allow(missing_docs)]
+/// Write a line of text into the MacroQuest console
+///
+/// This text will show up in the MacroQuest console (`ctrl \`), or in MQ2Chat
+/// or MQ2ChatWnd depending on which plugins you have loaded. It supports any of
+/// the MacroQuest colors (see
+/// [Color Codes](https://docs.macroquest.org/reference/commands/echo/?h=#color-codes))
+/// or any of the standard 8 ANSI color codes (as well as the "Faint" intensity
+/// modifier for dimmed or darker text).
+///
+/// This will use the the default [`ChatColor`], if you want to set a specific
+/// [`ChatColor`], see [`write_chat_color`].
 pub fn write_chat<'a, S>(line: S)
 where
     S: Into<Cow<'a, str>>,
@@ -97,7 +107,17 @@ where
     write_chat_color(line, ChatColor::default());
 }
 
-#[allow(missing_docs)]
+/// Write a line of text into the MacroQuest console
+///
+/// This text will show up in the MacroQuest console (`ctrl \`), or in MQ2Chat
+/// or MQ2ChatWnd depending on which plugins you have loaded. It supports any of
+/// the MacroQuest colors (see
+/// [Color Codes](https://docs.macroquest.org/reference/commands/echo/?h=#color-codes))
+/// or any of the standard 8 ANSI color codes (as well as the "Faint" intensity
+/// modifier for dimmed or darker text).
+///
+/// You must specify which [`ChatColor`] the line of text should use, if you
+/// want to just use the default, see [`write_chat`].
 pub fn write_chat_color<'a, S>(line: S, color: ChatColor)
 where
     S: Into<Cow<'a, str>>,

@@ -4,6 +4,8 @@ doc-valid-idents = [
     "MacroQuest2",
     "MQNext",
     "MQ2Main",
+    "MQ2Chat",
+    "MQ2ChatWnd",
     "ImGui",
 ]
 allowed-duplicate-crates = [
