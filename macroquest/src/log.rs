@@ -11,12 +11,6 @@ pub mod logger {
 
     use crate::mq;
 
-    #[cfg(feature = "colors")]
-    const SHOULD_COLOR: bool = true;
-
-    #[cfg(not(feature = "colors"))]
-    const SHOULD_COLOR: bool = false;
-
     pub fn init<F>(
         console_filter: Option<LevelFilter>,
         file_opts: Option<(LevelFilter, F)>,
@@ -25,10 +19,10 @@ pub mod logger {
     {
         let console_layer = console_filter.map(|filter| {
             tracing_subscriber::fmt::layer()
-                .with_writer(mq::ConsoleWriter::new)
+                .with_writer(mq::console)
                 .event_format(
                     tracing_subscriber::fmt::format()
-                        .with_ansi(SHOULD_COLOR)
+                        .with_ansi(true)
                         .without_time(),
                 )
                 .with_filter(filter)
