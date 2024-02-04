@@ -103,7 +103,7 @@ pub fn write_chat<'a, S>(line: S)
 where
     S: Into<Cow<'a, str>>,
 {
-    write_chat_color(line, ChatColor::Default);
+    write_chat_color(line, ChatColor::default());
 }
 
 #[allow(missing_docs)]
