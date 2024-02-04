@@ -231,7 +231,7 @@ pub enum ChatColor {
     AggroWarning       = 255 + 98,
     /// Aggro Labels - Most
     AggroMost          = 255 + 99,
-    /// Dialog [Response] Links
+    /// Dialog \[Response\] Links
     DialogLink         = 255 + 100,
     /// Flurry (Yours)
     YouFlurry          = 255 + 101,
