@@ -23,6 +23,7 @@
 //!
 //! ```
 //! # use macroquest::eq::ChatColor;
+//! # use macroquest::plugin::Hooks;
 //! use macroquest::log::debug;
 //! # #[macroquest::plugin::create]
 //! # #[derive(Debug, Default)]
@@ -44,6 +45,7 @@
 //!
 //! ```
 //! # use macroquest::log::{ConsoleLogger, FileLogger, Logger, LevelFilter};
+//! # use macroquest::plugin::Hooks;
 //! # #[macroquest::plugin::create]
 //! # #[derive(Debug, Default)]
 //! # struct MQRustLogging {}
