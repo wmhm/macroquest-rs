@@ -260,6 +260,7 @@ impl ToTokens for Hook {
         let hook = &self.hook;
 
         quote! {
+            #[allow(clippy::inline_always)]
             #[inline(always)]
             #hook
         }

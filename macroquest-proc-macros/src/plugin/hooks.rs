@@ -76,6 +76,7 @@ impl Fold for Hooks {
     fn fold_impl_item_fn(&mut self, method: ImplItemFn) -> ImplItemFn {
         self.implemented.push(method.clone());
         syn::parse2(quote! {
+            #[allow(clippy::inline_always)]
             #[inline(always)]
             #method
         })
