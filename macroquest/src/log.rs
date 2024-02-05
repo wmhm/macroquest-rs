@@ -51,12 +51,12 @@
 //! # struct MQRustLogging {}
 //! #[macroquest::plugin::hooks]
 //! impl Hooks for MQRustLogging {
-//!     fn initialize() {
+//!     fn initialize(&self) {
 //!         Logger::builder()
 //!             .console(ConsoleLogger::builder().level(LevelFilter::INFO).build())
 //!             .file(
 //!                 FileLogger::builder()
-//!                     .filename(PLUGIN_NAME)
+//!                     .filename("MQRustLogging")
 //!                     .level(LevelFilter::DEBUG)
 //!                     .build(),
 //!             )
