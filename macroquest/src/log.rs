@@ -29,7 +29,7 @@
 //! # #[derive(Debug, Default)]
 //! # struct MQRustLogging {}
 //! #[macroquest::plugin::hooks]
-//! impl Hooks for MQRustSimple {
+//! impl Hooks for MQRustLogging {
 //!     fn incoming_chat(&self, line: &str, color: ChatColor) -> bool {
 //!         // This logs a "debug" message, with a captured parameter named
 //!         // "line" that uses the debug output of the `line` variable.
@@ -50,7 +50,7 @@
 //! # #[derive(Debug, Default)]
 //! # struct MQRustLogging {}
 //! #[macroquest::plugin::hooks]
-//! impl Hooks for MQRustSimple {
+//! impl Hooks for MQRustLogging {
 //!     fn initialize() {
 //!         Logger::builder()
 //!             .console(ConsoleLogger::builder().level(LevelFilter::INFO).build())
