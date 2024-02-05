@@ -26,6 +26,8 @@ impl ToTokens for PluginMain {
         let main_fn_name = main_fn.sig.ident.clone();
 
         quote! {
+            #[allow(clippy::inline_always)]
+            #[inline(always)]
             #main_fn
 
             #[no_mangle]

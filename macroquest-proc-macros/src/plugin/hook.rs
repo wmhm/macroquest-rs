@@ -257,7 +257,14 @@ impl Hook {
 
 impl ToTokens for Hook {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
-        self.hook.to_tokens(tokens);
+        let hook = &self.hook;
+
+        quote! {
+            #[allow(clippy::inline_always)]
+            #[inline(always)]
+            #hook
+        }
+        .to_tokens(tokens);
 
         match self.opts.kind {
             Kind::InitializePlugin

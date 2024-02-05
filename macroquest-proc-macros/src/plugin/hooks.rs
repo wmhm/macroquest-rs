@@ -66,7 +66,7 @@ impl Parse for Hooks {
             implemented: vec![],
         };
 
-        hooks.fold_item_impl(plugin_impl);
+        hooks.body = hooks.fold_item_impl(plugin_impl);
 
         Ok(hooks)
     }
@@ -75,7 +75,12 @@ impl Parse for Hooks {
 impl Fold for Hooks {
     fn fold_impl_item_fn(&mut self, method: ImplItemFn) -> ImplItemFn {
         self.implemented.push(method.clone());
-        method
+        syn::parse2(quote! {
+            #[allow(clippy::inline_always)]
+            #[inline(always)]
+            #method
+        })
+        .unwrap()
     }
 }
 
