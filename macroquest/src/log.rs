@@ -43,6 +43,7 @@
 //! "DEBUG" messages logged to a file with a particular name.
 //!
 //! ```
+//! # use macroquest::log::{ConsoleLogger, FileLogger, Logger, LevelFilter};
 //! # #[macroquest::plugin::create]
 //! # #[derive(Debug, Default)]
 //! # struct MQRustLogging {}
