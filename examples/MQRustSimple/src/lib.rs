@@ -8,15 +8,30 @@
 #![warn(clippy::style)]
 #![warn(clippy::pedantic)]
 
+const PLUGIN_NAME: &str = env!("CARGO_PKG_NAME");
+
 use macroquest::eq;
+use macroquest::log::{ConsoleLogger, FileLogger, LevelFilter, Logger};
 use macroquest::plugin::Hooks;
+
 #[macroquest::plugin::create]
 #[derive(Debug, Default)]
 struct MQRustSimple {}
 
 #[macroquest::plugin::hooks]
 impl Hooks for MQRustSimple {
-    fn initialize(&self) {}
+    fn initialize(&self) {
+        Logger::builder()
+            .console(ConsoleLogger::builder().level(LevelFilter::DEBUG).build())
+            .file(
+                FileLogger::builder()
+                    .filename(PLUGIN_NAME)
+                    .level(LevelFilter::DEBUG)
+                    .build(),
+            )
+            .build()
+            .install();
+    }
 
     fn shutdown(&self) {}
 
