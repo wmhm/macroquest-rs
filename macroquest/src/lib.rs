@@ -8,6 +8,7 @@
 #![warn(clippy::perf)]
 #![warn(clippy::style)]
 #![warn(clippy::pedantic)]
+#![cfg_attr(docsrs, feature(doc_cfg))]
 #![cfg(target_os = "windows")]
 
 #[cfg(not(docsrs))]

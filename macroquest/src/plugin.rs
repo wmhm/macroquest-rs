@@ -154,6 +154,42 @@ impl<T: Default> New for T {
     }
 }
 
+/// Provides the internal plugin protocol that we add ontop of the MacroQuest
+/// protocol/hooks.
+///
+/// This trait is implemented automatically for any type that implements the
+/// [`Hooks`] trait, but it may also be implemented in cases where the built in
+/// behavior for this trait isn't accurate.
+// pub trait Plugin {
+//     /// Called as early on into the process as possible, prior to any other
+//     /// hooks being called. Used for setting up any global state that
+//     /// doesn't depend on the plugin instance existing, such as logging.
+//     fn setup(&self) {
+//         #[cfg(feature = "logger")]
+//         {
+//             use crate::log::{ConsoleLoggerBuilder, FileLoggerBuilder, LoggerBuilder};
+
+//             LoggerBuilder::new()
+//                 .console(
+//                     ConsoleLoggerBuilder::new()
+//                         .level(tracing::level_filters::LevelFilter::DEBUG)
+//                         .build()
+//                         .unwrap(),
+//                 )
+//                 .file(
+//                     FileLoggerBuilder::new()
+//                         .filename("MQRustTest")
+//                         .level(tracing::level_filters::LevelFilter::DEBUG)
+//                         .build()
+//                         .unwrap(),
+//                 )
+//                 .build()
+//                 .unwrap()
+//                 .init();
+//         }
+//     }
+// }
+
 /// The Hooks trait implements the protocol that a MacroQuest plugin must
 /// implement.
 ///
