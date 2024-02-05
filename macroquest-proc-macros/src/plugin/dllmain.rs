@@ -26,6 +26,7 @@ impl ToTokens for PluginMain {
         let main_fn_name = main_fn.sig.ident.clone();
 
         quote! {
+            #[inline(always)]
             #main_fn
 
             #[no_mangle]
