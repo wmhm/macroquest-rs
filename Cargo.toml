@@ -4,7 +4,6 @@ members = [
     "macroquest",
     "macroquest-sys",
     "macroquest-proc-macros",
-    "macroquest-build-config",
     "examples/MQRustLowLevel",
     "examples/MQRustSimple",
 ]
@@ -21,4 +20,3 @@ keywords = ["gamedev", "bindings", "codegen", "macroquest"]
 macroquest = { version = "0.1", path = "./macroquest" }
 macroquest-sys = { version = "0.1", path = "./macroquest-sys" }
 macroquest-proc-macros = { version = "0.1", path = "./macroquest-proc-macros" }
-macroquest-build-config = { version = "0.1", path = "./macroquest-build-config" }

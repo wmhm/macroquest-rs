@@ -14,9 +14,8 @@ cxx = "1"
 
 
 [build-dependencies]
-macroquest-build-config = { workspace = true }
 cxx-build = "1"
-walkdir = "2"
+libloading = "0.8"
 
 
 [package.metadata.docs.rs]
