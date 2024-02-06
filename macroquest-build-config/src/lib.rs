@@ -14,9 +14,9 @@ use serde::Deserialize;
 #[derive(Deserialize, Debug)]
 pub struct BuildConfig {
     eq_version: String,
-    profile:    String,
-    root_dir:   PathBuf,
-    bin_dir:    PathBuf,
+    mq_dir:     PathBuf,
+    mq_profile: String,
+    mq_arch:    String,
 }
 
 impl BuildConfig {
@@ -27,39 +27,14 @@ impl BuildConfig {
         let config: BuildConfig = toml::from_str(config_str).unwrap();
         config
     }
-
-    pub fn emit(&self) {
-        println!(
-            "cargo:rustc-link-search={}",
-            self.bin_dir.join(self.profile.as_str()).display()
-        );
-        println!(
-            "cargo:rustc-link-search={}",
-            self.root_dir
-                .join("build/lib/x64")
-                .join(self.profile.as_str())
-                .display()
-        );
-        println!(
-            "cargo:rustc-link-search={}",
-            self.root_dir
-                .join(r"contrib\vcpkg\installed\x64-windows-static\lib")
-                .display()
-        );
-        println!(
-            "cargo:rustc-link-search={}",
-            self.root_dir
-                .join(r"contrib\vcpkg\installed\x64-windows\lib")
-                .display()
-        );
-
-        println!("cargo:rustc-link-lib=MQ2Main");
-        println!("cargo:rustc-link-lib=eqlib");
-        println!("cargo:rustc-link-lib=pluginapi");
-    }
 }
 
 impl BuildConfig {
+    #[must_use]
+    pub fn eq_version(&self) -> &str {
+        self.eq_version.as_str()
+    }
+
     #[must_use]
     pub fn include_dirs(&self) -> Vec<PathBuf> {
         [
@@ -71,17 +46,30 @@ impl BuildConfig {
             r"contrib\vcpkg\installed\x64-windows\include",
         ]
         .iter()
-        .map(|s| self.root_dir.join(s))
+        .map(|s| self.mq_dir.join(s))
         .collect()
     }
 
     #[must_use]
-    pub fn eqlib_dir(&self) -> PathBuf {
-        self.root_dir.join(r"src\eqlib")
-    }
-
-    #[must_use]
-    pub fn eq_version(&self) -> &str {
-        self.eq_version.as_str()
+    pub fn lib_dirs(&self) -> Vec<PathBuf> {
+        vec![
+            // $MACROQUEST/build/bin/$PROFILE/
+            self.mq_dir.join("build/bin").join(&self.mq_profile),
+            // $MACROQUEST/build/lib/$ARCH/$PROFILE
+            self.mq_dir
+                .join("build/lib")
+                .join(&self.mq_arch)
+                .join(&self.mq_profile),
+            // $MACROQUEST/contrib/vcpkg/installed/$ARCH-windows-static/lib
+            self.mq_dir
+                .join("contrib/vcpkg/installed")
+                .join(format!("{}-windows-static", self.mq_arch))
+                .join("lib"),
+            // $MACROQUEST/contrib/vcpkg/installed/$ARCH-windows/lib
+            self.mq_dir
+                .join("contrib/vcpkg/installed")
+                .join(format!("{}-windows", self.mq_arch))
+                .join("lib"),
+        ]
     }
 }

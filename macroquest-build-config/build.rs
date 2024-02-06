@@ -9,20 +9,20 @@ use serde::Serialize;
 #[derive(Debug, Serialize)]
 struct BuildConfig {
     eq_version: String,
-    profile:    String,
-    root_dir:   PathBuf,
-    bin_dir:    PathBuf,
+    mq_dir:     PathBuf,
+    mq_profile: String,
+    mq_arch:    String,
 }
 
 fn eq_version(dir: &Path) -> Result<String, Box<dyn std::error::Error>> {
     let current_path = env::var_os("PATH").unwrap();
     let mut new_path = current_path.clone();
     new_path.push(";");
-    new_path.push(dir.join("release"));
+    new_path.push(dir);
     env::set_var("PATH", new_path);
 
     Ok(unsafe {
-        let lib = libloading::Library::new(dir.join("release/MQ2Main.dll"))?;
+        let lib = libloading::Library::new(dir.join("MQ2Main.dll"))?;
 
         let version_ptr: libloading::Symbol<*const c_char> =
             lib.get(b"gszVersion\0")?;
@@ -37,10 +37,9 @@ fn eq_version(dir: &Path) -> Result<String, Box<dyn std::error::Error>> {
 
 fn main() {
     // We need to rerun if a number of things change, so mark them all.
-    println!("cargo:rerun-if-env-changed=MACROQUEST_BUILD_PROFILE");
     println!("cargo:rerun-if-env-changed=MACROQUEST_DIR");
-    println!("cargo:rerun-if-env-changed=MACROQUEST_BUILD_BIN_DIR");
-    println!("cargo:rerun-if-env-changed=MACROQUEST_BUILD_LIB_DIR");
+    println!("cargo:rerun-if-env-changed=MACROQUEST_PROFILE");
+    println!("cargo:rerun-if-env-changed=MACROQUEST_ARCH");
     println!("cargo:rerun-if-changed=build.rs");
 
     let target_os = std::env::var("CARGO_CFG_TARGET_OS").unwrap();
@@ -49,9 +48,9 @@ fn main() {
         // If we're building on docs.rs then we synthesize a build configuration
         BuildConfig {
             eq_version: String::from("docs build"),
-            root_dir:   PathBuf::from("docs build"),
-            profile:    String::from("docs build"),
-            bin_dir:    PathBuf::from("docs build"),
+            mq_dir:     PathBuf::from("docs build"),
+            mq_profile: String::from("docs build"),
+            mq_arch:    String::from("docs build"),
         }
     }
     else if target_os != "windows" {
@@ -59,31 +58,31 @@ fn main() {
         // build configuration
         BuildConfig {
             eq_version: String::from("non windows build"),
-            root_dir:   PathBuf::from("non windows build"),
-            profile:    String::from("non windows build"),
-            bin_dir:    PathBuf::from("non windows build"),
+            mq_dir:     PathBuf::from("non windows build"),
+            mq_profile: String::from("non windows build"),
+            mq_arch:    String::from("non windows build"),
         }
     }
     else {
         // Compute our Build Configuration
-        let mq_profile =
-            env::var("MACROQUEST_BUILD_PROFILE").unwrap_or_else(|_| "release".into());
-        let mq_root_dir = PathBuf::from(
+        let mq_dir = PathBuf::from(
             env::var_os("MACROQUEST_DIR")
                 .expect("Must set MACROQUEST_DIR to the root of a MacroQuest checkout"),
         );
-        let mq_bin_dir = env::var_os("MACROQUEST_BUILD_BIN_DIR")
-            .map(PathBuf::from)
-            .unwrap_or_else(|| mq_root_dir.join("build/bin/"));
+        let mq_profile =
+            env::var("MACROQUEST_PROFILE").unwrap_or_else(|_| "release".into());
+        let mq_arch = env::var("MACROQUEST_ARCH").unwrap_or_else(|_| "x64".into());
 
         // Determine what version of EverQuest we're building against
-        let eq_version = eq_version(mq_bin_dir.as_path()).unwrap();
+        let eq_version =
+            eq_version(mq_dir.join("build/bin").join(mq_profile.as_str()).as_path())
+                .unwrap();
 
         BuildConfig {
             eq_version,
-            root_dir: mq_root_dir,
-            profile: mq_profile,
-            bin_dir: mq_bin_dir,
+            mq_dir,
+            mq_profile,
+            mq_arch,
         }
     };
 

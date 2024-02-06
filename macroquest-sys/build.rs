@@ -10,28 +10,24 @@ fn main() {
 
     // We can only be built for windows
     if target_os == "windows" {
-        let mq_config = macroquest_build_config::BuildConfig::load();
+        let config = macroquest_build_config::BuildConfig::load();
 
+        // Emit the directories to search for linkable libraries
+        for libdir in config.lib_dirs() {
+            println!("cargo:rustc-link-search={}", libdir.to_string_lossy());
+        }
+
+        // Emit the libraries we actually need to link against
+        println!("cargo:rustc-link-lib=MQ2Main");
+        println!("cargo:rustc-link-lib=eqlib");
+        println!("cargo:rustc-link-lib=pluginapi");
+
+        // Build our bridge between C++ and Rust
         cxx_build::bridge("src/lib.rs")
             .std("c++17")
-            .includes(mq_config.include_dirs())
+            .includes(config.include_dirs())
             .define("NOMINMAX", None)
             .files(["src/eqlib.cc", "src/mq.cc"])
             .compile("mqrust");
-
-        mq_config.emit();
-
-        // Emit for all of the headers/files in eqlib
-        for entry in walkdir::WalkDir::new(mq_config.eqlib_dir())
-            .into_iter()
-            .filter_map(|e| e.ok())
-        {
-            if entry.file_type().is_file() {
-                let filename = entry.file_name().to_string_lossy();
-                if filename.ends_with(".h") || filename.ends_with(".cc") {
-                    println!("cargo:rerun-if-changed={}", entry.path().display())
-                }
-            }
-        }
     }
 }

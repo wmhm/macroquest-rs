@@ -10,8 +10,6 @@ fn main() {
     if target_os == "windows" {
         let config = macroquest_build_config::BuildConfig::load();
 
-        config.emit();
-
         // Write out the EQVersion string
         let out_dir = env::var_os("OUT_DIR").unwrap();
         let dest_path = Path::new(&out_dir).join("eq_version.rs");
