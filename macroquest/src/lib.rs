@@ -65,6 +65,8 @@ pub mod ffi {
         pub fn write_chat_color(line: &str, color: i32) {
             unimplemented!()
         }
+
+        pub struct MQPlugin;
     }
 }
 

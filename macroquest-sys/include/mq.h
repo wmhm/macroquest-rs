@@ -22,5 +22,12 @@ namespace mqrust
 
         // General Functions
         void write_chat_color(rust::Str line, int color);
+
+        // MQPlugin Functions
+        class MQPlugin : ::mq::MQPlugin
+        {
+        public:
+            rust::Str plugin_name() const;
+        };
     }
 }

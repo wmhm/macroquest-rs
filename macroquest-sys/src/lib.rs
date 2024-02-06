@@ -64,5 +64,14 @@ pub mod mq {
 
         // General Functions
         fn write_chat_color(line: &str, color: i32);
+
+        // MQPlugin
+        pub type MQPlugin;
+
+        #[must_use]
+        fn plugin_name(&self) -> &str;
     }
 }
+
+unsafe impl Send for mq::MQPlugin {}
+unsafe impl Sync for mq::MQPlugin {}

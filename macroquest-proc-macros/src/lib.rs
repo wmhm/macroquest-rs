@@ -42,6 +42,9 @@ pub fn plugin_preamble(item: TokenStream) -> TokenStream {
 
         #[no_mangle]
         pub static EverQuestVersion: ::macroquest::EQVersion = ::macroquest::eq_version();
+
+        #[no_mangle]
+        pub static mut ThisPlugin: Option<&::macroquest::ffi::mq::MQPlugin> = None;
     }
     .into()
 }

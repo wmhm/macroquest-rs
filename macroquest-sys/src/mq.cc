@@ -21,5 +21,8 @@ namespace mqrust
         {
             ::mq::WriteChatColor(static_cast<std::string>(line).c_str(), color);
         }
+
+        // MQPlugin Functions
+        rust::Str MQPlugin::plugin_name() const { return this->name; }
     }
 }
