@@ -8,7 +8,12 @@ on:
     - cron: "30 11 * * *"
 
 env:
+  # Turn all warnings into errors in CI
   RUSTFLAGS: -Dwarnings
+  # CI builds are more akin to from-scratch builds, incremental compilation adds
+  # unnecessary dependency-tracking and IO overhead, reducing caching
+  # effectiveness.
+  CARGO_INCREMENTAL: 0
 
 jobs:
   macroquest:
