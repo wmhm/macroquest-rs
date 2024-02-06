@@ -159,3 +159,14 @@ jobs:
       - run: cargo docs-rs -p macroquest-build-config
       - run: cargo docs-rs -p macroquest-proc-macros
       - run: cargo docs-rs -p macroquest
+
+  deps:
+    name: Dependencies
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+    steps:
+      - name: Checkout macroquest-rs
+        uses: actions/checkout@v4
+      - name: Machete
+        uses: bnjbvr/cargo-machete@main
