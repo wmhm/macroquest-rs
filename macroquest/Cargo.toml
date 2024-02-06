@@ -30,10 +30,6 @@ windows = { version = "0.*", features = [
 ] }
 
 
-[build-dependencies]
-macroquest-build-config = { workspace = true }
-
-
 [dev-dependencies]
 colored = "2"
 

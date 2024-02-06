@@ -16,7 +16,3 @@ crate-type = ["cdylib"]
 
 [dependencies]
 macroquest = { workspace = true, features = ["logger"] }
-
-
-[build-dependencies]
-macroquest-build-config = { workspace = true }
