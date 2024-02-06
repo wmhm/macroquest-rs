@@ -3,15 +3,25 @@ use std::os::raw::c_char;
 use std::path::{Path, PathBuf};
 use std::{env, fs};
 
-use serde::Serialize;
-
 // NOTE: this has to be kept in sync with the BuildConfig located in srcs/lib.rs
-#[derive(Debug, Serialize)]
+#[derive(Debug)]
 struct BuildConfig {
     eq_version: String,
     mq_dir:     PathBuf,
     mq_profile: String,
     mq_arch:    String,
+}
+
+impl BuildConfig {
+    fn serialize(&self) -> String {
+        [
+            self.eq_version.as_str(),
+            self.mq_dir.to_str().expect("invalid path; not valid utf8"),
+            self.mq_profile.as_str(),
+            self.mq_arch.as_str(),
+        ]
+        .join("\n")
+    }
 }
 
 fn eq_version(dir: &Path) -> Result<String, Box<dyn std::error::Error>> {
@@ -89,6 +99,6 @@ fn main() {
     // Actually write out our configuration file so that our crate can read it
     // at compile time.
     let out_dir = env::var_os("OUT_DIR").unwrap();
-    let dest_path = Path::new(&out_dir).join("config.toml");
-    fs::write(dest_path, toml::to_string(&config).unwrap()).unwrap();
+    let dest_path = Path::new(&out_dir).join("config.txt");
+    fs::write(dest_path, config.serialize()).unwrap();
 }

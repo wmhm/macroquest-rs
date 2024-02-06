@@ -8,10 +8,8 @@
 
 use std::path::PathBuf;
 
-use serde::Deserialize;
-
 // NOTE: this has to be kept in sync with the BuildConfig located in build.rs
-#[derive(Deserialize, Debug)]
+#[derive(Debug)]
 pub struct BuildConfig {
     eq_version: String,
     mq_dir:     PathBuf,
@@ -23,9 +21,15 @@ impl BuildConfig {
     #[must_use]
     #[allow(clippy::missing_panics_doc)]
     pub fn load() -> BuildConfig {
-        let config_str = include_str!(concat!(env!("OUT_DIR"), "/config.toml"));
-        let config: BuildConfig = toml::from_str(config_str).unwrap();
-        config
+        let config_str = include_str!(concat!(env!("OUT_DIR"), "/config.txt"));
+        let config_data: Vec<&str> = config_str.split('\n').collect();
+
+        BuildConfig {
+            eq_version: String::from(config_data[0]),
+            mq_dir:     PathBuf::from(config_data[1]),
+            mq_profile: String::from(config_data[2]),
+            mq_arch:    String::from(config_data[3]),
+        }
     }
 }
 
