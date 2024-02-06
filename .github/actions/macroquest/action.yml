@@ -64,6 +64,14 @@ runs:
       shell: pwsh
       working-directory: ./MacroQuest
 
+    - name: Update Path
+      run: echo "${{ github.workspace }}/MacroQuest/build/bin/release" >> $GITHUB_PATH
+      shell: bash
+
+    - name: Set MACROQUEST_DIR
+      run: echo "MACROQUEST_DIR=${{ github.workspace }}//MacroQuest/" >> $GITHUB_ENV
+      shell: bash
+
     - name: Save MacroQuest Cache
       if: steps.cache-macroquest-restore.outputs.cache-hit != 'true'
       id: cache-macroquest-save

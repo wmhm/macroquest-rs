@@ -51,21 +51,18 @@ jobs:
         with:
           ref: ${{ needs.macroquest.outputs.commit }}
       - name: Fetch Rust Toolchain
-        uses: dtolnay/rust-toolchain@master
-        with:
-          toolchain: ${{matrix.rust}}
+        uses: dtolnay/rust-toolchain@stable
       - name: Cache Rust Dependencies
         uses: Swatinem/rust-cache@v2
         with:
           workspaces: crates
-      - run: cargo build --workspace --all-targets
+      - name: Build with Default Features
+        run: cargo build --workspace --all-targets
         working-directory:  ${{ github.workspace }}/crates
-        env:
-          MACROQUEST_DIR: ${{ github.workspace }}//MacroQuest/
-      - run: cargo build --workspace --all-targets --all-features
+      - name: Build with All Features
+        run: cargo build --workspace --all-targets --all-features
         working-directory: ${{ github.workspace }}/crates
-        env:
-          MACROQUEST_DIR: ${{ github.workspace }}/MacroQuest/
+
 
   unit-test:
     name: Unit Tests
@@ -86,12 +83,6 @@ jobs:
         uses: Swatinem/rust-cache@v2
         with:
           workspaces: crates
-      - name: Update Path
-        run: echo "${{ github.workspace }}/MacroQuest/build/bin/release" >> $GITHUB_PATH
-        shell: bash
-      - name: Set MACROQUEST_DIR
-        run: echo "MACROQUEST_DIR=${{ github.workspace }}//MacroQuest/" >> $GITHUB_ENV
-        shell: bash
       - name: Install cargo-nextest
         run: cargo install cargo-nextest --locked
       - name: Build Tests
@@ -100,6 +91,7 @@ jobs:
       - name: Run Tests
         run: cargo nextest run --workspace --all-targets --all-features
         working-directory:  ${{ github.workspace }}/crates
+
 
   doc-test:
     name: Doc Tests
@@ -120,13 +112,9 @@ jobs:
         uses: Swatinem/rust-cache@v2
         with:
           workspaces: crates
-      - name: Update Path
-        run: echo "${{ github.workspace }}/MacroQuest/build/bin/release" >> $GITHUB_PATH
-        shell: bash
-      - run: cargo test --workspace --exclude 'MQRust*' --all-features --doc
+      - name: Run Doc Tests
+        run: cargo test --workspace --all-features --doc
         working-directory:  ${{ github.workspace }}/crates
-        env:
-          MACROQUEST_DIR: ${{ github.workspace }}//MacroQuest/
 
 
   clippy:
@@ -154,8 +142,6 @@ jobs:
           workspaces: crates
       - run: cargo clippy --workspace --all-targets --all-features
         working-directory: ${{ github.workspace }}/crates
-        env:
-          MACROQUEST_DIR: ${{ github.workspace }}/MacroQuest/
 
 
   fmt:
@@ -202,5 +188,9 @@ jobs:
     steps:
       - name: Checkout macroquest-rs
         uses: actions/checkout@v4
-      - name: Machete
-        uses: bnjbvr/cargo-machete@main
+      - name: Cache Rust Dependencies
+        uses: Swatinem/rust-cache@v2
+      - name: Install cargo-machete
+        run: cargo install cargo-machete --locked
+      - name: Unused Dependencies
+        run: cargo machete
