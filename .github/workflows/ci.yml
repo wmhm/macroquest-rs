@@ -33,6 +33,7 @@ jobs:
         uses: ./crates/.github/actions/macroquest
         with:
           ref: rel-live
+          skip-if-cached: "true"
 
   build:
     name: Build - ${{matrix.rust}}

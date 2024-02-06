@@ -7,6 +7,10 @@ inputs:
     description: What ref of MacroQuest to build against
     default: master
 
+  skip-if-cached:
+    description: Whether to skip downloading the cache if it is cached.
+    default: "false"
+
 outputs:
   commit:
     description: What commit of MacroQuest we built against
@@ -30,13 +34,16 @@ runs:
       shell: bash
 
     - name: Restore MacroQuest Cache
+      if: steps.cache-macroquest-lookup.outputs.cache-hit != 'true' || steps.cache-vcpkg-lookup.outputs.cache-hit != 'true'
       id: cache-macroquest-restore
       uses: actions/cache/restore@v4
       with:
         path: ${{ github.workspace }}/MacroQuest/build
         key: ${{ runner.os }}-macroquest-x64-${{ steps.macroquest-commit.outputs.macroquest-commit }}
+        lookup-only: ${{ inputs.skip-if-cached == 'true' }}
 
     - name: Restore vcpkg Cache
+      if: steps.cache-macroquest-lookup.outputs.cache-hit != 'true' || steps.cache-vcpkg-lookup.outputs.cache-hit != 'true'
       id: cache-vcpkg-restore
       uses: actions/cache/restore@v4
       with:
@@ -51,6 +58,7 @@ runs:
         restore-keys: |
           ${{ runner.os }}-vcpkg-x64-
           ${{ runner.os }}-vcpkg-
+        lookup-only: ${{ inputs.skip-if-cached == 'true' && steps.cache-macroquest-restore.outputs.cache-hit == 'true' }}
 
     - name: Install MSBuild
       if: steps.cache-macroquest-restore.outputs.cache-hit != 'true'
