@@ -8,7 +8,12 @@ on:
     - cron: "30 11 * * *"
 
 env:
+  # Turn all warnings into errors in CI
   RUSTFLAGS: -Dwarnings
+  # CI builds are more akin to from-scratch builds, incremental compilation adds
+  # unnecessary dependency-tracking and IO overhead, reducing caching
+  # effectiveness.
+  CARGO_INCREMENTAL: 0
 
 jobs:
   macroquest:
@@ -62,8 +67,8 @@ jobs:
         env:
           MACROQUEST_DIR: ${{ github.workspace }}/MacroQuest/
 
-  test:
-    name: Tests
+  unit-test:
+    name: Unit Tests
     runs-on: windows-latest
     needs: [macroquest]
     steps:
@@ -84,10 +89,40 @@ jobs:
       - name: Update Path
         run: echo "${{ github.workspace }}/MacroQuest/build/bin/release" >> $GITHUB_PATH
         shell: bash
-      - run: cargo test --workspace --all-targets --all-features
+      - name: Set MACROQUEST_DIR
+        run: echo "MACROQUEST_DIR=${{ github.workspace }}//MacroQuest/" >> $GITHUB_ENV
+        shell: bash
+      - name: Install cargo-nextest
+        run: cargo install cargo-nextest --locked
+      - name: Build Tests
+        run: cargo nextest run --workspace --all-targets --all-features --no-run
         working-directory:  ${{ github.workspace }}/crates
-        env:
-          MACROQUEST_DIR: ${{ github.workspace }}//MacroQuest/
+      - name: Run Tests
+        run: cargo nextest run --workspace --all-targets --all-features
+        working-directory:  ${{ github.workspace }}/crates
+
+  doc-test:
+    name: Doc Tests
+    runs-on: windows-latest
+    needs: [macroquest]
+    steps:
+      - name: Checkout macroquest-rs
+        uses: actions/checkout@v4
+        with:
+          path: ./crates
+      - name: Build MacroQuest
+        uses: ./crates/.github/actions/macroquest
+        with:
+          ref: ${{ needs.macroquest.outputs.commit }}
+      - name: Fetch Rust Toolchain
+        uses: dtolnay/rust-toolchain@stable
+      - name: Cache Rust Dependencies
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: crates
+      - name: Update Path
+        run: echo "${{ github.workspace }}/MacroQuest/build/bin/release" >> $GITHUB_PATH
+        shell: bash
       - run: cargo test --workspace --exclude 'MQRust*' --all-features --doc
         working-directory:  ${{ github.workspace }}/crates
         env:
