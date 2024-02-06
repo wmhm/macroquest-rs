@@ -29,5 +29,10 @@ fn main() {
             .define("NOMINMAX", None)
             .files(["src/eqlib.cc", "src/mq.cc"])
             .compile("mqrust");
+
+        // Write out the EQVersion string
+        let out_dir = std::env::var_os("OUT_DIR").unwrap();
+        let dest_path = std::path::Path::new(&out_dir).join("eq_version.rs");
+        std::fs::write(dest_path, format!("b\"{}\\0\"", config.eq_version())).unwrap();
     }
 }

@@ -7,6 +7,8 @@
 #![warn(clippy::pedantic)]
 #![cfg(target_os = "windows")]
 
+pub const EQ_VERSION: &[u8; 21] = include!(concat!(env!("OUT_DIR"), "/eq_version.rs"));
+
 #[cxx::bridge(namespace = "mqrust::eqlib")]
 pub mod eqlib {
     unsafe extern "C++" {

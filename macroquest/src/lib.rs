@@ -142,7 +142,7 @@ impl EQVersion {
 #[doc(alias = "EverQuestVersion")]
 #[must_use]
 pub const fn eq_version() -> EQVersion {
-    EQVersion(*include!(concat!(env!("OUT_DIR"), "/eq_version.rs")))
+    EQVersion(*ffi::EQ_VERSION)
 }
 
 #[cfg(test)]
