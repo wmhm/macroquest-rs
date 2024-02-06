@@ -190,7 +190,11 @@ jobs:
         uses: actions/checkout@v4
       - name: Cache Rust Dependencies
         uses: Swatinem/rust-cache@v2
-      - name: Install cargo-machete
-        run: cargo install cargo-machete --locked
-      - name: Unused Dependencies
+      - name: Install Tools
+        run: cargo install cargo-audit cargo-machete --locked
+      - name: Generate Lockfile
+        run: cargo generate-lockfile
+      - name: Check Unused
         run: cargo machete
+      - name: Check Security
+        run: cargo audit
