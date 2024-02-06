@@ -89,12 +89,17 @@ jobs:
       - name: Update Path
         run: echo "${{ github.workspace }}/MacroQuest/build/bin/release" >> $GITHUB_PATH
         shell: bash
+      - name: Set MACROQUEST_DIR
+        run: echo "MACROQUEST_DIR=${{ github.workspace }}//MacroQuest/" >> $GITHUB_ENV
+        shell: bash
       - name: Install cargo-nextest
         run: cargo install cargo-nextest --locked
-      - run: cargo nextest run --workspace --all-targets --all-features
+      - name: Build Tests
+        run: cargo nextest run --workspace --all-targets --all-features --no-run
         working-directory:  ${{ github.workspace }}/crates
-        env:
-          MACROQUEST_DIR: ${{ github.workspace }}//MacroQuest/
+      - name: Run Tests
+        run: cargo nextest run --workspace --all-targets --all-features
+        working-directory:  ${{ github.workspace }}/crates
 
   doc-test:
     name: Doc Tests
