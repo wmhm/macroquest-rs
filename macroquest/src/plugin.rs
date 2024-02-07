@@ -5,9 +5,42 @@
 //! whenever certain events occur. Plugins may implement any number of these
 //! functions to implement their functionality.
 //!
+//! Defining a MacroQuest plugin will primarily use three items: The [`setup`]
+//! macro, the [`Hooks`] trait, and the [`hooks`] macro.
+//!
+//! The [`setup`] macro is responsible for setting up a given type to be used
+//! as a MacroQuest plugin, exporting all the required symbols and setting up
+//! all of our own internal state.
+//!
+//! It has one form:
+//!
+//! ```
+//! # struct MyPlugin;
+//! macroquest::plugin::setup!(MyPlugin);
+//! ```
+//!
+//! This takes a given type (`MyPlugin` in this case), which must implement
+//! [`New`] and [`Hooks`], and generates all of the required structure for this
+//! plugin to be loaded as a MacroQuest plugin.
+//!
+//! The [`Hooks`] trait is how a plugin implementation defines which MacroQuest
+//! hooks their plugin wants to implement. This trait has methods for each
+//! MacroQuest hook, which can be implemented to implement the actual desired
+//! functionality of the MacroQuest plugin.
+//!
+//! While the [`Hooks`] trait has methods available for every MacroQuest hook,
+//! only the hooks that are needed should be implemented (the rest have empty
+//! default implementations), and the unimplemented ones will not be exported
+//! by the [`hooks`] macro to prevent any runtime overhead for unused hooks.
+//!
+//! The [`hooks`] macro is used to decorate the `impl Hooks` block for this
+//! plugin, and it exports all of the required symbols and boilerplate to have
+//! MacroQuest ultimately call the hook method on [`Hooks`] for the given hook.
+//!
+//!
 //! # Examples
 //!
-//! Use the API to create a basic, but useless, plugin.
+//! Putting this all together, to create a basic, but useless, plugin.
 //!
 //! ```
 //! # use macroquest::log::trace;
