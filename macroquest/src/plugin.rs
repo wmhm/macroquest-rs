@@ -339,7 +339,22 @@ impl<T> LazyPlugin<T> {
     }
 }
 
-/// TODO
+/// Setup the Plugin type to be exported as an actual MacroQuest Plugin.
+///
+/// This performs all of the required setup to expose the plugin implementation
+/// from this crate in a way that MacroQuest will be able to understand and use
+/// it.
+///
+/// It has one form:
+///
+/// ```
+/// # struct MyPlugin;
+/// macroquest::plugin::setup!(MyPlugin);
+/// ```
+///
+/// Which registers the given type as a MacroQuest plugin, exporting all of the
+/// required symbols in the resulting DLL, setups up our own internal state
+/// required to execute the plugin hooks, etc.
 #[doc(hidden)]
 #[allow(clippy::module_name_repetitions)]
 #[macro_export]
