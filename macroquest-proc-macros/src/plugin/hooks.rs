@@ -5,7 +5,7 @@ use quote::{format_ident, quote, ToTokens};
 use strum::EnumString;
 use syn::fold::Fold;
 use syn::parse::{Parse, ParseStream};
-use syn::{Ident, ImplItemFn, ItemImpl};
+use syn::{ImplItemFn, ItemImpl};
 
 #[derive(Debug, PartialEq, EnumString, strum::Display)]
 enum Kind {
@@ -75,12 +75,7 @@ impl Parse for Hooks {
 impl Fold for Hooks {
     fn fold_impl_item_fn(&mut self, method: ImplItemFn) -> ImplItemFn {
         self.implemented.push(method.clone());
-        syn::parse2(quote! {
-            #[allow(clippy::inline_always)]
-            #[inline(always)]
-            #method
-        })
-        .unwrap()
+        method
     }
 }
 
@@ -89,203 +84,16 @@ impl ToTokens for Hooks {
         self.body.to_tokens(tokens);
 
         for hook in &self.implemented {
-            let plugin_hook_name = &hook.sig.ident;
             let Ok(kind) = Kind::from_str(hook.sig.ident.to_string().as_str())
             else {
                 abort!(hook, "The hook must be a supported MacroQuest hook");
             };
+            let hook_kind = format_ident!("{}", kind.to_string());
 
-            match kind {
-                kind @ (Kind::InitializePlugin
-                | Kind::ShutdownPlugin
-                | Kind::OnCleanUI
-                | Kind::OnDrawHUD
-                | Kind::OnReloadUI
-                | Kind::OnPulse
-                | Kind::OnBeginZone
-                | Kind::OnEndZone
-                | Kind::OnZoned
-                | Kind::OnUpdateImGui) => Hooks::to_tokens_simple_hook(
-                    plugin_hook_name,
-                    &format_ident!("{}", kind.to_string()),
-                    tokens,
-                ),
-                kind @ Kind::SetGameState => Hooks::to_tokens_gamestate_hook(
-                    plugin_hook_name,
-                    &format_ident!("{}", kind.to_string()),
-                    tokens,
-                ),
-                kind @ Kind::OnWriteChatColor => Hooks::to_tokens_writechatcolor_hook(
-                    plugin_hook_name,
-                    &format_ident!("{}", kind.to_string()),
-                    tokens,
-                ),
-                kind @ Kind::OnIncomingChat => Hooks::to_tokens_incomingchat_hook(
-                    plugin_hook_name,
-                    &format_ident!("{}", kind.to_string()),
-                    tokens,
-                ),
-                kind @ (Kind::OnMacroStart
-                | Kind::OnMacroStop
-                | Kind::OnLoadPlugin
-                | Kind::OnUnloadPlugin) => Hooks::to_tokens_str_hook(
-                    plugin_hook_name,
-                    &format_ident!("{}", kind.to_string()),
-                    tokens,
-                ),
-                kind @ (Kind::OnAddSpawn | Kind::OnRemoveSpawn) => {
-                    Hooks::to_tokens_spawn_hook(
-                        plugin_hook_name,
-                        &format_ident!("{}", kind.to_string()),
-                        tokens,
-                    );
-                }
-                kind @ (Kind::OnAddGroundItem | Kind::OnRemoveGroundItem) => {
-                    Hooks::to_tokens_grounditem_hook(
-                        plugin_hook_name,
-                        &format_ident!("{}", kind.to_string()),
-                        tokens,
-                    );
-                }
-            };
-        }
-    }
-}
-
-impl Hooks {
-    fn to_tokens_simple_hook(
-        name: &Ident,
-        hook: &Ident,
-        tokens: &mut proc_macro2::TokenStream,
-    ) {
-        let outer_name = format_ident!("__plugin_{}", name);
-        let hook_name = format_ident!("{}", hook.to_string());
-        quote! {
-            #[::macroquest::plugin::hook(#hook_name)]
-            fn #outer_name() {
-                match PLUGIN.get() {
-                    ::std::option::Option::Some(plugin) => plugin.#name(),
-                    ::std::option::Option::None => ::macroquest::log::error!("plugin never set"),
-                }
+            quote! {
+                macroquest::plugin::hook!(#hook_kind(PLUGIN));
             }
+            .to_tokens(tokens);
         }
-        .to_tokens(tokens);
-    }
-
-    fn to_tokens_gamestate_hook(
-        name: &Ident,
-        hook: &Ident,
-        tokens: &mut proc_macro2::TokenStream,
-    ) {
-        let outer_name = format_ident!("__plugin_{}", name);
-        let hook_name = format_ident!("{}", hook.to_string());
-        quote! {
-            #[::macroquest::plugin::hook(#hook_name)]
-            fn #outer_name(state: ::macroquest::eq::GameState) {
-                match PLUGIN.get() {
-                    ::std::option::Option::Some(plugin) => plugin.#name(state),
-                    ::std::option::Option::None => ::macroquest::log::error!("plugin never set"),
-                }
-            }
-        }
-        .to_tokens(tokens);
-    }
-
-    fn to_tokens_writechatcolor_hook(
-        name: &Ident,
-        hook: &Ident,
-        tokens: &mut proc_macro2::TokenStream,
-    ) {
-        let outer_name = format_ident!("__plugin_{}", name);
-        let hook_name = format_ident!("{}", hook.to_string());
-        quote! {
-            #[::macroquest::plugin::hook(#hook_name)]
-            fn #outer_name(line: &::std::primitive::str, color: ::macroquest::eq::ChatColor) {
-                match PLUGIN.get() {
-                    ::std::option::Option::Some(plugin) => plugin.#name(line, color),
-                    ::std::option::Option::None => ::macroquest::log::error!("plugin never set"),
-                }
-            }
-        }
-        .to_tokens(tokens);
-    }
-
-    fn to_tokens_incomingchat_hook(
-        name: &Ident,
-        hook: &Ident,
-        tokens: &mut proc_macro2::TokenStream,
-    ) {
-        let outer_name = format_ident!("__plugin_{}", name);
-        let hook_name = format_ident!("{}", hook.to_string());
-        quote! {
-            #[::macroquest::plugin::hook(#hook_name)]
-            fn #outer_name(line: &::std::primitive::str, color: ::macroquest::eq::ChatColor) -> ::std::primitive::bool {
-                match PLUGIN.get() {
-                    ::std::option::Option::Some(plugin) => plugin.#name(line, color),
-                    ::std::option::Option::None => {
-                        ::macroquest::log::error!("plugin never set");
-                        false
-                    }
-                }
-            }
-        }
-        .to_tokens(tokens);
-    }
-
-    fn to_tokens_str_hook(
-        name: &Ident,
-        hook: &Ident,
-        tokens: &mut proc_macro2::TokenStream,
-    ) {
-        let outer_name = format_ident!("__plugin_{}", name);
-        let hook_name = format_ident!("{}", hook.to_string());
-        quote! {
-            #[::macroquest::plugin::hook(#hook_name)]
-            fn #outer_name(value: &::std::primitive::str) {
-                match PLUGIN.get() {
-                    ::std::option::Option::Some(plugin) => plugin.#name(value),
-                    ::std::option::Option::None => ::macroquest::log::error!("plugin never set"),
-                }
-            }
-        }
-        .to_tokens(tokens);
-    }
-
-    fn to_tokens_spawn_hook(
-        name: &Ident,
-        hook: &Ident,
-        tokens: &mut proc_macro2::TokenStream,
-    ) {
-        let outer_name = format_ident!("__plugin_{}", name);
-        let hook_name = format_ident!("{}", hook.to_string());
-        quote! {
-            #[::macroquest::plugin::hook(#hook_name)]
-            fn #outer_name(spawn: &::macroquest::eq::Spawn) {
-                match PLUGIN.get() {
-                    ::std::option::Option::Some(plugin) => plugin.#name(spawn),
-                    ::std::option::Option::None => ::macroquest::log::error!("plugin never set"),
-                }
-            }
-        }
-        .to_tokens(tokens);
-    }
-
-    fn to_tokens_grounditem_hook(
-        name: &Ident,
-        hook: &Ident,
-        tokens: &mut proc_macro2::TokenStream,
-    ) {
-        let outer_name = format_ident!("__plugin_{}", name);
-        let hook_name = format_ident!("{}", hook.to_string());
-        quote! {
-            #[::macroquest::plugin::hook(#hook_name)]
-            fn #outer_name(item: &::macroquest::eq::GroundItem) {
-                match PLUGIN.get() {
-                    ::std::option::Option::Some(plugin) => plugin.#name(item),
-                    ::std::option::Option::None => ::macroquest::log::error!("plugin never set"),
-                }
-            }
-        }
-        .to_tokens(tokens);
     }
 }
