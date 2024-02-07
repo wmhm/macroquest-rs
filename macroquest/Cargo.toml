@@ -14,6 +14,7 @@ keywords.workspace = true
 macroquest-sys = { workspace = true, optional = true }
 macroquest-proc-macros = { workspace = true }
 
+arc-swap = "1.6.0"
 cansi = "2.2.1"
 memchr = "2"
 num_enum = "0.7.2"
