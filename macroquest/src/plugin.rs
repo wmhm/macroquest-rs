@@ -71,13 +71,7 @@ use num_enum::TryFromPrimitive;
 use windows::Win32::System::SystemServices::{DLL_PROCESS_ATTACH, DLL_PROCESS_DETACH};
 
 #[doc(inline)]
-pub use macroquest_proc_macros::{
-    plugin_create as create,
-    plugin_hook as hook,
-    plugin_hooks as hooks,
-    plugin_main as main,
-    plugin_preamble as preamble,
-};
+pub use macroquest_proc_macros::{plugin_hook as hook, plugin_hooks as hooks};
 
 use crate::eq;
 
@@ -395,3 +389,111 @@ pub trait Hooks {
     #[doc(alias = "OnUnloadPlugin")]
     fn plugin_unload(&self, name: &str) {}
 }
+
+#[doc(hidden)]
+#[allow(clippy::module_name_repetitions)]
+pub struct LazyPlugin<T>(std::sync::OnceLock<T>);
+
+impl<T> LazyPlugin<T> {
+    #[must_use]
+    pub const fn new() -> Self {
+        LazyPlugin(std::sync::OnceLock::new())
+    }
+
+    #[allow(clippy::missing_errors_doc)]
+    pub fn set(&self, value: T) -> Result<(), T> {
+        self.0.set(value)
+    }
+
+    pub fn get(&self) -> Option<&T> {
+        self.0.get()
+    }
+}
+
+/// ?
+#[doc(hidden)]
+#[allow(clippy::module_name_repetitions)]
+#[macro_export]
+macro_rules! __plugin_setup {
+    ($plugin_type:ident, $plugin_version:literal) => {
+        // MacroQuest requires a symbol exported named this to validate that a plugin
+        // was compiled for "MQNext", which is the only MacroQuest at this point in
+        // time.
+        #[no_mangle]
+        pub static IsBuiltForNext: bool = ::macroquest::is_mq_next();
+
+        // MacroQuest requires a symbol exported named this, that is used a stand in for
+        // "version" of the EverQuest binary, which is compromised of the build date and
+        // build time of the eqgame.exe.
+        #[no_mangle]
+        pub static EverQuestVersion: ::macroquest::EQVersion =
+            ::macroquest::eq_version();
+
+        // MacroQuest will look for this symbol, which is a pointer to a mq::MQPlugin,
+        // and if it exists, will set the value of that pointer to the mq::MQPlugin
+        // instance that it has created for the given plugin.
+        #[no_mangle]
+        pub static mut ThisPlugin: Option<&::macroquest::ffi::mq::MQPlugin> = None;
+
+        // We have a plugin for our plugin which
+        static PLUGIN: ::macroquest::plugin::LazyPlugin<$plugin_type> =
+            ::macroquest::plugin::LazyPlugin::new();
+
+        #[inline(always)]
+        fn __plugin_main(
+            reason: ::macroquest::plugin::Reason,
+        ) -> ::std::primitive::bool {
+            use ::macroquest::log::error;
+            use ::macroquest::plugin::{New, Reason};
+
+            match reason {
+                Reason::Load => match PLUGIN.set($plugin_type::new()) {
+                    Ok(_) => true,
+                    Err(error) => {
+                        error!(?error, "there was already a PLUGIN set");
+                        false
+                    }
+                },
+                Reason::Unload => true,
+            }
+        }
+
+        #[no_mangle]
+        extern "system" fn DllMain(
+            _: *mut (),
+            c_reason: ::std::primitive::u32,
+            _: *mut (),
+        ) -> ::std::primitive::bool {
+            use ::macroquest::log::error;
+
+            let result = ::std::panic::catch_unwind(|| {
+                use ::macroquest::plugin::{MainResult, Reason};
+                use ::std::convert::TryFrom;
+
+                let rvalue = match Reason::try_from(c_reason) {
+                    ::std::result::Result::Ok(reason) => {
+                        Into::<MainResult>::into(__plugin_main(reason))
+                    }
+                    ::std::result::Result::Err(_) => {
+                        error!(reason = c_reason, "unknown reason in DllMain");
+
+                        MainResult::Bool(false)
+                    }
+                };
+
+                rvalue.into()
+            });
+
+            match result {
+                ::std::result::Result::Ok(r) => r,
+                ::std::result::Result::Err(error) => {
+                    error!(?error, hook = "PluginMain", "caught an unwind");
+                    false
+                }
+            }
+        }
+    };
+}
+
+#[doc(inline)]
+pub use crate::__plugin_setup as setup;

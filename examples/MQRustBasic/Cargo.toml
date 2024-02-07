@@ -1,6 +1,6 @@
 [package]
-name = "MQRustSimple"
-description = "An example of a simple MacroQuest plugin"
+name = "MQRustBasic"
+description = "An example of a basic MacroQuest plugin"
 readme = "README.md"
 categories = ["gaming"]
 version.workspace = true
