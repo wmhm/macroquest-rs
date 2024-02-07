@@ -15,7 +15,7 @@
 //! # use macroquest::plugin::Hooks;
 //! # use std::sync::RwLock;
 //!
-//! macroquest::plugin::setup!(MyPlugin, 1.0);
+//! macroquest::plugin::setup!(MyPlugin);
 //!
 //! #[derive(Debug, Default)]
 //! struct MyPlugin {
@@ -345,7 +345,7 @@ impl<T> LazyPlugin<T> {
 #[allow(clippy::module_name_repetitions)]
 #[macro_export]
 macro_rules! __plugin_setup {
-    ($plugin_type:ident, $plugin_version:literal) => {
+    ($plugin_type:ident) => {
         // MacroQuest requires a symbol exported named this to validate that a plugin
         // was compiled for "MQNext", which is the only MacroQuest at this point in
         // time.

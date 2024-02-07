@@ -14,7 +14,7 @@ use macroquest::eq;
 use macroquest::log::{ConsoleLogger, FileLogger, LevelFilter, Logger};
 use macroquest::plugin::Hooks;
 
-macroquest::plugin::setup!(MQRustSimple, 1.0);
+macroquest::plugin::setup!(MQRustSimple);
 
 #[derive(Debug, Default)]
 struct MQRustSimple {}
