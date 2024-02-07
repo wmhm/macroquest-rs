@@ -7,15 +7,17 @@
 //!
 //! # Examples
 //!
-//! Use the high level API to create a basic, but useless, plugin.
+//! Use the API to create a basic, but useless, plugin.
 //!
 //! ```
 //! # use macroquest::log::trace;
 //! # use macroquest::eq::ChatColor;
 //! # use macroquest::plugin::Hooks;
 //! # use std::sync::RwLock;
+//!
+//! macroquest::plugin::setup!(MyPlugin, 1.0);
+//!
 //! #[derive(Debug, Default)]
-//! #[macroquest::plugin::create]
 //! struct MyPlugin {
 //!     last: RwLock<Option<String>>,
 //! }
@@ -28,42 +30,6 @@
 //!
 //!         false
 //!     }
-//! }
-//! ```
-//!
-//! Use the low level API to create a basic, but useless, plugin.
-//!
-//! ```
-//! # use std::sync::OnceLock;
-//! # use macroquest::log::trace;
-//! # use macroquest::plugin::Reason;
-//! # use macroquest::eq::ChatColor;
-//! static DATA: OnceLock<String> = OnceLock::new();
-//!
-//! macroquest::plugin::preamble!();
-//!
-//! #[macroquest::plugin::main]
-//! fn pmain(reason: Reason) {
-//!     match reason {
-//!         Reason::Load => {
-//!             trace!("module loaded");
-//!
-//!             DATA.set(String::new());
-//!         }
-//!         Reason::Unload => trace!("module unloaded"),
-//!     };
-//! }
-//!
-//! #[macroquest::plugin::hook(InitializePlugin)]
-//! fn initialize() {
-//!     trace!("plugin initialized")
-//! }
-//!
-//! #[macroquest::plugin::hook(OnIncomingChat)]
-//! fn incoming_chat(line: &str, color: ChatColor) -> bool {
-//!     trace!(?line, ?color, "got a new line of chat");
-//!
-//!     false
 //! }
 //! ```
 
@@ -374,7 +340,7 @@ impl<T> LazyPlugin<T> {
     }
 }
 
-/// ?
+/// TODO
 #[doc(hidden)]
 #[allow(clippy::module_name_repetitions)]
 #[macro_export]
