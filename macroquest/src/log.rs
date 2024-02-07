@@ -23,10 +23,15 @@
 //!
 //! ```
 //! # use macroquest::eq::ChatColor;
-//! # use macroquest::plugin::Hooks;
+//! # use macroquest::plugin::{Hooks, Plugin};
 //! # macroquest::plugin::setup!(MQRustLogging);
-//! # #[derive(Debug, Default)]
+//! # #[derive(Debug)]
 //! # struct MQRustLogging {}
+//! # impl Plugin for MQRustLogging {
+//! #     fn new() -> Self {
+//! #         MQRustLogging { }
+//! #     }
+//! # }
 //! use macroquest::log::debug;
 //!
 //! #[macroquest::plugin::hooks]
@@ -46,10 +51,15 @@
 //!
 //! ```
 //! # use macroquest::log::{ConsoleLogger, FileLogger, Logger, LevelFilter};
-//! # use macroquest::plugin::Hooks;
+//! # use macroquest::plugin::{Hooks, Plugin};
 //! # macroquest::plugin::setup!(MQRustLogging);
-//! # #[derive(Debug, Default)]
+//! # #[derive(Debug)]
 //! # struct MQRustLogging {}
+//! # impl Plugin for MQRustLogging {
+//! #     fn new() -> Self {
+//! #         MQRustLogging { }
+//! #     }
+//! # }
 //! #[macroquest::plugin::hooks]
 //! impl Hooks for MQRustLogging {
 //!     fn initialize(&self) {
