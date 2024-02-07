@@ -15,14 +15,21 @@
 //! It has one form:
 //!
 //! ```
-//! # #[derive(Debug, Default)]
+//! # use macroquest::plugin::{Hooks, Plugin};
+//! # #[derive(Debug)]
 //! # struct MyPlugin;
+//! # impl Plugin for MyPlugin {
+//! #     fn new() -> Self {
+//! #         MyPlugin
+//! #     }
+//! # }
+//! # impl Hooks for MyPlugin {}
 //! macroquest::plugin::setup!(MyPlugin);
 //! ```
 //!
 //! This takes a given type (`MyPlugin` in this case), which must implement
-//! [`New`] and [`Hooks`], and generates all of the required structure for this
-//! plugin to be loaded as a MacroQuest plugin.
+//! [`Plugin`] and [`Hooks`], and generates all of the required structure for
+//! this plugin to be loaded as a MacroQuest plugin.
 //!
 //! The [`Hooks`] trait is how a plugin implementation defines which MacroQuest
 //! hooks their plugin wants to implement. This trait has methods for each
@@ -46,19 +53,27 @@
 //! ```
 //! # use macroquest::log::trace;
 //! # use macroquest::eq::ChatColor;
-//! # use macroquest::plugin::Hooks;
-//! # use std::sync::RwLock;
+//! # use macroquest::plugin::{Hooks, Plugin};
+//! # use std::sync::Mutex;
 //! macroquest::plugin::setup!(MyPlugin);
 //!
-//! #[derive(Debug, Default)]
+//! #[derive(Debug)]
 //! struct MyPlugin {
-//!     last: RwLock<Option<String>>,
+//!     last: Mutex<Option<String>>,
+//! }
+//!
+//! impl Plugin for MyPlugin {
+//!     fn new() -> Self {
+//!         MyPlugin {
+//!             last: Mutex::new(None),
+//!         }
+//!     }
 //! }
 //!
 //! #[macroquest::plugin::hooks]
 //! impl Hooks for MyPlugin {
 //!     fn incoming_chat(&self, line: &str, color: ChatColor) -> bool {
-//!         let mut l = self.last.write().unwrap();
+//!         let mut l = self.last.lock().unwrap();
 //!         *l = Some(line.to_string());
 //!
 //!         false
@@ -69,78 +84,27 @@
 use std::sync::Arc;
 
 use arc_swap::ArcSwapOption;
-use num_enum::TryFromPrimitive;
-use windows::Win32::System::SystemServices::{DLL_PROCESS_ATTACH, DLL_PROCESS_DETACH};
 
 #[doc(inline)]
 pub use macroquest_proc_macros::plugin_hooks as hooks;
 
+#[doc(hidden)]
+pub use crate::__plugin_hook as hook;
+#[doc(inline)]
+pub use crate::__plugin_setup as setup;
+
 use crate::eq;
 
-/// Describes the reason that the plugin `main` function is being called.
-#[derive(Copy, Clone, Debug, Eq, PartialEq, TryFromPrimitive)]
-#[repr(u32)]
-pub enum Reason {
-    /// The DLL is being loaded into memory
-    Load   = DLL_PROCESS_ATTACH,
-    /// The DLL is being unloaded from memory
-    Unload = DLL_PROCESS_DETACH,
-}
-
-/// Helper type that is used to allow the [`main`] macro to support multiple
-/// return types. Functionally acts as an adapter from Any supported type into
-/// [`std::primitive::bool`].
+/// Implements a MacroQuest plugin.
 ///
-/// Each variant represents another possible return type that we support for the
-/// decorated `main` function.
-///
-/// This type is technically an implementation detail, but needs to be exposed
-/// as pub because the [`main`] macro will generate code that uses it within the
-/// user's own crate.
-#[doc(hidden)]
-pub enum MainResult {
-    Unit,
-    Bool(bool),
-}
-
-/// Adapt a given [`MainResult`] into a bool for return to the OS when
-/// Windows calls the `DllMain` function.
-///
-/// If this returns [`false`](std::primitive::bool) then the module will be
-/// unloaded immediately.
-impl From<MainResult> for bool {
-    fn from(value: MainResult) -> Self {
-        match value {
-            MainResult::Unit => true,
-            MainResult::Bool(b) => b,
-        }
-    }
-}
-
-impl From<()> for MainResult {
-    #[allow(clippy::ignored_unit_patterns)]
-    fn from(_: ()) -> Self {
-        MainResult::Unit
-    }
-}
-
-impl From<bool> for MainResult {
-    fn from(value: bool) -> Self {
-        MainResult::Bool(value)
-    }
-}
-
-/// Provides a way to create new instances of a plugin type.
-///
-/// When using plugin types and the high level plugin API, this trait is used
-/// when creating the global instance of the Plugin type.
-///
-/// This trait has a blanket implementation for [`std::default::Default`] and
-/// implementing that trait should be preferred unless you need different
-/// behavior specific to when creating the global instance of the plugin type
-/// for loading into MacroQuest.
-pub trait New {
-    /// Creates the new instance of the plugin type.
+/// This trait implements the basic requirements of making a Plugin, but it does
+/// not expose any of the hooks that MacroQuest has that plugins can implement,
+/// for that see [`Hooks`].
+pub trait Plugin: Hooks {
+    /// Creates an instance of the plugin type.
+    ///
+    /// Typically this will only be called once, early on in the plugin
+    /// lifecycle prior to any of the hooks in [`Hooks`] being called.
     fn new() -> Self;
 }
 
@@ -148,7 +112,7 @@ pub trait New {
 /// implement.
 ///
 /// For each process, there is one global plugin instance, created using the
-/// [`New::new()`] function, and the MacroQuest plugin hooks will get
+/// [`Plugin::new()`] function, and the MacroQuest plugin hooks will get
 /// dispatched to the instance methods of that plugin instance.
 ///
 /// All MacroQuest plugin hooks have a default, no-op implementation, allowing
@@ -355,7 +319,7 @@ pub trait Hooks {
 #[repr(transparent)]
 pub struct ArcPluginOption<T>(ArcSwapOption<T>);
 
-impl<T: New> ArcPluginOption<T> {
+impl<T: Plugin> ArcPluginOption<T> {
     #[must_use]
     pub const fn new() -> Self {
         ArcPluginOption(ArcSwapOption::const_empty())
@@ -383,8 +347,15 @@ impl<T: New> ArcPluginOption<T> {
 /// It has one form:
 ///
 /// ```
-/// # #[derive(Debug, Default)]
+/// # #[derive(Debug)]
 /// # struct MyPlugin;
+/// # use macroquest::plugin::{Plugin, Hooks};
+/// # impl Plugin for MyPlugin {
+/// #     fn new() -> Self {
+/// #         MyPlugin
+/// #     }
+/// # }
+/// # impl Hooks for MyPlugin {}
 /// macroquest::plugin::setup!(MyPlugin);
 /// ```
 ///
@@ -695,8 +666,3 @@ macro_rules! __plugin_hook {
         }
     };
 }
-
-#[doc(hidden)]
-pub use crate::__plugin_hook as hook;
-#[doc(inline)]
-pub use crate::__plugin_setup as setup;
