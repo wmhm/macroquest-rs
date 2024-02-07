@@ -4,8 +4,7 @@ members = [
     "macroquest",
     "macroquest-sys",
     "macroquest-proc-macros",
-    "examples/MQRustLowLevel",
-    "examples/MQRustSimple",
+    "examples/MQRustBasic",
 ]
 
 [workspace.package]

@@ -5,17 +5,52 @@
 //! whenever certain events occur. Plugins may implement any number of these
 //! functions to implement their functionality.
 //!
+//! Defining a MacroQuest plugin will primarily use three items: The [`setup`]
+//! macro, the [`Hooks`] trait, and the [`hooks`] macro.
+//!
+//! The [`setup`] macro is responsible for setting up a given type to be used
+//! as a MacroQuest plugin, exporting all the required symbols and setting up
+//! all of our own internal state.
+//!
+//! It has one form:
+//!
+//! ```
+//! # #[derive(Debug, Default)]
+//! # struct MyPlugin;
+//! macroquest::plugin::setup!(MyPlugin);
+//! ```
+//!
+//! This takes a given type (`MyPlugin` in this case), which must implement
+//! [`New`] and [`Hooks`], and generates all of the required structure for this
+//! plugin to be loaded as a MacroQuest plugin.
+//!
+//! The [`Hooks`] trait is how a plugin implementation defines which MacroQuest
+//! hooks their plugin wants to implement. This trait has methods for each
+//! MacroQuest hook, which can be implemented to implement the actual desired
+//! functionality of the MacroQuest plugin.
+//!
+//! While the [`Hooks`] trait has methods available for every MacroQuest hook,
+//! only the hooks that are needed should be implemented (the rest have empty
+//! default implementations), and the unimplemented ones will not be exported
+//! by the [`hooks`] macro to prevent any runtime overhead for unused hooks.
+//!
+//! The [`hooks`] macro is used to decorate the `impl Hooks` block for this
+//! plugin, and it exports all of the required symbols and boilerplate to have
+//! MacroQuest ultimately call the hook method on [`Hooks`] for the given hook.
+//!
+//!
 //! # Examples
 //!
-//! Use the high level API to create a basic, but useless, plugin.
+//! Putting this all together, to create a basic, but useless, plugin.
 //!
 //! ```
 //! # use macroquest::log::trace;
 //! # use macroquest::eq::ChatColor;
 //! # use macroquest::plugin::Hooks;
 //! # use std::sync::RwLock;
+//! macroquest::plugin::setup!(MyPlugin);
+//!
 //! #[derive(Debug, Default)]
-//! #[macroquest::plugin::create]
 //! struct MyPlugin {
 //!     last: RwLock<Option<String>>,
 //! }
@@ -30,54 +65,12 @@
 //!     }
 //! }
 //! ```
-//!
-//! Use the low level API to create a basic, but useless, plugin.
-//!
-//! ```
-//! # use std::sync::OnceLock;
-//! # use macroquest::log::trace;
-//! # use macroquest::plugin::Reason;
-//! # use macroquest::eq::ChatColor;
-//! static DATA: OnceLock<String> = OnceLock::new();
-//!
-//! macroquest::plugin::preamble!();
-//!
-//! #[macroquest::plugin::main]
-//! fn pmain(reason: Reason) {
-//!     match reason {
-//!         Reason::Load => {
-//!             trace!("module loaded");
-//!
-//!             DATA.set(String::new());
-//!         }
-//!         Reason::Unload => trace!("module unloaded"),
-//!     };
-//! }
-//!
-//! #[macroquest::plugin::hook(InitializePlugin)]
-//! fn initialize() {
-//!     trace!("plugin initialized")
-//! }
-//!
-//! #[macroquest::plugin::hook(OnIncomingChat)]
-//! fn incoming_chat(line: &str, color: ChatColor) -> bool {
-//!     trace!(?line, ?color, "got a new line of chat");
-//!
-//!     false
-//! }
-//! ```
 
 use num_enum::TryFromPrimitive;
 use windows::Win32::System::SystemServices::{DLL_PROCESS_ATTACH, DLL_PROCESS_DETACH};
 
 #[doc(inline)]
-pub use macroquest_proc_macros::{
-    plugin_create as create,
-    plugin_hook as hook,
-    plugin_hooks as hooks,
-    plugin_main as main,
-    plugin_preamble as preamble,
-};
+pub use macroquest_proc_macros::plugin_hooks as hooks;
 
 use crate::eq;
 
@@ -153,42 +146,6 @@ impl<T: Default> New for T {
         Self::default()
     }
 }
-
-/// Provides the internal plugin protocol that we add ontop of the MacroQuest
-/// protocol/hooks.
-///
-/// This trait is implemented automatically for any type that implements the
-/// [`Hooks`] trait, but it may also be implemented in cases where the built in
-/// behavior for this trait isn't accurate.
-// pub trait Plugin {
-//     /// Called as early on into the process as possible, prior to any other
-//     /// hooks being called. Used for setting up any global state that
-//     /// doesn't depend on the plugin instance existing, such as logging.
-//     fn setup(&self) {
-//         #[cfg(feature = "logger")]
-//         {
-//             use crate::log::{ConsoleLoggerBuilder, FileLoggerBuilder, LoggerBuilder};
-
-//             LoggerBuilder::new()
-//                 .console(
-//                     ConsoleLoggerBuilder::new()
-//                         .level(tracing::level_filters::LevelFilter::DEBUG)
-//                         .build()
-//                         .unwrap(),
-//                 )
-//                 .file(
-//                     FileLoggerBuilder::new()
-//                         .filename("MQRustTest")
-//                         .level(tracing::level_filters::LevelFilter::DEBUG)
-//                         .build()
-//                         .unwrap(),
-//                 )
-//                 .build()
-//                 .unwrap()
-//                 .init();
-//         }
-//     }
-// }
 
 /// The Hooks trait implements the protocol that a MacroQuest plugin must
 /// implement.
@@ -395,3 +352,350 @@ pub trait Hooks {
     #[doc(alias = "OnUnloadPlugin")]
     fn plugin_unload(&self, name: &str) {}
 }
+
+#[doc(hidden)]
+#[allow(clippy::module_name_repetitions)]
+pub struct LazyPlugin<T>(std::sync::OnceLock<T>);
+
+impl<T> LazyPlugin<T> {
+    #[must_use]
+    pub const fn new() -> Self {
+        LazyPlugin(std::sync::OnceLock::new())
+    }
+
+    #[allow(clippy::missing_errors_doc)]
+    pub fn set(&self, value: T) -> Result<(), T> {
+        self.0.set(value)
+    }
+
+    pub fn get(&self) -> Option<&T> {
+        self.0.get()
+    }
+}
+
+/// Setup the Plugin type to be exported as an actual MacroQuest Plugin.
+///
+/// This performs all of the required setup to expose the plugin implementation
+/// from this crate in a way that MacroQuest will be able to understand and use
+/// it.
+///
+/// It has one form:
+///
+/// ```
+/// # #[derive(Debug, Default)]
+/// # struct MyPlugin;
+/// macroquest::plugin::setup!(MyPlugin);
+/// ```
+///
+/// Which registers the given type as a MacroQuest plugin, exporting all of the
+/// required symbols in the resulting DLL, setups up our own internal state
+/// required to execute the plugin hooks, etc.
+#[doc(hidden)]
+#[allow(clippy::module_name_repetitions)]
+#[macro_export]
+macro_rules! __plugin_setup {
+    ($plugin_type:ident) => {
+        // MacroQuest requires a symbol exported named this to validate that a plugin
+        // was compiled for "MQNext", which is the only MacroQuest at this point in
+        // time.
+        #[no_mangle]
+        pub static IsBuiltForNext: bool = ::macroquest::is_mq_next();
+
+        // MacroQuest requires a symbol exported named this, that is used a stand in for
+        // "version" of the EverQuest binary, which is compromised of the build date and
+        // build time of the eqgame.exe.
+        #[no_mangle]
+        pub static EverQuestVersion: ::macroquest::EQVersion =
+            ::macroquest::eq_version();
+
+        // MacroQuest will look for this symbol, which is a pointer to a mq::MQPlugin,
+        // and if it exists, will set the value of that pointer to the mq::MQPlugin
+        // instance that it has created for the given plugin.
+        #[no_mangle]
+        pub static mut ThisPlugin: Option<&::macroquest::ffi::mq::MQPlugin> = None;
+
+        // We need to store our plugin instance somewhere so that our hook methods
+        // can access it to call the implemented hook method on that plugin, so
+        // we'll use this global to do that.
+        static PLUGIN: ::macroquest::plugin::LazyPlugin<$plugin_type> =
+            ::macroquest::plugin::LazyPlugin::new();
+
+        #[inline(always)]
+        fn __plugin_main(
+            reason: ::macroquest::plugin::Reason,
+        ) -> ::std::primitive::bool {
+            use ::macroquest::log::error;
+            use ::macroquest::plugin::{New, Reason};
+
+            match reason {
+                Reason::Load => match PLUGIN.set($plugin_type::new()) {
+                    Ok(_) => true,
+                    Err(error) => {
+                        error!(?error, "there was already a PLUGIN set");
+                        false
+                    }
+                },
+                Reason::Unload => true,
+            }
+        }
+
+        #[no_mangle]
+        extern "system" fn DllMain(
+            _: *mut (),
+            c_reason: ::std::primitive::u32,
+            _: *mut (),
+        ) -> ::std::primitive::bool {
+            use ::macroquest::log::error;
+
+            let result = ::std::panic::catch_unwind(|| {
+                use ::macroquest::plugin::{MainResult, Reason};
+                use ::std::convert::TryFrom;
+
+                let rvalue = match Reason::try_from(c_reason) {
+                    ::std::result::Result::Ok(reason) => {
+                        Into::<MainResult>::into(__plugin_main(reason))
+                    }
+                    ::std::result::Result::Err(_) => {
+                        error!(reason = c_reason, "unknown reason in DllMain");
+
+                        MainResult::Bool(false)
+                    }
+                };
+
+                rvalue.into()
+            });
+
+            match result {
+                ::std::result::Result::Ok(r) => r,
+                ::std::result::Result::Err(error) => {
+                    error!(?error, hook = "PluginMain", "caught an unwind");
+                    false
+                }
+            }
+        }
+    };
+}
+
+// This is an internal macro, but it has to be exported and made public so that
+// the macroquest::plugin::hooks proc macro can generate code in our user's
+// crate that calls this, so we'll leave it undocumented at least so people
+// don't see it in the docs.
+#[doc(hidden)]
+#[allow(clippy::module_name_repetitions)]
+#[macro_export]
+macro_rules! __plugin_hook {
+    (InitializePlugin($global:ident)) => {
+        $crate::__plugin_hook!(impl simple $global InitializePlugin initialize);
+    };
+
+    (ShutdownPlugin($global:ident)) => {
+        $crate::__plugin_hook!(impl simple $global ShutdownPlugin shutdown);
+    };
+
+    (OnCleanUI($global:ident)) => {
+        $crate::__plugin_hook!(impl simple $global OnCleanUI clean_ui);
+    };
+
+    (OnReloadUI($global:ident)) => {
+        $crate::__plugin_hook!(impl simple $global OnReloadUI reload_ui);
+    };
+
+    (OnDrawHUD($global:ident)) => {
+        $crate::__plugin_hook!(impl simple $global OnDrawHUD draw_hud);
+    };
+
+    (OnPulse($global:ident)) => {
+        $crate::__plugin_hook!(impl simple $global OnPulse pulse);
+    };
+
+    (OnBeginZone($global:ident)) => {
+        $crate::__plugin_hook!(impl simple $global OnBeginZone begin_zone);
+    };
+
+    (OnEndZone($global:ident)) => {
+        $crate::__plugin_hook!(impl simple $global OnEndZone end_zone);
+    };
+
+    (OnZoned($global:ident)) => {
+        $crate::__plugin_hook!(impl simple $global OnZoned zoned);
+    };
+
+    (OnUpdateImGui($global:ident)) => {
+        $crate::__plugin_hook!(impl simple $global OnUpdateImGui update_imgui);
+    };
+
+    (SetGameState($global:ident)) => {
+        $crate::__plugin_hook!(impl gamestate $global SetGameState game_state);
+    };
+
+    (OnWriteChatColor($global:ident)) => {
+        $crate::__plugin_hook!(impl chat $global OnWriteChatColor write_chat () = ());
+    };
+
+    (OnIncomingChat($global:ident)) => {
+        $crate::__plugin_hook!(impl chat $global OnIncomingChat incoming_chat bool = false);
+    };
+
+    (OnAddSpawn($global:ident)) => {
+        $crate::__plugin_hook!(impl spawn $global OnAddSpawn add_spawn);
+    };
+
+    (OnRemoveSpawn($global:ident)) => {
+        $crate::__plugin_hook!(impl spawn $global OnRemoveSpawn remove_spawn);
+    };
+
+    (OnAddGroundItem($global:ident)) => {
+        $crate::__plugin_hook!(impl ground $global OnAddGroundItem add_ground_item);
+    };
+
+    (OnRemoveGroundItem($global:ident)) => {
+        $crate::__plugin_hook!(impl ground $global OnRemoveGroundItem remove_ground_item);
+    };
+
+    (OnMacroStart($global:ident)) => {
+        $crate::__plugin_hook!(impl string $global OnMacroStart macro_start);
+    };
+
+    (OnMacroStop($global:ident)) => {
+        $crate::__plugin_hook!(impl string $global OnMacroStop macro_stop);
+    };
+
+    (OnLoadPlugin($global:ident)) => {
+        $crate::__plugin_hook!(impl string $global OnLoadPlugin plugin_load);
+    };
+
+    (OnUnloadPlugin($global:ident)) => {
+        $crate::__plugin_hook!(impl string $global OnUnloadPlugin plugin_unload);
+    };
+
+
+    (impl simple $global:ident $macroquest_hook:ident $plugin_hook:ident) => {
+        #[no_mangle]
+        pub extern "C" fn $macroquest_hook() {
+            let result = ::std::panic::catch_unwind(|| {
+                $global.get()
+                    .expect("hook called without plugin initialized")
+                    .$plugin_hook()
+            });
+
+            match result {
+                ::std::result::Result::Ok(r) => r,
+                ::std::result::Result::Err(error) => {
+                    ::macroquest::log::error!(?error, hook = stringify!($plugin_hook), "caught an unwind");
+                }
+            }
+        }
+    };
+
+    (impl gamestate $global:ident $macroquest_hook:ident $plugin_hook:ident) => {
+        #[no_mangle]
+        pub extern "C" fn $macroquest_hook(c_state: ::std::ffi::c_int) {
+            let result = ::std::panic::catch_unwind(|| {
+                $global.get()
+                    .expect("hook called without plugin initialized")
+                    .$plugin_hook(::macroquest::eq::GameState::from(c_state))
+            });
+
+            match result {
+                ::std::result::Result::Ok(r) => r,
+                ::std::result::Result::Err(error) => {
+                    ::macroquest::log::error!(?error, hook = stringify!($plugin_hook), "caught an unwind");
+                }
+            }
+        }
+    };
+
+    (impl chat $global:ident $macroquest_hook:ident $plugin_hook:ident $rtype:ty = $rvalue:expr) => {
+        #[no_mangle]
+        pub unsafe extern "C" fn $macroquest_hook(
+            ptr: *const ::std::os::raw::c_char,
+            color: ::std::ffi::c_ulong,
+        ) -> $rtype {
+            let result = ::std::panic::catch_unwind(|| {
+                let c_str = ::std::ffi::CStr::from_ptr(ptr);
+                let r_str = c_str.to_string_lossy();
+
+                let color = ::std::primitive::i32::try_from(color)
+                    .expect("color parameter couldn't convert to i32 from u32");
+
+                $global.get()
+                    .expect("hook called without plugin initialized")
+                    .$plugin_hook(r_str.as_ref(), ::macroquest::eq::ChatColor::from(color))
+            });
+
+            match result {
+                ::std::result::Result::Ok(r) => r,
+                ::std::result::Result::Err(error) => {
+                    ::macroquest::log::error!(?error, hook = stringify!($plugin_hook), "caught an unwind");
+                    $rvalue
+                }
+            }
+        }
+    };
+
+    (impl spawn $global:ident $macroquest_hook:ident $plugin_hook:ident) => {
+        #[no_mangle]
+        pub extern "C" fn $macroquest_hook(pc: &::macroquest::ffi::eqlib::PlayerClient) {
+            let result = ::std::panic::catch_unwind(|| {
+                let spawn = ::std::convert::AsRef::<::macroquest::eq::Spawn>::as_ref(pc);
+
+                $global.get()
+                    .expect("hook called without plugin initialized")
+                    .$plugin_hook(spawn)
+            });
+
+            match result {
+                ::std::result::Result::Ok(r) => r,
+                ::std::result::Result::Err(error) => {
+                    ::macroquest::log::error!(?error, hook = stringify!($plugin_hook), "caught an unwind");
+                }
+            }
+        }
+    };
+
+    (impl ground $global:ident $macroquest_hook:ident $plugin_hook:ident) => {
+        #[no_mangle]
+        pub extern "C" fn $macroquest_hook(eq_item: &::macroquest::ffi::eqlib::EQGroundItem) {
+            let result = ::std::panic::catch_unwind(|| {
+                let item = ::std::convert::AsRef::<::macroquest::eq::GroundItem>::as_ref(eq_item);
+
+                $global.get()
+                    .expect("hook called without plugin initialized")
+                    .$plugin_hook(item)
+            });
+
+            match result {
+                ::std::result::Result::Ok(r) => r,
+                ::std::result::Result::Err(error) => {
+                    ::macroquest::log::error!(?error, hook = stringify!($plugin_hook), "caught an unwind");
+                }
+            }
+        }
+    };
+
+    (impl string $global:ident $macroquest_hook:ident $plugin_hook:ident) => {
+        #[no_mangle]
+        pub unsafe extern "C" fn $macroquest_hook(ptr: *const ::std::os::raw::c_char) {
+            let result = ::std::panic::catch_unwind(|| {
+                let c_str = ::std::ffi::CStr::from_ptr(ptr);
+                let r_str = c_str.to_string_lossy();
+
+                $global.get()
+                    .expect("hook called without plugin initialized")
+                    .$plugin_hook(r_str.as_ref())
+            });
+
+            match result {
+                ::std::result::Result::Ok(r) => r,
+                ::std::result::Result::Err(error) => {
+                    ::macroquest::log::error!(?error, hook = stringify!($plugin_hook), "caught an unwind");
+                }
+            }
+        }
+    };
+}
+
+#[doc(hidden)]
+pub use crate::__plugin_hook as hook;
+#[doc(inline)]
+pub use crate::__plugin_setup as setup;
