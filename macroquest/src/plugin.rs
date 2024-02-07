@@ -426,7 +426,10 @@ macro_rules! __plugin_setup {
     };
 }
 
-/// TODO
+// This is an internal macro, but it has to be exported and made public so that
+// the macroquest::plugin::hooks proc macro can generate code in our user's
+// crate that calls this, so we'll leave it undocumented at least so people
+// don't see it in the docs.
 #[doc(hidden)]
 #[allow(clippy::module_name_repetitions)]
 #[macro_export]
@@ -642,5 +645,6 @@ macro_rules! __plugin_hook {
     };
 }
 
+pub use crate::__plugin_hook as _hook;
 #[doc(inline)]
-pub use crate::{__plugin_hook as hook, __plugin_setup as setup};
+pub use crate::__plugin_setup as setup;

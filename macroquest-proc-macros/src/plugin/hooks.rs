@@ -91,7 +91,7 @@ impl ToTokens for Hooks {
             let hook_kind = format_ident!("{}", kind.to_string());
 
             quote! {
-                macroquest::plugin::hook!(#hook_kind(PLUGIN));
+                macroquest::plugin::_hook!(#hook_kind(PLUGIN));
             }
             .to_tokens(tokens);
         }
