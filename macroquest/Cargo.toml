@@ -14,6 +14,7 @@ keywords.workspace = true
 macroquest-sys = { workspace = true, optional = true }
 macroquest-proc-macros = { workspace = true }
 
+arc-swap = "1.6.0"
 cansi = "2.2.1"
 memchr = "2"
 num_enum = "0.7.2"
@@ -24,10 +25,6 @@ tracing = "0.1"
 tracing-subscriber = { version = "0.3", optional = true }
 tracing-appender = { version = "0.2", optional = true }
 typed-builder = "0.18.1"
-windows = { version = "0.*", features = [
-    "Win32_Foundation",
-    "Win32_System_SystemServices",
-] }
 
 
 [dev-dependencies]

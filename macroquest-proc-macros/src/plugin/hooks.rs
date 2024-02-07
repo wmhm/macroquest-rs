@@ -88,10 +88,19 @@ impl ToTokens for Hooks {
             else {
                 abort!(hook, "The hook must be a supported MacroQuest hook");
             };
-            let hook_kind = format_ident!("{}", kind.to_string());
 
-            quote! {
-                macroquest::plugin::hook!(#hook_kind(PLUGIN));
+            match kind {
+                // InitializePlugin and ShutdownPlugin are handled by
+                // macroquest::plugin::setup!.
+                Kind::InitializePlugin | Kind::ShutdownPlugin => quote! {},
+                // Everything else is handled here, and we just emit the private
+                // macroquest::plugin::hook! invocation for each defined hook.
+                _ => {
+                    let hook_kind = format_ident!("{}", kind.to_string());
+                    quote! {
+                        macroquest::plugin::hook!(#hook_kind(PLUGIN));
+                    }
+                }
             }
             .to_tokens(tokens);
         }

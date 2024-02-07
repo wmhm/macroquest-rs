@@ -12,12 +12,18 @@ const PLUGIN_NAME: &str = env!("CARGO_PKG_NAME");
 
 use macroquest::eq;
 use macroquest::log::{ConsoleLogger, FileLogger, LevelFilter, Logger};
-use macroquest::plugin::Hooks;
+use macroquest::plugin::{Hooks, Plugin};
 
 macroquest::plugin::setup!(MQRustSimple);
 
-#[derive(Debug, Default)]
+#[derive(Debug)]
 struct MQRustSimple {}
+
+impl Plugin for MQRustSimple {
+    fn new() -> Self {
+        MQRustSimple {}
+    }
+}
 
 #[macroquest::plugin::hooks]
 impl Hooks for MQRustSimple {

@@ -15,14 +15,21 @@
 //! It has one form:
 //!
 //! ```
-//! # #[derive(Debug, Default)]
+//! # use macroquest::plugin::{Hooks, Plugin};
+//! # #[derive(Debug)]
 //! # struct MyPlugin;
+//! # impl Plugin for MyPlugin {
+//! #     fn new() -> Self {
+//! #         MyPlugin
+//! #     }
+//! # }
+//! # impl Hooks for MyPlugin {}
 //! macroquest::plugin::setup!(MyPlugin);
 //! ```
 //!
 //! This takes a given type (`MyPlugin` in this case), which must implement
-//! [`New`] and [`Hooks`], and generates all of the required structure for this
-//! plugin to be loaded as a MacroQuest plugin.
+//! [`Plugin`] and [`Hooks`], and generates all of the required structure for
+//! this plugin to be loaded as a MacroQuest plugin.
 //!
 //! The [`Hooks`] trait is how a plugin implementation defines which MacroQuest
 //! hooks their plugin wants to implement. This trait has methods for each
@@ -46,19 +53,27 @@
 //! ```
 //! # use macroquest::log::trace;
 //! # use macroquest::eq::ChatColor;
-//! # use macroquest::plugin::Hooks;
-//! # use std::sync::RwLock;
+//! # use macroquest::plugin::{Hooks, Plugin};
+//! # use std::sync::Mutex;
 //! macroquest::plugin::setup!(MyPlugin);
 //!
-//! #[derive(Debug, Default)]
+//! #[derive(Debug)]
 //! struct MyPlugin {
-//!     last: RwLock<Option<String>>,
+//!     last: Mutex<Option<String>>,
+//! }
+//!
+//! impl Plugin for MyPlugin {
+//!     fn new() -> Self {
+//!         MyPlugin {
+//!             last: Mutex::new(None),
+//!         }
+//!     }
 //! }
 //!
 //! #[macroquest::plugin::hooks]
 //! impl Hooks for MyPlugin {
 //!     fn incoming_chat(&self, line: &str, color: ChatColor) -> bool {
-//!         let mut l = self.last.write().unwrap();
+//!         let mut l = self.last.lock().unwrap();
 //!         *l = Some(line.to_string());
 //!
 //!         false
@@ -66,92 +81,38 @@
 //! }
 //! ```
 
-use num_enum::TryFromPrimitive;
-use windows::Win32::System::SystemServices::{DLL_PROCESS_ATTACH, DLL_PROCESS_DETACH};
+use std::sync::Arc;
+
+use arc_swap::ArcSwapOption;
 
 #[doc(inline)]
 pub use macroquest_proc_macros::plugin_hooks as hooks;
 
+#[doc(hidden)]
+pub use crate::__plugin_hook as hook;
+#[doc(inline)]
+pub use crate::__plugin_setup as setup;
+
 use crate::eq;
 
-/// Describes the reason that the plugin `main` function is being called.
-#[derive(Copy, Clone, Debug, Eq, PartialEq, TryFromPrimitive)]
-#[repr(u32)]
-pub enum Reason {
-    /// The DLL is being loaded into memory
-    Load   = DLL_PROCESS_ATTACH,
-    /// The DLL is being unloaded from memory
-    Unload = DLL_PROCESS_DETACH,
-}
-
-/// Helper type that is used to allow the [`main`] macro to support multiple
-/// return types. Functionally acts as an adapter from Any supported type into
-/// [`std::primitive::bool`].
+/// Implements a MacroQuest plugin.
 ///
-/// Each variant represents another possible return type that we support for the
-/// decorated `main` function.
-///
-/// This type is technically an implementation detail, but needs to be exposed
-/// as pub because the [`main`] macro will generate code that uses it within the
-/// user's own crate.
-#[doc(hidden)]
-pub enum MainResult {
-    Unit,
-    Bool(bool),
-}
-
-/// Adapt a given [`MainResult`] into a bool for return to the OS when
-/// Windows calls the `DllMain` function.
-///
-/// If this returns [`false`](std::primitive::bool) then the module will be
-/// unloaded immediately.
-impl From<MainResult> for bool {
-    fn from(value: MainResult) -> Self {
-        match value {
-            MainResult::Unit => true,
-            MainResult::Bool(b) => b,
-        }
-    }
-}
-
-impl From<()> for MainResult {
-    #[allow(clippy::ignored_unit_patterns)]
-    fn from(_: ()) -> Self {
-        MainResult::Unit
-    }
-}
-
-impl From<bool> for MainResult {
-    fn from(value: bool) -> Self {
-        MainResult::Bool(value)
-    }
-}
-
-/// Provides a way to create new instances of a plugin type.
-///
-/// When using plugin types and the high level plugin API, this trait is used
-/// when creating the global instance of the Plugin type.
-///
-/// This trait has a blanket implementation for [`std::default::Default`] and
-/// implementing that trait should be preferred unless you need different
-/// behavior specific to when creating the global instance of the plugin type
-/// for loading into MacroQuest.
-pub trait New {
-    /// Creates the new instance of the plugin type.
+/// This trait implements the basic requirements of making a Plugin, but it does
+/// not expose any of the hooks that MacroQuest has that plugins can implement,
+/// for that see [`Hooks`].
+pub trait Plugin: Hooks {
+    /// Creates an instance of the plugin type.
+    ///
+    /// Typically this will only be called once, early on in the plugin
+    /// lifecycle prior to any of the hooks in [`Hooks`] being called.
     fn new() -> Self;
-}
-
-impl<T: Default> New for T {
-    fn new() -> Self {
-        Self::default()
-    }
 }
 
 /// The Hooks trait implements the protocol that a MacroQuest plugin must
 /// implement.
 ///
 /// For each process, there is one global plugin instance, created using the
-/// [`New::new()`] function, and the MacroQuest plugin hooks will get
+/// [`Plugin::new()`] function, and the MacroQuest plugin hooks will get
 /// dispatched to the instance methods of that plugin instance.
 ///
 /// All MacroQuest plugin hooks have a default, no-op implementation, allowing
@@ -355,21 +316,25 @@ pub trait Hooks {
 
 #[doc(hidden)]
 #[allow(clippy::module_name_repetitions)]
-pub struct LazyPlugin<T>(std::sync::OnceLock<T>);
+#[repr(transparent)]
+pub struct ArcPluginOption<T>(ArcSwapOption<T>);
 
-impl<T> LazyPlugin<T> {
+impl<T: Plugin> ArcPluginOption<T> {
     #[must_use]
     pub const fn new() -> Self {
-        LazyPlugin(std::sync::OnceLock::new())
+        ArcPluginOption(ArcSwapOption::const_empty())
     }
 
-    #[allow(clippy::missing_errors_doc)]
-    pub fn set(&self, value: T) -> Result<(), T> {
-        self.0.set(value)
+    pub fn set(&self) {
+        self.0.store(Some(Arc::new(T::new())));
     }
 
-    pub fn get(&self) -> Option<&T> {
-        self.0.get()
+    pub fn unset(&self) {
+        self.0.store(None);
+    }
+
+    pub fn get(&self) -> arc_swap::Guard<Option<Arc<T>>> {
+        self.0.load()
     }
 }
 
@@ -382,8 +347,15 @@ impl<T> LazyPlugin<T> {
 /// It has one form:
 ///
 /// ```
-/// # #[derive(Debug, Default)]
+/// # #[derive(Debug)]
 /// # struct MyPlugin;
+/// # use macroquest::plugin::{Plugin, Hooks};
+/// # impl Plugin for MyPlugin {
+/// #     fn new() -> Self {
+/// #         MyPlugin
+/// #     }
+/// # }
+/// # impl Hooks for MyPlugin {}
 /// macroquest::plugin::setup!(MyPlugin);
 /// ```
 ///
@@ -417,62 +389,17 @@ macro_rules! __plugin_setup {
         // We need to store our plugin instance somewhere so that our hook methods
         // can access it to call the implemented hook method on that plugin, so
         // we'll use this global to do that.
-        static PLUGIN: ::macroquest::plugin::LazyPlugin<$plugin_type> =
-            ::macroquest::plugin::LazyPlugin::new();
+        static PLUGIN: ::macroquest::plugin::ArcPluginOption<$plugin_type> =
+            ::macroquest::plugin::ArcPluginOption::new();
 
-        #[inline(always)]
-        fn __plugin_main(
-            reason: ::macroquest::plugin::Reason,
-        ) -> ::std::primitive::bool {
-            use ::macroquest::log::error;
-            use ::macroquest::plugin::{New, Reason};
-
-            match reason {
-                Reason::Load => match PLUGIN.set($plugin_type::new()) {
-                    Ok(_) => true,
-                    Err(error) => {
-                        error!(?error, "there was already a PLUGIN set");
-                        false
-                    }
-                },
-                Reason::Unload => true,
-            }
-        }
-
-        #[no_mangle]
-        extern "system" fn DllMain(
-            _: *mut (),
-            c_reason: ::std::primitive::u32,
-            _: *mut (),
-        ) -> ::std::primitive::bool {
-            use ::macroquest::log::error;
-
-            let result = ::std::panic::catch_unwind(|| {
-                use ::macroquest::plugin::{MainResult, Reason};
-                use ::std::convert::TryFrom;
-
-                let rvalue = match Reason::try_from(c_reason) {
-                    ::std::result::Result::Ok(reason) => {
-                        Into::<MainResult>::into(__plugin_main(reason))
-                    }
-                    ::std::result::Result::Err(_) => {
-                        error!(reason = c_reason, "unknown reason in DllMain");
-
-                        MainResult::Bool(false)
-                    }
-                };
-
-                rvalue.into()
-            });
-
-            match result {
-                ::std::result::Result::Ok(r) => r,
-                ::std::result::Result::Err(error) => {
-                    error!(?error, hook = "PluginMain", "caught an unwind");
-                    false
-                }
-            }
-        }
+        // We always setup hooks for InitializePlugin and ShutdownPlugin as we
+        // have our own logic that needs to happen during those hooks, regardless
+        // of whether the plugin itself has any logic there.
+        //
+        // If the plugin hasn't implemented these, then the default no-op
+        // implementations will be used (and should be optimized out completely).
+        macroquest::plugin::hook!(InitializePlugin(PLUGIN));
+        macroquest::plugin::hook!(ShutdownPlugin(PLUGIN));
     };
 }
 
@@ -485,11 +412,11 @@ macro_rules! __plugin_setup {
 #[macro_export]
 macro_rules! __plugin_hook {
     (InitializePlugin($global:ident)) => {
-        $crate::__plugin_hook!(impl simple $global InitializePlugin initialize);
+        $crate::__plugin_hook!(impl init $global InitializePlugin initialize);
     };
 
     (ShutdownPlugin($global:ident)) => {
-        $crate::__plugin_hook!(impl simple $global ShutdownPlugin shutdown);
+        $crate::__plugin_hook!(impl shutdown $global ShutdownPlugin shutdown);
     };
 
     (OnCleanUI($global:ident)) => {
@@ -568,12 +495,52 @@ macro_rules! __plugin_hook {
         $crate::__plugin_hook!(impl string $global OnUnloadPlugin plugin_unload);
     };
 
+    (impl init $global:ident $macroquest_hook:ident $plugin_hook:ident) => {
+        #[no_mangle]
+        pub extern "C" fn $macroquest_hook() {
+            let result = ::std::panic::catch_unwind(|| {
+                $global.set();
+                $global.get()
+                    .as_ref()
+                    .expect("hook called without plugin initialized")
+                    .$plugin_hook()
+            });
+
+            match result {
+                ::std::result::Result::Ok(r) => r,
+                ::std::result::Result::Err(error) => {
+                    ::macroquest::log::error!(?error, hook = stringify!($plugin_hook), "caught an unwind");
+                }
+            }
+        }
+    };
+
+    (impl shutdown $global:ident $macroquest_hook:ident $plugin_hook:ident) => {
+        #[no_mangle]
+        pub extern "C" fn $macroquest_hook() {
+            let result = ::std::panic::catch_unwind(|| {
+                $global.get()
+                    .as_ref()
+                    .expect("hook called without plugin initialized")
+                    .$plugin_hook();
+                $global.unset();
+            });
+
+            match result {
+                ::std::result::Result::Ok(r) => r,
+                ::std::result::Result::Err(error) => {
+                    ::macroquest::log::error!(?error, hook = stringify!($plugin_hook), "caught an unwind");
+                }
+            }
+        }
+    };
 
     (impl simple $global:ident $macroquest_hook:ident $plugin_hook:ident) => {
         #[no_mangle]
         pub extern "C" fn $macroquest_hook() {
             let result = ::std::panic::catch_unwind(|| {
                 $global.get()
+                    .as_ref()
                     .expect("hook called without plugin initialized")
                     .$plugin_hook()
             });
@@ -592,6 +559,7 @@ macro_rules! __plugin_hook {
         pub extern "C" fn $macroquest_hook(c_state: ::std::ffi::c_int) {
             let result = ::std::panic::catch_unwind(|| {
                 $global.get()
+                    .as_ref()
                     .expect("hook called without plugin initialized")
                     .$plugin_hook(::macroquest::eq::GameState::from(c_state))
             });
@@ -619,6 +587,7 @@ macro_rules! __plugin_hook {
                     .expect("color parameter couldn't convert to i32 from u32");
 
                 $global.get()
+                    .as_ref()
                     .expect("hook called without plugin initialized")
                     .$plugin_hook(r_str.as_ref(), ::macroquest::eq::ChatColor::from(color))
             });
@@ -640,6 +609,7 @@ macro_rules! __plugin_hook {
                 let spawn = ::std::convert::AsRef::<::macroquest::eq::Spawn>::as_ref(pc);
 
                 $global.get()
+                    .as_ref()
                     .expect("hook called without plugin initialized")
                     .$plugin_hook(spawn)
             });
@@ -660,6 +630,7 @@ macro_rules! __plugin_hook {
                 let item = ::std::convert::AsRef::<::macroquest::eq::GroundItem>::as_ref(eq_item);
 
                 $global.get()
+                    .as_ref()
                     .expect("hook called without plugin initialized")
                     .$plugin_hook(item)
             });
@@ -681,6 +652,7 @@ macro_rules! __plugin_hook {
                 let r_str = c_str.to_string_lossy();
 
                 $global.get()
+                    .as_ref()
                     .expect("hook called without plugin initialized")
                     .$plugin_hook(r_str.as_ref())
             });
@@ -694,8 +666,3 @@ macro_rules! __plugin_hook {
         }
     };
 }
-
-#[doc(hidden)]
-pub use crate::__plugin_hook as hook;
-#[doc(inline)]
-pub use crate::__plugin_setup as setup;
