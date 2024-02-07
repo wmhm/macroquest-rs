@@ -15,7 +15,7 @@
 //! It has one form:
 //!
 //! ```
-//! # #[derive(Debug)]
+//! # #[derive(Debug, Default)]
 //! # struct MyPlugin;
 //! macroquest::plugin::setup!(MyPlugin);
 //! ```
@@ -382,7 +382,7 @@ impl<T> LazyPlugin<T> {
 /// It has one form:
 ///
 /// ```
-/// # #[derive(Debug)]
+/// # #[derive(Debug, Default)]
 /// # struct MyPlugin;
 /// macroquest::plugin::setup!(MyPlugin);
 /// ```
