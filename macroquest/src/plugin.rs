@@ -37,7 +37,7 @@ use num_enum::TryFromPrimitive;
 use windows::Win32::System::SystemServices::{DLL_PROCESS_ATTACH, DLL_PROCESS_DETACH};
 
 #[doc(inline)]
-pub use macroquest_proc_macros::{plugin_hook as hook, plugin_hooks as hooks};
+pub use macroquest_proc_macros::plugin_hooks as hooks;
 
 use crate::eq;
 
@@ -425,5 +425,221 @@ macro_rules! __plugin_setup {
     };
 }
 
+/// TODO
+#[doc(hidden)]
+#[allow(clippy::module_name_repetitions)]
+#[macro_export]
+macro_rules! __plugin_hook {
+    (InitializePlugin($global:ident)) => {
+        $crate::__plugin_hook!(impl simple $global InitializePlugin initialize);
+    };
+
+    (ShutdownPlugin($global:ident)) => {
+        $crate::__plugin_hook!(impl simple $global ShutdownPlugin shutdown);
+    };
+
+    (OnCleanUI($global:ident)) => {
+        $crate::__plugin_hook!(impl simple $global OnCleanUI clean_ui);
+    };
+
+    (OnReloadUI($global:ident)) => {
+        $crate::__plugin_hook!(impl simple $global OnReloadUI reload_ui);
+    };
+
+    (OnDrawHUD($global:ident)) => {
+        $crate::__plugin_hook!(impl simple $global OnDrawHUD draw_hud);
+    };
+
+    (OnPulse($global:ident)) => {
+        $crate::__plugin_hook!(impl simple $global OnPulse pulse);
+    };
+
+    (OnBeginZone($global:ident)) => {
+        $crate::__plugin_hook!(impl simple $global OnBeginZone begin_zone);
+    };
+
+    (OnEndZone($global:ident)) => {
+        $crate::__plugin_hook!(impl simple $global OnEndZone end_zone);
+    };
+
+    (OnZoned($global:ident)) => {
+        $crate::__plugin_hook!(impl simple $global OnZoned zoned);
+    };
+
+    (OnUpdateImGui($global:ident)) => {
+        $crate::__plugin_hook!(impl simple $global OnUpdateImGui update_imgui);
+    };
+
+    (SetGameState($global:ident)) => {
+        $crate::__plugin_hook!(impl gamestate $global SetGameState game_state);
+    };
+
+    (OnWriteChatColor($global:ident)) => {
+        $crate::__plugin_hook!(impl chat $global OnWriteChatColor write_chat () = ());
+    };
+
+    (OnIncomingChat($global:ident)) => {
+        $crate::__plugin_hook!(impl chat $global OnIncomingChat incoming_chat bool = false);
+    };
+
+    (OnAddSpawn($global:ident)) => {
+        $crate::__plugin_hook!(impl spawn $global OnAddSpawn add_spawn);
+    };
+
+    (OnRemoveSpawn($global:ident)) => {
+        $crate::__plugin_hook!(impl spawn $global OnRemoveSpawn remove_spawn);
+    };
+
+    (OnAddGroundItem($global:ident)) => {
+        $crate::__plugin_hook!(impl ground $global OnAddGroundItem add_ground_item);
+    };
+
+    (OnRemoveGroundItem($global:ident)) => {
+        $crate::__plugin_hook!(impl ground $global OnRemoveGroundItem remove_ground_item);
+    };
+
+    (OnMacroStart($global:ident)) => {
+        $crate::__plugin_hook!(impl string $global OnMacroStart macro_start);
+    };
+
+    (OnMacroStop($global:ident)) => {
+        $crate::__plugin_hook!(impl string $global OnMacroStop macro_stop);
+    };
+
+    (OnLoadPlugin($global:ident)) => {
+        $crate::__plugin_hook!(impl string $global OnLoadPlugin plugin_load);
+    };
+
+    (OnUnloadPlugin($global:ident)) => {
+        $crate::__plugin_hook!(impl string $global OnUnloadPlugin plugin_unload);
+    };
+
+
+    (impl simple $global:ident $macroquest_hook:ident $plugin_hook:ident) => {
+        #[no_mangle]
+        pub extern "C" fn $macroquest_hook() {
+            let result = ::std::panic::catch_unwind(|| {
+                $global.get()
+                    .expect("hook called without plugin initialized")
+                    .$plugin_hook()
+            });
+
+            match result {
+                ::std::result::Result::Ok(r) => r,
+                ::std::result::Result::Err(error) => {
+                    ::macroquest::log::error!(?error, hook = stringify!($plugin_hook), "caught an unwind");
+                }
+            }
+        }
+    };
+
+    (impl gamestate $global:ident $macroquest_hook:ident $plugin_hook:ident) => {
+        #[no_mangle]
+        pub extern "C" fn $macroquest_hook(c_state: ::std::ffi::c_int) {
+            let result = ::std::panic::catch_unwind(|| {
+                $global.get()
+                    .expect("hook called without plugin initialized")
+                    .$plugin_hook(::macroquest::eq::GameState::from(c_state))
+            });
+
+            match result {
+                ::std::result::Result::Ok(r) => r,
+                ::std::result::Result::Err(error) => {
+                    ::macroquest::log::error!(?error, hook = stringify!($plugin_hook), "caught an unwind");
+                }
+            }
+        }
+    };
+
+    (impl chat $global:ident $macroquest_hook:ident $plugin_hook:ident $rtype:ty = $rvalue:expr) => {
+        #[no_mangle]
+        pub unsafe extern "C" fn $macroquest_hook(
+            ptr: *const ::std::os::raw::c_char,
+            color: ::std::ffi::c_ulong,
+        ) -> $rtype {
+            let result = ::std::panic::catch_unwind(|| {
+                let c_str = ::std::ffi::CStr::from_ptr(ptr);
+                let r_str = c_str.to_string_lossy();
+
+                let color = ::std::primitive::i32::try_from(color)
+                    .expect("color parameter couldn't convert to i32 from u32");
+
+                $global.get()
+                    .expect("hook called without plugin initialized")
+                    .$plugin_hook(r_str.as_ref(), ::macroquest::eq::ChatColor::from(color))
+            });
+
+            match result {
+                ::std::result::Result::Ok(r) => r,
+                ::std::result::Result::Err(error) => {
+                    ::macroquest::log::error!(?error, hook = stringify!($plugin_hook), "caught an unwind");
+                    $rvalue
+                }
+            }
+        }
+    };
+
+    (impl spawn $global:ident $macroquest_hook:ident $plugin_hook:ident) => {
+        #[no_mangle]
+        pub extern "C" fn $macroquest_hook(pc: &::macroquest::ffi::eqlib::PlayerClient) {
+            let result = ::std::panic::catch_unwind(|| {
+                let spawn = ::std::convert::AsRef::<::macroquest::eq::Spawn>::as_ref(pc);
+
+                $global.get()
+                    .expect("hook called without plugin initialized")
+                    .$plugin_hook(spawn)
+            });
+
+            match result {
+                ::std::result::Result::Ok(r) => r,
+                ::std::result::Result::Err(error) => {
+                    ::macroquest::log::error!(?error, hook = stringify!($plugin_hook), "caught an unwind");
+                }
+            }
+        }
+    };
+
+    (impl ground $global:ident $macroquest_hook:ident $plugin_hook:ident) => {
+        #[no_mangle]
+        pub extern "C" fn $macroquest_hook(eq_item: &::macroquest::ffi::eqlib::EQGroundItem) {
+            let result = ::std::panic::catch_unwind(|| {
+                let item = ::std::convert::AsRef::<::macroquest::eq::GroundItem>::as_ref(eq_item);
+
+                $global.get()
+                    .expect("hook called without plugin initialized")
+                    .$plugin_hook(item)
+            });
+
+            match result {
+                ::std::result::Result::Ok(r) => r,
+                ::std::result::Result::Err(error) => {
+                    ::macroquest::log::error!(?error, hook = stringify!($plugin_hook), "caught an unwind");
+                }
+            }
+        }
+    };
+
+    (impl string $global:ident $macroquest_hook:ident $plugin_hook:ident) => {
+        #[no_mangle]
+        pub unsafe extern "C" fn $macroquest_hook(ptr: *const ::std::os::raw::c_char) {
+            let result = ::std::panic::catch_unwind(|| {
+                let c_str = ::std::ffi::CStr::from_ptr(ptr);
+                let r_str = c_str.to_string_lossy();
+
+                $global.get()
+                    .expect("hook called without plugin initialized")
+                    .$plugin_hook(r_str.as_ref())
+            });
+
+            match result {
+                ::std::result::Result::Ok(r) => r,
+                ::std::result::Result::Err(error) => {
+                    ::macroquest::log::error!(?error, hook = stringify!($plugin_hook), "caught an unwind");
+                }
+            }
+        }
+    };
+}
+
 #[doc(inline)]
-pub use crate::__plugin_setup as setup;
+pub use crate::{__plugin_hook as hook, __plugin_setup as setup};

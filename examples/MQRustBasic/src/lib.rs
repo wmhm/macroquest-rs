@@ -19,7 +19,7 @@ macroquest::plugin::setup!(MQRustSimple, 1.0);
 #[derive(Debug, Default)]
 struct MQRustSimple {}
 
-#[macroquest::plugin::hooks]
+// #[macroquest::plugin::hooks]
 impl Hooks for MQRustSimple {
     fn initialize(&self) {
         Logger::builder()
@@ -76,3 +76,30 @@ impl Hooks for MQRustSimple {
 
     fn plugin_unload(&self, name: &str) {}
 }
+
+macroquest::plugin::hook!(InitializePlugin(PLUGIN));
+macroquest::plugin::hook!(ShutdownPlugin(PLUGIN));
+macroquest::plugin::hook!(OnCleanUI(PLUGIN));
+macroquest::plugin::hook!(OnReloadUI(PLUGIN));
+macroquest::plugin::hook!(OnDrawHUD(PLUGIN));
+macroquest::plugin::hook!(OnPulse(PLUGIN));
+macroquest::plugin::hook!(OnBeginZone(PLUGIN));
+macroquest::plugin::hook!(OnEndZone(PLUGIN));
+macroquest::plugin::hook!(OnZoned(PLUGIN));
+macroquest::plugin::hook!(OnUpdateImGui(PLUGIN));
+
+macroquest::plugin::hook!(SetGameState(PLUGIN));
+
+macroquest::plugin::hook!(OnWriteChatColor(PLUGIN));
+macroquest::plugin::hook!(OnIncomingChat(PLUGIN));
+
+macroquest::plugin::hook!(OnAddSpawn(PLUGIN));
+macroquest::plugin::hook!(OnRemoveSpawn(PLUGIN));
+
+macroquest::plugin::hook!(OnAddGroundItem(PLUGIN));
+macroquest::plugin::hook!(OnRemoveGroundItem(PLUGIN));
+
+macroquest::plugin::hook!(OnMacroStart(PLUGIN));
+macroquest::plugin::hook!(OnMacroStop(PLUGIN));
+macroquest::plugin::hook!(OnLoadPlugin(PLUGIN));
+macroquest::plugin::hook!(OnUnloadPlugin(PLUGIN));
