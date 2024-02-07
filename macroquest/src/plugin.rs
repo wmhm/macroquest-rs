@@ -694,6 +694,6 @@ macro_rules! __plugin_hook {
 }
 
 #[doc(hidden)]
-pub use crate::__plugin_hook as _hook;
+pub use crate::__plugin_hook as hook;
 #[doc(inline)]
 pub use crate::__plugin_setup as setup;
