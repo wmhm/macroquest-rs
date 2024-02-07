@@ -364,7 +364,9 @@ macro_rules! __plugin_setup {
         #[no_mangle]
         pub static mut ThisPlugin: Option<&::macroquest::ffi::mq::MQPlugin> = None;
 
-        // We have a plugin for our plugin which
+        // We need to store our plugin instance somewhere so that our hook methods
+        // can access it to call the implemented hook method on that plugin, so
+        // we'll use this global to do that.
         static PLUGIN: ::macroquest::plugin::LazyPlugin<$plugin_type> =
             ::macroquest::plugin::LazyPlugin::new();
 
