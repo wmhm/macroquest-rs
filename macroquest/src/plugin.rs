@@ -14,7 +14,6 @@
 //! # use macroquest::eq::ChatColor;
 //! # use macroquest::plugin::Hooks;
 //! # use std::sync::RwLock;
-//!
 //! macroquest::plugin::setup!(MyPlugin);
 //!
 //! #[derive(Debug, Default)]
